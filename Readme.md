@@ -14,7 +14,7 @@ Grab the latest release and make sure you have module manager (in order to patch
 
 ## Warning
 
-To keep engine condition untouched on KCT recovery increasing reliability increases resources capacity, but does not increase amount of resources "put" in the engine. Make sure you fill it manually before launching!
+To keep engine condition untouched on KCT recovery, increasing reliability increases resources capacity, but does not increase amount of resources "put" in the engine automatically. Make sure you fill it manually before launching!
 
 ## Some regards
 
