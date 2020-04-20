@@ -46,6 +46,7 @@ namespace EngineDecay
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Extra Burn Time Percent", guiFormat = "F2"),
             UI_FloatEdit(scene = UI_Scene.Editor, minValue = 0, maxValue = 100, incrementLarge = 20, incrementSmall = 5, incrementSlide = 1)]
         float extraBurnTimePercent = 0;
+
         float prevEBTP = -1;
 
         [KSPField(isPersistant = true, guiActive = false)]
@@ -60,7 +61,12 @@ namespace EngineDecay
         float prevEIP = -1;
 
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Ignitions", guiFormat = "F2")]
-        public int Ign;
+        int Ign;
+
+        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Reliability Status", guiFormat = "F2")]
+        string reliabilityStatus = "nominal";
+
+
         bool wasRunningPrevTick = false;
 
         [KSPField(isPersistant = true, guiActive = false)]
@@ -78,6 +84,7 @@ namespace EngineDecay
         float faliureResLevel = 0;
 
         bool notInEditor = false;
+        float ignoreIgnitionUntil = 0;
 
         #endregion
 
@@ -98,7 +105,12 @@ namespace EngineDecay
             }
             else
             {
+                ignoreIgnitionUntil = Time.time + 3;
                 notInEditor = true;
+                if(reliabilityStatus == "failed")
+                {
+                    Failure();
+                }
             }
         }
 
@@ -244,20 +256,23 @@ namespace EngineDecay
 
         public void FixedUpdate()
         {
-            if (IsRunning())
-            {
-                part.RequestResource("_EngineResource", TimeWarp.fixedDeltaTime * resourceConsumption);
-            }
-
             if (notInEditor)
             {
-                if (part.Resources["_EngineResource"].amount == 0)
+                if (IsRunning())
+                {
+                    part.RequestResource("_EngineResource", TimeWarp.fixedDeltaTime * resourceConsumption);
+                }
+
+                if (part.Resources["_EngineResource"].amount == 0  && reliabilityStatus == "nominal")
                 {
                     Failure();
                 }
             }
 
-            checkIgnition();
+            if (Time.time >= ignoreIgnitionUntil)
+            {
+                checkIgnition();
+            }
         }
 
         #region mass and cost modifiers implementation
@@ -305,7 +320,8 @@ namespace EngineDecay
             {
                 running = running || (i.currentThrottle > 0 && i.EngineIgnited);
             }
-            return running;
+
+            return running; //&& TimeWarp.CurrentRateIndex == 1;
         }
 
         void checkIgnition()
@@ -320,6 +336,7 @@ namespace EngineDecay
 
         void Failure()
         {
+            print("Engine failed!");
             foreach (PartModule i in decaying_engines)             //kerbalism copypasta, need revision
             {
                 var e = i as ModuleEngines;
@@ -339,6 +356,8 @@ namespace EngineDecay
                     efx.enabled = false;
                 }
             }
+
+            reliabilityStatus = "failed";
         }
 
         #endregion
