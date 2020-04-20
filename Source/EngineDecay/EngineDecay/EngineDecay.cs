@@ -151,7 +151,10 @@ namespace EngineDecay
                         PartResource simulationResource = part.SimulationResources?[resourceDefinition.name];
                         if (simulationResource != null) simulationResource.maxAmount = maxAmount;
 
-                        engineResource.amount = maxAmount;
+                        if (engineResource.amount >= maxAmount)
+                        {
+                            engineResource.amount = maxAmount;
+                        }
                     }
 
                     prevEBTP = extraBurnTimePercent;
@@ -202,7 +205,10 @@ namespace EngineDecay
                         PartResource simulationResource = part.SimulationResources?[resourceDefinition.name];
                         if (simulationResource != null) simulationResource.maxAmount = maxAmount;
 
-                        ignitions.amount = maxAmount;
+                        if (ignitions.amount >= maxAmount)
+                        {
+                            ignitions.amount = maxAmount;
+                        }
                     }
 
                     prevEIP = extraIgnitionsPercent;
@@ -226,11 +232,6 @@ namespace EngineDecay
         {
             if (isRunning())
             {
-                print(resourceConsumption);
-                print(part.Resources["_EngineResource"].maxAmount);
-                print(chosenBTime);
-                print(knownPartCost);
-                print(resourceCostRatio);
                 part.RequestResource("_EngineResource", TimeWarp.fixedDeltaTime * resourceConsumption);
             }
 
@@ -255,7 +256,7 @@ namespace EngineDecay
             {
                 knownPartCost = defaultCost;
             }
-            return defaultCost * (extraBurnTimePercent * maxCostRatedTimeCoeff + extraIgnitionsPercent * maxCostIgnitionsCoeff) / 100;
+            return defaultCost * (extraBurnTimePercent * maxCostRatedTimeCoeff + extraIgnitionsPercent * maxCostIgnitionsCoeff) / 100 + (float)part.Resources["_EngineResource"].amount;
         }
 
         ModifierChangeWhen IPartCostModifier.GetModuleCostChangeWhen()
