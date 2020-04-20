@@ -45,14 +45,14 @@ namespace EngineDecay
 
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Extra Burn Time Percent", guiFormat = "F2"),
             UI_FloatEdit(scene = UI_Scene.Editor, minValue = 0, maxValue = 100, incrementLarge = 20, incrementSmall = 5, incrementSlide = 1)]
-        public float extraBurnTimePercent = 0;
+        float extraBurnTimePercent = 0;
         float prevEBTP = -1;
 
         [KSPField(isPersistant = true, guiActive = false)]
         float chosenBTime;
 
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Chosen Burn Time", guiFormat = "F2")]
-        public string chosenBurnTime;
+        string chosenBurnTime;
 
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Extra Ignitions Percent", guiFormat = "F2"),
             UI_FloatEdit(scene = UI_Scene.Editor, minValue = 0, maxValue = 100, incrementLarge = 20, incrementSmall = 5, incrementSlide = 1)]
@@ -74,7 +74,10 @@ namespace EngineDecay
         [KSPField(isPersistant = true, guiActive = false)]
         bool newBorn = true;
 
-        bool lockStats = false;
+        [KSPField(isPersistant = true, guiActive = false)]
+        float faliureResLevel = 0;
+
+        bool notInEditor = false;
 
         #endregion
 
@@ -91,22 +94,22 @@ namespace EngineDecay
 
             if (state == StartState.Editor)
             {
-                lockStats = false;
+                notInEditor = false;
             }
             else
             {
-                lockStats = true;
+                notInEditor = true;
             }
         }
 
         public void Update()
         {
-            if (lockStats && newBorn)
+            if (notInEditor && newBorn)
             {
                 throw new Exception("EngineDecay MODULE thinks it is not in editor but not initialized yet");
             }
 
-            if (!lockStats)
+            if (!notInEditor)
             {
                 newBorn = false;
 
@@ -155,7 +158,7 @@ namespace EngineDecay
 
                         GameEvents.onPartResourceListChange.Fire(part);
                     }
-                    else if (!lockStats)
+                    else if (!notInEditor)
                     {
                         engineResource.maxAmount = maxAmount;
 
@@ -209,7 +212,7 @@ namespace EngineDecay
 
                         GameEvents.onPartResourceListChange.Fire(part);
                     }
-                    else if (!lockStats)
+                    else if (!notInEditor)
                     {
                         ignitions.maxAmount = maxAmount;
 
@@ -241,9 +244,17 @@ namespace EngineDecay
 
         public void FixedUpdate()
         {
-            if (isRunning())
+            if (IsRunning())
             {
                 part.RequestResource("_EngineResource", TimeWarp.fixedDeltaTime * resourceConsumption);
+            }
+
+            if (notInEditor)
+            {
+                if (part.Resources["_EngineResource"].amount == 0)
+                {
+                    Failure();
+                }
             }
 
             checkIgnition();
@@ -287,7 +298,7 @@ namespace EngineDecay
 
         #region internal methods
 
-        bool isRunning()
+        bool IsRunning()
         {
             bool running = false;
             foreach (var i in decaying_engines)
@@ -296,14 +307,38 @@ namespace EngineDecay
             }
             return running;
         }
+
         void checkIgnition()
         {
-            bool running = isRunning();
+            bool running = IsRunning();
             if (running && !wasRunningPrevTick)
             {
                 part.RequestResource("_Ignitions", 1f);
             }
             wasRunningPrevTick = running;
+        }
+
+        void Failure()
+        {
+            foreach (PartModule i in decaying_engines)             //kerbalism copypasta, need revision
+            {
+                var e = i as ModuleEngines;
+                e.independentThrottle = false;
+                e.currentThrottle = 0;
+                e.Shutdown();
+                e.EngineIgnited = false;
+                e.flameout = true;
+                e.enabled = false;
+
+                var efx = i as ModuleEnginesFX;
+                if (efx != null)
+                {
+                    efx.DeactivateRunningFX();
+                    efx.DeactivatePowerFX();
+                    efx.DeactivateLoopingFX();
+                    efx.enabled = false;
+                }
+            }
         }
 
         #endregion
