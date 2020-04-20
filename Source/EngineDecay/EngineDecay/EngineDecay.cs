@@ -71,11 +71,15 @@ namespace EngineDecay
         [KSPField(isPersistant = true, guiActive = false)]
         float resourceConsumption;
 
+        [KSPField(isPersistant = true, guiActive = false)]
+        bool newBorn = true;
+
         bool lockStats = false;
 
         #endregion
 
         private List<ModuleEngines> decaying_engines;
+
         public override void OnStart(StartState state)
         {
             knownPartCost = baseOnCost;
@@ -97,8 +101,15 @@ namespace EngineDecay
 
         public void Update()
         {
+            if (lockStats && newBorn)
+            {
+                throw new Exception("EngineDecay MODULE thinks it is not in editor but not initialized yet");
+            }
+
             if (!lockStats)
             {
+                newBorn = false;
+
                 chosenBTime = baseRatedTime + extraBurnTimePercent * (maxRatedTime - baseRatedTime) / 100;
                 int t = (int)chosenBTime;
                 chosenBurnTime = String.Format("{0}h:{1}:{2}", t / 3600, (t % 3600) / 60, t % 60);
@@ -256,7 +267,15 @@ namespace EngineDecay
             {
                 knownPartCost = defaultCost;
             }
-            return defaultCost * (extraBurnTimePercent * maxCostRatedTimeCoeff + extraIgnitionsPercent * maxCostIgnitionsCoeff) / 100 + (float)part.Resources["_EngineResource"].amount;
+
+            float result = defaultCost * (extraBurnTimePercent * maxCostRatedTimeCoeff + extraIgnitionsPercent * maxCostIgnitionsCoeff) / 100;
+            if (!newBorn)
+            {
+                result += (float)part.Resources["_EngineResource"].amount;
+            }
+
+
+            return result;
         }
 
         ModifierChangeWhen IPartCostModifier.GetModuleCostChangeWhen()
