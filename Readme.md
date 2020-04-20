@@ -1,4 +1,4 @@
-### Welcome to PayToPlay repo!
+# Welcome to PayToPlay repo!
 
 This is a brand-new KSP reliability mod designed to  ~~cause some explosions~~ make you pay for engine maintainance. The idea is to have an easy-to-use mod that decreases parts' cost as they are being used and make them fail if you don't repair them. As for now it is an early WIP stage, the mod doesn't do much at the moment.
 
@@ -8,10 +8,10 @@ Two engine reliability settings are available in editor. One for rated burn time
 In case of KCT to-storage recovery you recover craft with the same engine conditions, refill the resources in PAW to make it ready for the next flight.
 This system is deeply configurable, see (the only) patch for "Twich" engine. Copypaste the module definition for other engines and tweak the numbers as you wish.
 
-# WARNING
+### WARNING
 
 To keep engine condition untouched on KCT recovery increasing reliability will not increase amount of "reliability" in the engine. Make sure you fill them manually before launching!
 
-# Some regards
+### Some regards
 
 I'd like to thank kerbalism contributors team, their open source and advice have been essential to let me code the plugin.
