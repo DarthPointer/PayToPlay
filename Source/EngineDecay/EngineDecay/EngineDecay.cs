@@ -86,6 +86,7 @@ namespace EngineDecay
 
         bool notInEditor = false;
         float ignoreIgnitionUntil = 0;
+        int ticksTillDisabling = -1;
 
         #endregion
 
@@ -275,9 +276,19 @@ namespace EngineDecay
                         part.RequestResource("_EngineResource", TimeWarp.fixedDeltaTime * resourceConsumption);
                     }
 
-                    if (part.Resources["_EngineResource"].amount == 0 && reliabilityStatus == "nominal")
+                    if (part.Resources["_EngineResource"].amount == 0 && ticksTillDisabling == -1)              //-1 ticks is a flag of nominal, comparing strings is not the best idea ever
                     {
                         Failure();
+                    }
+
+                    if(ticksTillDisabling > 0)
+                    {
+                        ticksTillDisabling--;
+                    }
+
+                    if(ticksTillDisabling == 0)
+                    {
+                        Disable();
                     }
 
                     if (Time.time >= ignoreIgnitionUntil)
@@ -355,29 +366,39 @@ namespace EngineDecay
         void Failure()
         {
             print("Engine failed!");
-            foreach (PartModule i in decaying_engines)             //kerbalism copypasta, need revision
-            {
-                var e = i as ModuleEngines;
-                e.independentThrottle = false;
-                e.currentThrottle = 0;
-                e.Shutdown();
-                e.EngineIgnited = false;
-                e.flameout = true;
-                e.enabled = false;
+            ticksTillDisabling = 5;
 
-                var efx = i as ModuleEnginesFX;
+            foreach (ModuleEngines i in decaying_engines)             //kerbalism copypasta, need revision
+            {
+                //var e = i as ModuleEngines;
+                //e.independentThrottle = false;
+                //i.throttleLocked = true;
+                i.Shutdown();
+                i.currentThrottle = 0;
+
+                //e.EngineIgnited = false;
+                //i.enabled = false;
+
+                /*var efx = i as ModuleEnginesFX;
                 if (efx != null)
                 {
                     efx.DeactivateRunningFX();
                     efx.DeactivatePowerFX();
                     efx.DeactivateLoopingFX();
                     efx.enabled = false;
-                }
+                }*/
             }
 
             reliabilityStatus = "failed";
         }
 
+        void Disable()
+        {
+            foreach (ModuleEngines i in decaying_engines)
+            {
+                i.enabled = false;
+            }
+        }
         #endregion
     }
 }
