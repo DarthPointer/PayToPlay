@@ -296,7 +296,17 @@ namespace EngineDecay
                     {
                         checkIgnition();
                     }
-                }  
+                }
+                else
+                {
+                    if(!IsRailWarping())
+                    {
+                        if(part.Resources["_Ignitions"].amount < 0.99)
+                        {
+                            Disable();
+                        }
+                    }
+                }
             }
         }
 
@@ -369,11 +379,7 @@ namespace EngineDecay
             print("Engine failed!");
             ticksTillDisabling = 5;
 
-            foreach (ModuleEngines i in decaying_engines)
-            {
-                i.Shutdown();
-                i.currentThrottle = 0;
-            }
+            CutoffOnFailure();
 
             reliabilityStatus = "failed";
         }
@@ -394,6 +400,7 @@ namespace EngineDecay
                 i.Shutdown();
                 i.currentThrottle = 0;
                 i.enabled = false;
+                i.isEnabled = false;
             }
         }
         #endregion
