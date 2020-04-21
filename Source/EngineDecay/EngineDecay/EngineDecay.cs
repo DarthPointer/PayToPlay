@@ -262,9 +262,9 @@ namespace EngineDecay
         {
             if (notInEditor)
             {
-                bool railwarpingThisTick = IsRailWarping();
+                bool railWarping = IsRailWarping();
 
-                if(!railwarpingThisTick)
+                if(!railWarping)
                 {
                     if (wasRailwarpingPrevTick)
                     {
@@ -297,16 +297,10 @@ namespace EngineDecay
                         checkIgnition();
                     }
                 }
-                else
-                {
-                    if(!IsRailWarping())
-                    {
-                        if(part.Resources["_Ignitions"].amount < 0.99)
-                        {
-                            Disable();
-                        }
-                    }
-                }
+
+                LastIgnitionCheck();
+
+                wasRunningPrevTick = railWarping;
             }
         }
 
@@ -401,6 +395,14 @@ namespace EngineDecay
                 i.currentThrottle = 0;
                 i.enabled = false;
                 i.isEnabled = false;
+            }
+        }
+
+        void LastIgnitionCheck()
+        {
+            if(wasRunningPrevTick && !IsRunning() && part.Resources["_Ignitions"].amount < 0.99)
+            {
+                Disable();
             }
         }
         #endregion
