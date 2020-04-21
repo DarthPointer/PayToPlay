@@ -68,6 +68,7 @@ namespace EngineDecay
 
 
         bool wasRunningPrevTick = false;
+        bool wasRailwarpingPrevTick = false;
 
         [KSPField(isPersistant = true, guiActive = false)]
         public float baseOnCost = -1;
@@ -105,8 +106,10 @@ namespace EngineDecay
             }
             else
             {
-                ignoreIgnitionUntil = Time.time + 3;
                 notInEditor = true;
+
+                ignoreIgnitionUntil = Time.time + 3;
+                
                 if(reliabilityStatus == "failed")
                 {
                     Failure();
@@ -258,20 +261,30 @@ namespace EngineDecay
         {
             if (notInEditor)
             {
-                if (IsRunning())
-                {
-                    part.RequestResource("_EngineResource", TimeWarp.fixedDeltaTime * resourceConsumption);
-                }
+                bool railwarpingThisTick = IsRailWarping();
 
-                if (part.Resources["_EngineResource"].amount == 0  && reliabilityStatus == "nominal")
+                if(!railwarpingThisTick)
                 {
-                    Failure();
-                }
-            }
+                    if (wasRailwarpingPrevTick)
+                    {
+                        ignoreIgnitionUntil = Time.time + 3;
+                    }
 
-            if (Time.time >= ignoreIgnitionUntil)
-            {
-                checkIgnition();
+                    if (IsRunning())
+                    {
+                        part.RequestResource("_EngineResource", TimeWarp.fixedDeltaTime * resourceConsumption);
+                    }
+
+                    if (part.Resources["_EngineResource"].amount == 0 && reliabilityStatus == "nominal")
+                    {
+                        Failure();
+                    }
+
+                    if (Time.time >= ignoreIgnitionUntil)
+                    {
+                        checkIgnition();
+                    }
+                }  
             }
         }
 
@@ -321,7 +334,12 @@ namespace EngineDecay
                 running = running || (i.currentThrottle > 0 && i.EngineIgnited);
             }
 
-            return running && (TimeWarp.WarpMode == TimeWarp.Modes.LOW || TimeWarp.CurrentRate == 1);
+            return running;
+        }
+
+        bool IsRailWarping()
+        {
+            return TimeWarp.WarpMode == TimeWarp.Modes.HIGH && TimeWarp.CurrentRate != 1;
         }
 
         void checkIgnition()
