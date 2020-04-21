@@ -321,7 +321,7 @@ namespace EngineDecay
                 running = running || (i.currentThrottle > 0 && i.EngineIgnited);
             }
 
-            return running; //&& TimeWarp.CurrentRateIndex == 1;
+            return running && (TimeWarp.WarpMode == TimeWarp.Modes.LOW || TimeWarp.CurrentRate == 1);
         }
 
         void checkIgnition()
