@@ -283,6 +283,7 @@ namespace EngineDecay
 
                     if(ticksTillDisabling > 0)
                     {
+                        CutoffOnFailure();
                         ticksTillDisabling--;
                     }
 
@@ -368,34 +369,30 @@ namespace EngineDecay
             print("Engine failed!");
             ticksTillDisabling = 5;
 
-            foreach (ModuleEngines i in decaying_engines)             //kerbalism copypasta, need revision
+            foreach (ModuleEngines i in decaying_engines)
             {
-                //var e = i as ModuleEngines;
-                //e.independentThrottle = false;
-                //i.throttleLocked = true;
                 i.Shutdown();
                 i.currentThrottle = 0;
-
-                //e.EngineIgnited = false;
-                //i.enabled = false;
-
-                /*var efx = i as ModuleEnginesFX;
-                if (efx != null)
-                {
-                    efx.DeactivateRunningFX();
-                    efx.DeactivatePowerFX();
-                    efx.DeactivateLoopingFX();
-                    efx.enabled = false;
-                }*/
             }
 
             reliabilityStatus = "failed";
+        }
+
+        void CutoffOnFailure()
+        {
+            foreach (ModuleEngines i in decaying_engines)
+            {
+                i.Shutdown();
+                i.currentThrottle = 0;
+            }
         }
 
         void Disable()
         {
             foreach (ModuleEngines i in decaying_engines)
             {
+                i.Shutdown();
+                i.currentThrottle = 0;
                 i.enabled = false;
             }
         }
