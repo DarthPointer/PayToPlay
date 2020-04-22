@@ -223,7 +223,7 @@ namespace EngineDecay
                         usedBurnTime += (float)TimeWarp.fixedDeltaTime;
                     }
 
-                    if (usedBurnTime / setBurnTime > failAtBurnTimeRatio)
+                    if (usedBurnTime / setBurnTime > failAtBurnTimeRatio && nominal)
                     {
                         Failure();
                     }
