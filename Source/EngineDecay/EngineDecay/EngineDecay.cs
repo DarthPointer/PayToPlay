@@ -47,31 +47,15 @@ namespace EngineDecay
             UI_FloatEdit(scene = UI_Scene.Editor, minValue = 0, maxValue = 100, incrementLarge = 20, incrementSmall = 5, incrementSlide = 1)]
         float extraBurnTimePercent = 0;
 
-        //float prevEBTP = -1;
-
-        //[KSPField(isPersistant = true, guiActive = false)]
-        //float chosenBTime;
-
-        //[KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Chosen Burn Time", guiFormat = "F2")]
-        //string chosenBurnTime;
-
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Extra Ignitions Percent", guiFormat = "F2"),
             UI_FloatEdit(scene = UI_Scene.Editor, minValue = 0, maxValue = 100, incrementLarge = 20, incrementSmall = 5, incrementSlide = 1)]
         public float extraIgnitionsPercent = 0;
-        
-        //float prevEIP = -1;
-
-        //[KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Ignitions", guiFormat = "F2")]
-        //int Ign;
 
         [KSPField(isPersistant = true, guiActive = false)]
         float setBurnTime;
 
         [KSPField(isPersistant = true, guiActive = false)]
         float usedBurnTime;
-
-        /*[KSPField(isPersistant = true, guiActive = false)]
-        float burnCostPerSecond;*/
 
         [KSPField(isPersistant = true, guiActive = false)]
         int setIgnitions;
@@ -94,13 +78,7 @@ namespace EngineDecay
         bool wasRunningPrevTick = false;
         bool wasRailWarpingPrevTick = false;
 
-        /*[KSPField(isPersistant = true, guiActive = false)]
-        public float baseOnCost = -1;*/
-
         //float knownPartCost = -1;
-
-        //[KSPField(isPersistant = true, guiActive = false)]
-        //float resourceConsumption;
 
         [KSPField(isPersistant = true, guiActive = false)]
         bool newBorn = true;
@@ -119,12 +97,7 @@ namespace EngineDecay
 
         public override void OnStart(StartState state)
         {
-            //knownPartCost = baseOnCost;
             decaying_engines = part.FindModulesImplementing<ModuleEngines>();
-
-            //chosenBTime = baseRatedTime + extraBurnTimePercent * (maxRatedTime - baseRatedTime) / 100;
-            //float maxAmount = knownPartCost * (1 + extraBurnTimePercent * maxCostRatedTimeCoeff / 100) * resourceCostRatio;
-            //resourceConsumption = maxAmount / ((1f + resourceExcessCoeff) * chosenBTime);
 
             if (state == StartState.Editor)
             {
@@ -134,7 +107,7 @@ namespace EngineDecay
             {
                 notInEditor = true;
 
-                ignoreIgnitionTill = Time.time + 3;
+                ignoreIgnitionTill = Time.time + 0.5f;
                 
                 if(reliabilityStatus == "failed")
                 {
@@ -161,123 +134,6 @@ namespace EngineDecay
                 ignitionsLeft = setIgnitions;
 
                 UpdateIndicators();
-
-                //chosenBTime = baseRatedTime + extraBurnTimePercent * (maxRatedTime - baseRatedTime) / 100;
-                //int t = (int)chosenBTime;
-                //chosenBurnTime = String.Format("{0}h:{1}:{2}", t / 3600, (t % 3600) / 60, t % 60);
-
-                //Ign = (int)(baseIgnitions + extraIgnitionsPercent * (maxIgnitons - baseIgnitions) / 100);
-
-                /*if (extraBurnTimePercent != prevEBTP)
-                {
-                    
-
-                    float maxAmount = knownPartCost * (1 + extraBurnTimePercent * maxCostRatedTimeCoeff / 100) * resourceCostRatio;
-                    resourceConsumption = maxAmount / ((1f + resourceExcessCoeff) * chosenBTime);
-
-                    var reslib = PartResourceLibrary.Instance.resourceDefinitions;                                              //this is copypasta from kerbalism, need some revision
-                                                                                                                                // if the resource is not known, log a warning and do nothing
-                    if (!reslib.Contains("_EngineResource"))
-                    {
-                        print("wtf man, I dunno what your _EngineResource is");
-                        return;
-                    }
-                    var resourceDefinition = reslib["_EngineResource"];
-
-                    PartResource engineResource = part.Resources[resourceDefinition.name];
-
-                    if (engineResource == null)
-                    {
-                        engineResource = new PartResource(part);
-                        engineResource.SetInfo(resourceDefinition);
-                        engineResource.maxAmount = maxAmount;
-                        engineResource.amount = maxAmount;
-                        engineResource.flowState = true;
-                        engineResource.isTweakable = resourceDefinition.isTweakable;
-                        engineResource.isVisible = resourceDefinition.isVisible;
-                        engineResource.hideFlow = false;
-                        part.Resources.dict.Add(resourceDefinition.name.GetHashCode(), engineResource);
-
-                        PartResource simulationResource = new PartResource(engineResource);
-                        simulationResource.simulationResource = true;
-                        part.SimulationResources?.dict.Add(resourceDefinition.name.GetHashCode(), simulationResource);
-
-                        // flow mode is a property that call some code using SimulationResource in its setter.
-                        // consequently it must be set after simulationResource is registered to avoid the following log error spam :
-                        // [PartSet]: Failed to add Resource XXXXX to Simulation PartSet:XX as corresponding Part XXXX SimulationResource was not found.
-                        engineResource.flowMode = PartResource.FlowMode.Both;
-
-                        GameEvents.onPartResourceListChange.Fire(part);
-                    }
-                    else if (!notInEditor)
-                    {
-                        engineResource.maxAmount = maxAmount;
-
-                        PartResource simulationResource = part.SimulationResources?[resourceDefinition.name];
-                        if (simulationResource != null) simulationResource.maxAmount = maxAmount;
-
-                        if (engineResource.amount >= maxAmount)
-                        {
-                            engineResource.amount = maxAmount;
-                        }
-                    }
-
-                    prevEBTP = extraBurnTimePercent;
-                }*/
-
-                /*if (extraIgnitionsPercent != prevEIP)
-                {
-                    float maxAmount = Ign;
-
-                    var reslib = PartResourceLibrary.Instance.resourceDefinitions;                                              //this is copypasta from kerbalism, need some revision
-                                                                                                                                // if the resource is not known, log a warning and do nothing
-                    if (!reslib.Contains("_Ignitions"))
-                    {
-                        print("wtf man, I dunno what your _Ignitions is");
-                        return;
-                    }
-                    var resourceDefinition = reslib["_Ignitions"];
-
-                    PartResource ignitions = part.Resources[resourceDefinition.name];
-
-                    if (ignitions == null)
-                    {
-                        ignitions = new PartResource(part);
-                        ignitions.SetInfo(resourceDefinition);
-                        ignitions.maxAmount = maxAmount;
-                        ignitions.amount = maxAmount;
-                        ignitions.flowState = true;
-                        ignitions.isTweakable = resourceDefinition.isTweakable;
-                        ignitions.isVisible = resourceDefinition.isVisible;
-                        ignitions.hideFlow = false;
-                        part.Resources.dict.Add(resourceDefinition.name.GetHashCode(), ignitions);
-
-                        PartResource simulationResource = new PartResource(ignitions);
-                        simulationResource.simulationResource = true;
-                        part.SimulationResources?.dict.Add(resourceDefinition.name.GetHashCode(), simulationResource);
-
-                        // flow mode is a property that call some code using SimulationResource in its setter.
-                        // consequently it must be set after simulationResource is registered to avoid the following log error spam :
-                        // [PartSet]: Failed to add Resource XXXXX to Simulation PartSet:XX as corresponding Part XXXX SimulationResource was not found.
-                        ignitions.flowMode = PartResource.FlowMode.Both;
-
-                        GameEvents.onPartResourceListChange.Fire(part);
-                    }
-                    else if (!notInEditor)
-                    {
-                        ignitions.maxAmount = maxAmount;
-
-                        PartResource simulationResource = part.SimulationResources?[resourceDefinition.name];
-                        if (simulationResource != null) simulationResource.maxAmount = maxAmount;
-
-                        if (ignitions.amount >= maxAmount)
-                        {
-                            ignitions.amount = maxAmount;
-                        }
-                    }
-
-                    prevEIP = extraIgnitionsPercent;
-                }*/
             }
         }
 
@@ -296,11 +152,10 @@ namespace EngineDecay
 
                     if (IsRunning())
                     {
-                        //part.RequestResource("_EngineResource", TimeWarp.fixedDeltaTime * resourceConsumption);
                         usedBurnTime += (float)TimeWarp.fixedDeltaTime;
                     }
 
-                    if (usedBurnTime == setBurnTime * resourceExcessCoeff && nominal)
+                    if ((usedBurnTime >= setBurnTime * (resourceExcessCoeff + 1)) && nominal)
                     {
                         Failure();
                     }
@@ -357,14 +212,15 @@ namespace EngineDecay
                 knownPartCost = defaultCost;
             }*/
 
-            float result = defaultCost * (extraBurnTimePercent * maxCostRatedTimeCoeff + extraIgnitionsPercent * maxCostIgnitionsCoeff) / 100;
-            if (!newBorn)
+            if(newBorn)
             {
-                result += (float)part.Resources["_EngineResource"].amount - (float)part.Resources["_EngineResource"].maxAmount;
+                return 0;
             }
-
-
-            return result;
+            else
+            {
+                return (extraBurnTimePercent * maxCostRatedTimeCoeff * defaultCost / 100) + (extraIgnitionsPercent * maxCostIgnitionsCoeff * defaultCost / 100) -
+                    (defaultCost + extraBurnTimePercent * maxCostRatedTimeCoeff * defaultCost / 100) * resourceCostRatio * usedBurnTime / (setBurnTime * resourceExcessCoeff);
+            }
         }
 
         ModifierChangeWhen IPartCostModifier.GetModuleCostChangeWhen()
@@ -397,7 +253,6 @@ namespace EngineDecay
             bool running = IsRunning();
             if (running && !wasRunningPrevTick)
             {
-                //part.RequestResource("_Ignitions", 1f);
                 ignitionsLeft -= 1;
             }
         }
