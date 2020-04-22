@@ -170,12 +170,29 @@ namespace EngineDecay
                 throw new Exception("EngineDecay MODULE thinks it is not in editor but not initialized yet");
             }
 
+            if (checkMaintenance)
+            {
+                maintenanceCost = (int)(knownPartCost * (1 + extraBurnTimePercent * maxCostRatedTimeCoeff / 100) * resourceCostRatio * usedBurnTime / (setBurnTime * (resourceExcessCoeff + 1)));
+                if (maintenanceCost > 0)
+                {
+                    Events["Maintenance"].guiActiveEditor = true;
+                    Events["Maintenance"].guiName = String.Format("maintenance: {0}", maintenanceCost);
+                }
+
+                checkMaintenance = false;
+            }
+
             if (!notInEditor)
             {
                 newBorn = false;
 
                 if (prevEBTP != extraBurnTimePercent || prevEIP != extraIgnitionsPercent)
                 {
+                    if (maintenanceCost > 0)
+                    {
+                        Maintenance();
+                    }
+
                     setBurnTime = baseRatedTime + extraBurnTimePercent * (maxRatedTime - baseRatedTime) / 100;
                     usedBurnTime = 0;
 
@@ -189,18 +206,6 @@ namespace EngineDecay
 
                     prevEBTP = extraBurnTimePercent;
                     prevEIP = extraIgnitionsPercent;
-                }
-
-                if (checkMaintenance)
-                {
-                    maintenanceCost = (int)(knownPartCost * (1 + extraBurnTimePercent * maxCostRatedTimeCoeff / 100) * resourceCostRatio * usedBurnTime / (setBurnTime * (resourceExcessCoeff + 1)));
-                    if (maintenanceCost > 0)
-                    {
-                        Events["Maintenance"].guiActiveEditor = true;
-                        Events["Maintenance"].guiName = String.Format("maintenance: {0}", maintenanceCost);
-                    }
-
-                    checkMaintenance = false;
                 }
             }
         }
