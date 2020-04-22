@@ -43,17 +43,19 @@ namespace EngineDecay
         public float maxCostIgnitionsCoeff = 0.5f;
 
 
-        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Extra Burn Time Percent", guiFormat = "F2"),
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Extra Burn Time Percent", guiFormat = "D"),
             UI_FloatEdit(scene = UI_Scene.Editor, minValue = 0, maxValue = 100, incrementLarge = 20, incrementSmall = 5, incrementSlide = 1)]
         float extraBurnTimePercent = 0;
 
+        [KSPField(isPersistant = true, guiActive = false)]
         float prevEBTP = -1;
 
-        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Extra Ignitions Percent", guiFormat = "F2"),
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Extra Ignitions Percent", guiFormat = "D"),
             UI_FloatEdit(scene = UI_Scene.Editor, minValue = 0, maxValue = 100, incrementLarge = 20, incrementSmall = 5, incrementSlide = 1)]
-        public float extraIgnitionsPercent = 0;
+        float extraIgnitionsPercent = 0;
 
-        int prevEIP = -1;
+        [KSPField(isPersistant = true, guiActive = false)]
+        float prevEIP = -1;
 
         [KSPField(isPersistant = true, guiActive = false)]
         float setBurnTime;
@@ -76,12 +78,14 @@ namespace EngineDecay
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Reliability Status", guiFormat = "F2")]
         string reliabilityStatus = "nominal";
 
+        [KSPField(isPersistant = true, guiActive = false)]
         bool nominal = true;
 
 
         bool wasRunningPrevTick = false;
         bool wasRailWarpingPrevTick = false;
 
+        [KSPField(isPersistant = true, guiActive = false)]
         float knownPartCost = -1;
 
         [KSPField(isPersistant = true, guiActive = false)]
@@ -90,12 +94,16 @@ namespace EngineDecay
         [KSPField(isPersistant = true, guiActive = false)]
         float faliureTime = 0;
 
+        [KSPField(isPersistant = true, guiActive = false)]
+        bool checkMaintenance = false;
+
+        [KSPField(isPersistant = true, guiActive = false)]
+        int maintenanceCost = 0;
+
         bool notInEditor = false;
         float ignoreIgnitionTill = 0;
         int ticksTillDisabling = -1;
         float holdIndicatorsTill = 0;
-        bool checkMaintenance = false;
-        int maintenanceCost = 0;
 
         private List<ModuleEngines> decaying_engines;
 
@@ -106,7 +114,19 @@ namespace EngineDecay
         [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "maintenance")]
         void Maintenance()
         {
-            Update();
+            usedBurnTime = 0;
+
+            ignitionsLeft = setIgnitions;
+
+            UpdateIndicators();
+
+            reliabilityStatus = "nominal";
+            nominal = true;
+
+            maintenanceCost = 0;
+            Events["Maintenance"].guiActiveEditor = false;
+
+            part.ModulesOnUpdate();
         }
 
         #endregion
@@ -159,6 +179,9 @@ namespace EngineDecay
 
                     maintenanceCost = 0;
                     Events["Maintenance"].guiActiveEditor = false;
+
+                    prevEBTP = extraBurnTimePercent;
+                    prevEIP = extraIgnitionsPercent;
                 }
 
                 if(checkMaintenance)
@@ -166,7 +189,6 @@ namespace EngineDecay
                     maintenanceCost = (int)(knownPartCost * (1 + extraBurnTimePercent * maxCostRatedTimeCoeff / 100) * resourceCostRatio * usedBurnTime / (setBurnTime * resourceExcessCoeff));
                     if(maintenanceCost > 0)
                     {
-                        print("Maintenance required!");
                         Events["Maintenance"].guiActiveEditor = true;
                         Events["Maintenance"].guiName = String.Format("maintenance: {0}", maintenanceCost);
                     }
