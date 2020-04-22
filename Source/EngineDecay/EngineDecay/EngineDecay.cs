@@ -353,6 +353,16 @@ namespace EngineDecay
             }
         }
 
+        void Enable()
+        {
+            foreach (ModuleEngines i in decaying_engines)
+            {
+                i.isEnabled = true;
+                i.enabled = true;
+                i.currentThrottle = 0;
+            }
+        }
+
         void LastIgnitionCheck()
         {
             if(wasRunningPrevTick && !IsRunning() && ignitionsLeft == 0)
