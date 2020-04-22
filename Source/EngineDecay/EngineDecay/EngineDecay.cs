@@ -47,9 +47,13 @@ namespace EngineDecay
             UI_FloatEdit(scene = UI_Scene.Editor, minValue = 0, maxValue = 100, incrementLarge = 20, incrementSmall = 5, incrementSlide = 1)]
         float extraBurnTimePercent = 0;
 
+        float prevEBTP = -1;
+
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Extra Ignitions Percent", guiFormat = "F2"),
             UI_FloatEdit(scene = UI_Scene.Editor, minValue = 0, maxValue = 100, incrementLarge = 20, incrementSmall = 5, incrementSlide = 1)]
         public float extraIgnitionsPercent = 0;
+
+        int prevEIP = -1;
 
         [KSPField(isPersistant = true, guiActive = false)]
         float setBurnTime;
@@ -78,7 +82,7 @@ namespace EngineDecay
         bool wasRunningPrevTick = false;
         bool wasRailWarpingPrevTick = false;
 
-        //float knownPartCost = -1;
+        float knownPartCost = -1;
 
         [KSPField(isPersistant = true, guiActive = false)]
         bool newBorn = true;
@@ -90,10 +94,24 @@ namespace EngineDecay
         float ignoreIgnitionTill = 0;
         int ticksTillDisabling = -1;
         float holdIndicatorsTill = 0;
+        bool checkMaintenance = false;
+        int maintenanceCost = 0;
+
+        private List<ModuleEngines> decaying_engines;
 
         #endregion
 
-        private List<ModuleEngines> decaying_engines;
+        #region actions and events
+
+        [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "maintenance")]
+        void Maintenance()
+        {
+            Update();
+        }
+
+        #endregion
+
+        #region game-called methods
 
         public override void OnStart(StartState state)
         {
@@ -113,6 +131,8 @@ namespace EngineDecay
                 {
                     Failure();
                 }
+
+                checkMaintenance = true;
             }
         }
 
@@ -127,13 +147,32 @@ namespace EngineDecay
             {
                 newBorn = false;
 
-                setBurnTime = baseRatedTime + extraBurnTimePercent * (maxRatedTime - baseRatedTime) / 100;
-                usedBurnTime = 0;
+                if (prevEBTP != extraBurnTimePercent || prevEIP != extraIgnitionsPercent)
+                {
+                    setBurnTime = baseRatedTime + extraBurnTimePercent * (maxRatedTime - baseRatedTime) / 100;
+                    usedBurnTime = 0;
 
-                setIgnitions = (int)(baseIgnitions + extraIgnitionsPercent * (maxIgnitons - baseIgnitions) / 100);
-                ignitionsLeft = setIgnitions;
+                    setIgnitions = (int)(baseIgnitions + extraIgnitionsPercent * (maxIgnitons - baseIgnitions) / 100);
+                    ignitionsLeft = setIgnitions;
 
-                UpdateIndicators();
+                    UpdateIndicators();
+
+                    maintenanceCost = 0;
+                    Events["Maintenance"].guiActiveEditor = false;
+                }
+
+                if(checkMaintenance)
+                {
+                    maintenanceCost = (int)(knownPartCost * (1 + extraBurnTimePercent * maxCostRatedTimeCoeff / 100) * resourceCostRatio * usedBurnTime / (setBurnTime * resourceExcessCoeff));
+                    if(maintenanceCost > 0)
+                    {
+                        print("Maintenance required!");
+                        Events["Maintenance"].guiActiveEditor = true;
+                        Events["Maintenance"].guiName = String.Format("maintenance: {0}", maintenanceCost);
+                    }
+
+                    checkMaintenance = false;
+                }
             }
         }
 
@@ -193,7 +232,9 @@ namespace EngineDecay
             }
         }
 
-        #region mass and cost modifiers implementation
+        
+
+        #region mass and cost modifiers implementation (game-called too)
 
         float IPartMassModifier.GetModuleMass(float defaultMass, ModifierStagingSituation sit)
         {
@@ -207,10 +248,10 @@ namespace EngineDecay
 
         float IPartCostModifier.GetModuleCost(float defaultCost, ModifierStagingSituation sit)
         {
-            /*if (knownPartCost == -1)
+            if (knownPartCost == -1)            //It is assumed not to change. It makes procedural engines have issues.
             {
                 knownPartCost = defaultCost;
-            }*/
+            }
 
             if(newBorn)
             {
@@ -227,6 +268,8 @@ namespace EngineDecay
         {
             return ModifierChangeWhen.CONSTANTLY;
         }
+
+        #endregion
 
         #endregion
 
