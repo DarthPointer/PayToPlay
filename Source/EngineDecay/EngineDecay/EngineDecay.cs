@@ -92,7 +92,7 @@ namespace EngineDecay
         bool newBorn = true;
 
         [KSPField(isPersistant = true, guiActive = false)]
-        float faliureTime = 0;
+        float failAtBurnTimeRatio = -1;
 
         [KSPField(isPersistant = true, guiActive = false)]
         bool checkMaintenance = false;
@@ -142,6 +142,7 @@ namespace EngineDecay
             if (state == StartState.Editor)
             {
                 notInEditor = false;
+                failAtBurnTimeRatio = -1;
             }
             else
             {
@@ -149,9 +150,13 @@ namespace EngineDecay
 
                 ignoreIgnitionTill = Time.time + 0.5f;
 
-                if (reliabilityStatus == "failed")
+                if (!nominal)
                 {
-                    Failure();
+                    Disable();
+                }
+                else if(failAtBurnTimeRatio == -1)
+                {
+                    SetFailTimeRatio();
                 }
 
                 checkMaintenance = true;
@@ -218,7 +223,7 @@ namespace EngineDecay
                         usedBurnTime += (float)TimeWarp.fixedDeltaTime;
                     }
 
-                    if ((usedBurnTime >= setBurnTime * (resourceExcessCoeff + 1)) && nominal)
+                    if (usedBurnTime / setBurnTime > failAtBurnTimeRatio)
                     {
                         Failure();
                     }
@@ -382,6 +387,11 @@ namespace EngineDecay
             ignitionsIndicator = String.Format("{0} / {1}", ignitionsLeft, setIgnitions);
 
             holdIndicatorsTill = Time.time + 0.5f;
+        }
+
+        void SetFailTimeRatio()
+        {
+            failAtBurnTimeRatio = 1 + resourceExcessCoeff;      //placeholder
         }
         #endregion
     }
