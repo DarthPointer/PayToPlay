@@ -186,7 +186,7 @@ namespace EngineDecay
 
                 if(checkMaintenance)
                 {
-                    maintenanceCost = (int)(knownPartCost * (1 + extraBurnTimePercent * maxCostRatedTimeCoeff / 100) * resourceCostRatio * usedBurnTime / (setBurnTime * resourceExcessCoeff));
+                    maintenanceCost = (int)(knownPartCost * (1 + extraBurnTimePercent * maxCostRatedTimeCoeff / 100) * resourceCostRatio * usedBurnTime / (setBurnTime * (resourceExcessCoeff + 1)));
                     if(maintenanceCost > 0)
                     {
                         Events["Maintenance"].guiActiveEditor = true;
@@ -282,7 +282,7 @@ namespace EngineDecay
             else
             {
                 return (extraBurnTimePercent * maxCostRatedTimeCoeff * defaultCost / 100) + (extraIgnitionsPercent * maxCostIgnitionsCoeff * defaultCost / 100) -
-                    (defaultCost + extraBurnTimePercent * maxCostRatedTimeCoeff * defaultCost / 100) * resourceCostRatio * usedBurnTime / (setBurnTime * resourceExcessCoeff);
+                    (defaultCost + extraBurnTimePercent * maxCostRatedTimeCoeff * defaultCost / 100) * resourceCostRatio * usedBurnTime / (setBurnTime * (resourceExcessCoeff + 1));
             }
         }
 
