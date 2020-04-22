@@ -126,6 +126,8 @@ namespace EngineDecay
             maintenanceCost = 0;
             Events["Maintenance"].guiActiveEditor = false;
 
+            Enable();
+
             part.ModulesOnUpdate();
         }
 
