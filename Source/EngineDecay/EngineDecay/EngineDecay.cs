@@ -66,9 +66,11 @@ namespace EngineDecay
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Reliability Status", guiFormat = "F2")]
         string reliabilityStatus = "nominal";
 
+        bool nominal = true;
+
 
         bool wasRunningPrevTick = false;
-        bool wasRailwarpingPrevTick = false;
+        bool wasRailWarpingPrevTick = false;
 
         [KSPField(isPersistant = true, guiActive = false)]
         public float baseOnCost = -1;
@@ -266,9 +268,9 @@ namespace EngineDecay
 
                 if(!railWarping)
                 {
-                    if (wasRailwarpingPrevTick)
+                    if (wasRailWarpingPrevTick)
                     {
-                        ignoreIgnitionUntil = Time.time + 3;
+                        ignoreIgnitionUntil = Time.time + 0.5f;
                     }
 
                     if (IsRunning())
@@ -276,7 +278,7 @@ namespace EngineDecay
                         part.RequestResource("_EngineResource", TimeWarp.fixedDeltaTime * resourceConsumption);
                     }
 
-                    if (part.Resources["_EngineResource"].amount == 0 && ticksTillDisabling == -1)              //-1 ticks is a flag of nominal, comparing strings is not the best idea ever
+                    if (part.Resources["_EngineResource"].amount == 0 && nominal)
                     {
                         Failure();
                     }
@@ -290,6 +292,7 @@ namespace EngineDecay
                     if(ticksTillDisabling == 0)
                     {
                         Disable();
+                        ticksTillDisabling = -1;
                     }
 
                     if (Time.time >= ignoreIgnitionUntil)
@@ -298,9 +301,13 @@ namespace EngineDecay
                     }
                 }
 
-                LastIgnitionCheck();
+                if (nominal)
+                {
+                    LastIgnitionCheck();
+                }
 
-                wasRunningPrevTick = railWarping;
+                wasRailWarpingPrevTick = railWarping;
+                wasRunningPrevTick = IsRunning();
             }
         }
 
@@ -365,17 +372,17 @@ namespace EngineDecay
             {
                 part.RequestResource("_Ignitions", 1f);
             }
-            wasRunningPrevTick = running;
         }
 
         void Failure()
         {
-            print("Engine failed!");
             ticksTillDisabling = 5;
 
             CutoffOnFailure();
 
             reliabilityStatus = "failed";
+
+            nominal = false;
         }
 
         void CutoffOnFailure()
@@ -403,6 +410,9 @@ namespace EngineDecay
             if(wasRunningPrevTick && !IsRunning() && part.Resources["_Ignitions"].amount < 0.99)
             {
                 Disable();
+
+                reliabilityStatus = "Out of ignitions";
+                nominal = false;
             }
         }
         #endregion
