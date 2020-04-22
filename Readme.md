@@ -13,9 +13,6 @@ As for now, there is no random failure time, all affected engines fali if they h
 
 Grab the latest release and make sure you have module manager (in order to patch the EngineDecay MODULEs into engines). The mod is built for KSP 1.8.1, tested with MM 4.1.3. Should work with ANY MM 3.x or 4.x though.
 
-## Warning
-
-To keep engine condition untouched on KCT recovery, increasing reliability increases resources capacity, but does not increase amount of resources "put" in the engine automatically. Make sure you fill it manually before launching!
 
 ## Some regards
 
