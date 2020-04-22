@@ -333,7 +333,7 @@ namespace EngineDecay
             float result = defaultCost * (extraBurnTimePercent * maxCostRatedTimeCoeff + extraIgnitionsPercent * maxCostIgnitionsCoeff) / 100;
             if (!newBorn)
             {
-                result += (float)part.Resources["_EngineResource"].amount;
+                result += (float)part.Resources["_EngineResource"].amount - (float)part.Resources["_EngineResource"].maxAmount;
             }
 
 
