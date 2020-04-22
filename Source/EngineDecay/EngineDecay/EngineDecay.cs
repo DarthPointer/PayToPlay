@@ -47,21 +47,22 @@ namespace EngineDecay
             UI_FloatEdit(scene = UI_Scene.Editor, minValue = 0, maxValue = 100, incrementLarge = 20, incrementSmall = 5, incrementSlide = 1)]
         float extraBurnTimePercent = 0;
 
-        float prevEBTP = -1;
+        //float prevEBTP = -1;
 
-        [KSPField(isPersistant = true, guiActive = false)]
-        float chosenBTime;
+        //[KSPField(isPersistant = true, guiActive = false)]
+        //float chosenBTime;
 
-        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Chosen Burn Time", guiFormat = "F2")]
-        string chosenBurnTime;
+        //[KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Chosen Burn Time", guiFormat = "F2")]
+        //string chosenBurnTime;
 
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Extra Ignitions Percent", guiFormat = "F2"),
             UI_FloatEdit(scene = UI_Scene.Editor, minValue = 0, maxValue = 100, incrementLarge = 20, incrementSmall = 5, incrementSlide = 1)]
         public float extraIgnitionsPercent = 0;
-        float prevEIP = -1;
+        
+        //float prevEIP = -1;
 
-        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Ignitions", guiFormat = "F2")]
-        int Ign;
+        //[KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Ignitions", guiFormat = "F2")]
+        //int Ign;
 
         [KSPField(isPersistant = true, guiActive = false)]
         float setBurnTime;
@@ -69,8 +70,8 @@ namespace EngineDecay
         [KSPField(isPersistant = true, guiActive = false)]
         float usedBurnTime;
 
-        [KSPField(isPersistant = true, guiActive = false)]
-        float burnCostPerSecond;
+        /*[KSPField(isPersistant = true, guiActive = false)]
+        float burnCostPerSecond;*/
 
         [KSPField(isPersistant = true, guiActive = false)]
         int setIgnitions;
@@ -93,19 +94,19 @@ namespace EngineDecay
         bool wasRunningPrevTick = false;
         bool wasRailWarpingPrevTick = false;
 
-        [KSPField(isPersistant = true, guiActive = false)]
-        public float baseOnCost = -1;
+        /*[KSPField(isPersistant = true, guiActive = false)]
+        public float baseOnCost = -1;*/
 
-        float knownPartCost = -1;
+        //float knownPartCost = -1;
 
-        [KSPField(isPersistant = true, guiActive = false)]
-        float resourceConsumption;
+        //[KSPField(isPersistant = true, guiActive = false)]
+        //float resourceConsumption;
 
         [KSPField(isPersistant = true, guiActive = false)]
         bool newBorn = true;
 
         [KSPField(isPersistant = true, guiActive = false)]
-        float faliureResLevel = 0;
+        float faliureTime = 0;
 
         bool notInEditor = false;
         float ignoreIgnitionTill = 0;
@@ -118,12 +119,12 @@ namespace EngineDecay
 
         public override void OnStart(StartState state)
         {
-            knownPartCost = baseOnCost;
+            //knownPartCost = baseOnCost;
             decaying_engines = part.FindModulesImplementing<ModuleEngines>();
 
-            chosenBTime = baseRatedTime + extraBurnTimePercent * (maxRatedTime - baseRatedTime) / 100;
-            float maxAmount = knownPartCost * (1 + extraBurnTimePercent * maxCostRatedTimeCoeff / 100) * resourceCostRatio;
-            resourceConsumption = maxAmount / ((1f + resourceExcessCoeff) * chosenBTime);
+            //chosenBTime = baseRatedTime + extraBurnTimePercent * (maxRatedTime - baseRatedTime) / 100;
+            //float maxAmount = knownPartCost * (1 + extraBurnTimePercent * maxCostRatedTimeCoeff / 100) * resourceCostRatio;
+            //resourceConsumption = maxAmount / ((1f + resourceExcessCoeff) * chosenBTime);
 
             if (state == StartState.Editor)
             {
@@ -161,13 +162,13 @@ namespace EngineDecay
 
                 UpdateIndicators();
 
-                chosenBTime = baseRatedTime + extraBurnTimePercent * (maxRatedTime - baseRatedTime) / 100;
-                int t = (int)chosenBTime;
-                chosenBurnTime = String.Format("{0}h:{1}:{2}", t / 3600, (t % 3600) / 60, t % 60);
+                //chosenBTime = baseRatedTime + extraBurnTimePercent * (maxRatedTime - baseRatedTime) / 100;
+                //int t = (int)chosenBTime;
+                //chosenBurnTime = String.Format("{0}h:{1}:{2}", t / 3600, (t % 3600) / 60, t % 60);
 
-                Ign = (int)(baseIgnitions + extraIgnitionsPercent * (maxIgnitons - baseIgnitions) / 100);
+                //Ign = (int)(baseIgnitions + extraIgnitionsPercent * (maxIgnitons - baseIgnitions) / 100);
 
-                if (extraBurnTimePercent != prevEBTP)
+                /*if (extraBurnTimePercent != prevEBTP)
                 {
                     
 
@@ -222,9 +223,9 @@ namespace EngineDecay
                     }
 
                     prevEBTP = extraBurnTimePercent;
-                }
+                }*/
 
-                if (extraIgnitionsPercent != prevEIP)
+                /*if (extraIgnitionsPercent != prevEIP)
                 {
                     float maxAmount = Ign;
 
@@ -276,20 +277,8 @@ namespace EngineDecay
                     }
 
                     prevEIP = extraIgnitionsPercent;
-                }
+                }*/
             }
-            /*else
-            {
-                var reslib = PartResourceLibrary.Instance.resourceDefinitions;
-                if (!reslib.Contains("_Ignitions"))
-                {
-                    print("wtf man, I dunno what your _Ignitions is");
-                    return;
-                }
-                var resourceDefinition = reslib["_Ignitions"];
-                float maxAmount = (float)part.Resources[resourceDefinition.name].maxAmount;
-                resourceConsumption = maxAmount / ((1f + resourceExcessCoeff) * chosenBTime);
-            }*/
         }
 
         public void FixedUpdate()
@@ -307,11 +296,11 @@ namespace EngineDecay
 
                     if (IsRunning())
                     {
-                        part.RequestResource("_EngineResource", TimeWarp.fixedDeltaTime * resourceConsumption);
+                        //part.RequestResource("_EngineResource", TimeWarp.fixedDeltaTime * resourceConsumption);
                         usedBurnTime += (float)TimeWarp.fixedDeltaTime;
                     }
 
-                    if (part.Resources["_EngineResource"].amount == 0 && nominal)
+                    if (usedBurnTime == setBurnTime * resourceExcessCoeff && nominal)
                     {
                         Failure();
                     }
@@ -363,10 +352,10 @@ namespace EngineDecay
 
         float IPartCostModifier.GetModuleCost(float defaultCost, ModifierStagingSituation sit)
         {
-            if (knownPartCost == -1)
+            /*if (knownPartCost == -1)
             {
                 knownPartCost = defaultCost;
-            }
+            }*/
 
             float result = defaultCost * (extraBurnTimePercent * maxCostRatedTimeCoeff + extraIgnitionsPercent * maxCostIgnitionsCoeff) / 100;
             if (!newBorn)
@@ -408,7 +397,7 @@ namespace EngineDecay
             bool running = IsRunning();
             if (running && !wasRunningPrevTick)
             {
-                part.RequestResource("_Ignitions", 1f);
+                //part.RequestResource("_Ignitions", 1f);
                 ignitionsLeft -= 1;
             }
         }
@@ -446,7 +435,7 @@ namespace EngineDecay
 
         void LastIgnitionCheck()
         {
-            if(wasRunningPrevTick && !IsRunning() && part.Resources["_Ignitions"].amount < 0.99)
+            if(wasRunningPrevTick && !IsRunning() && ignitionsLeft == 0)
             {
                 Disable();
 
@@ -457,7 +446,7 @@ namespace EngineDecay
 
         void UpdateIndicators()
         {
-            burnTimeIndicator = String.Format("{0}h:{1}:{2} / {3}h:{4}:{5}", usedBurnTime / 3600, (usedBurnTime % 3600) / 60, usedBurnTime % 60, setBurnTime / 3600, (setBurnTime % 3600) / 60, setBurnTime % 60);
+            burnTimeIndicator = String.Format("{0}h:{1}:{2} / {3}h:{4}:{5}", ((int)usedBurnTime) / 3600, (((int)usedBurnTime) % 3600) / 60, ((int)usedBurnTime) % 60, ((int)setBurnTime) / 3600, (((int)setBurnTime) % 3600) / 60, ((int)setBurnTime) % 60);
             ignitionsIndicator = String.Format("{0} / {1}", ignitionsLeft, setIgnitions);
 
             holdIndicatorsTill = Time.time + 0.5f;
