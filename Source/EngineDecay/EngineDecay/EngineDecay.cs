@@ -31,10 +31,10 @@ namespace EngineDecay
         public float resourceExcessCoeff = 0.5f;
 
         [KSPField(isPersistant = true, guiActive = false)]
-        public float baseIgnitions = 1;
+        public int baseIgnitions = 1;
 
         [KSPField(isPersistant = true, guiActive = false)]
-        public float maxIgnitons = 100;
+        public int maxIgnitons = 100;
 
         [KSPField(isPersistant = true, guiActive = false)]
         public float maxMassIgnitionsCoeff = 0.1f;
@@ -63,6 +63,27 @@ namespace EngineDecay
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Ignitions", guiFormat = "F2")]
         int Ign;
 
+        [KSPField(isPersistant = true, guiActive = false)]
+        float setBurnTime;
+
+        [KSPField(isPersistant = true, guiActive = false)]
+        float usedBurnTime;
+
+        [KSPField(isPersistant = true, guiActive = false)]
+        float burnCostPerSecond;
+
+        [KSPField(isPersistant = true, guiActive = false)]
+        int setIgnitions;
+
+        [KSPField(isPersistant = true, guiActive = false)]
+        int ignitionsLeft;
+
+        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Burn Time Used", guiFormat = "F2")]
+        string burnTimeIndicator;
+
+        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Ignitions Left", guiFormat = "F2")]
+        string ignitionsIndicator;
+
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Reliability Status", guiFormat = "F2")]
         string reliabilityStatus = "nominal";
 
@@ -87,8 +108,9 @@ namespace EngineDecay
         float faliureResLevel = 0;
 
         bool notInEditor = false;
-        float ignoreIgnitionUntil = 0;
+        float ignoreIgnitionTill = 0;
         int ticksTillDisabling = -1;
+        float holdIndicatorsTill = 0;
 
         #endregion
 
@@ -111,7 +133,7 @@ namespace EngineDecay
             {
                 notInEditor = true;
 
-                ignoreIgnitionUntil = Time.time + 3;
+                ignoreIgnitionTill = Time.time + 3;
                 
                 if(reliabilityStatus == "failed")
                 {
@@ -131,6 +153,14 @@ namespace EngineDecay
             {
                 newBorn = false;
 
+                setBurnTime = baseRatedTime + extraBurnTimePercent * (maxRatedTime - baseRatedTime) / 100;
+                usedBurnTime = 0;
+
+                setIgnitions = (int)(baseIgnitions + extraIgnitionsPercent * (maxIgnitons - baseIgnitions) / 100);
+                ignitionsLeft = setIgnitions;
+
+                UpdateIndicators();
+
                 chosenBTime = baseRatedTime + extraBurnTimePercent * (maxRatedTime - baseRatedTime) / 100;
                 int t = (int)chosenBTime;
                 chosenBurnTime = String.Format("{0}h:{1}:{2}", t / 3600, (t % 3600) / 60, t % 60);
@@ -139,6 +169,8 @@ namespace EngineDecay
 
                 if (extraBurnTimePercent != prevEBTP)
                 {
+                    
+
                     float maxAmount = knownPartCost * (1 + extraBurnTimePercent * maxCostRatedTimeCoeff / 100) * resourceCostRatio;
                     resourceConsumption = maxAmount / ((1f + resourceExcessCoeff) * chosenBTime);
 
@@ -270,12 +302,13 @@ namespace EngineDecay
                 {
                     if (wasRailWarpingPrevTick)
                     {
-                        ignoreIgnitionUntil = Time.time + 0.5f;
+                        ignoreIgnitionTill = Time.time + 0.5f;
                     }
 
                     if (IsRunning())
                     {
                         part.RequestResource("_EngineResource", TimeWarp.fixedDeltaTime * resourceConsumption);
+                        usedBurnTime += (float)TimeWarp.fixedDeltaTime;
                     }
 
                     if (part.Resources["_EngineResource"].amount == 0 && nominal)
@@ -295,7 +328,7 @@ namespace EngineDecay
                         ticksTillDisabling = -1;
                     }
 
-                    if (Time.time >= ignoreIgnitionUntil)
+                    if (Time.time >= ignoreIgnitionTill)
                     {
                         checkIgnition();
                     }
@@ -304,6 +337,11 @@ namespace EngineDecay
                 if (nominal)
                 {
                     LastIgnitionCheck();
+                }
+
+                if (Time.time > holdIndicatorsTill)
+                {
+                    UpdateIndicators();
                 }
 
                 wasRailWarpingPrevTick = railWarping;
@@ -371,6 +409,7 @@ namespace EngineDecay
             if (running && !wasRunningPrevTick)
             {
                 part.RequestResource("_Ignitions", 1f);
+                ignitionsLeft -= 1;
             }
         }
 
@@ -411,9 +450,17 @@ namespace EngineDecay
             {
                 Disable();
 
-                reliabilityStatus = "Out of ignitions";
+                reliabilityStatus = "out of ignitions";
                 nominal = false;
             }
+        }
+
+        void UpdateIndicators()
+        {
+            burnTimeIndicator = String.Format("{0}h:{1}:{2} / {3}h:{4}:{5}", usedBurnTime / 3600, (usedBurnTime % 3600) / 60, usedBurnTime % 60, setBurnTime / 3600, (setBurnTime % 3600) / 60, setBurnTime % 60);
+            ignitionsIndicator = String.Format("{0} / {1}", ignitionsLeft, setIgnitions);
+
+            holdIndicatorsTill = Time.time + 0.5f;
         }
         #endregion
     }
