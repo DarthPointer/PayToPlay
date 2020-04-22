@@ -128,7 +128,7 @@ namespace EngineDecay
 
             Enable();
 
-            part.ModulesOnUpdate();
+            GameEvents.onEditorShipModified.Fire(EditorLogic.fetch.ship);
         }
 
         #endregion
@@ -148,8 +148,8 @@ namespace EngineDecay
                 notInEditor = true;
 
                 ignoreIgnitionTill = Time.time + 0.5f;
-                
-                if(reliabilityStatus == "failed")
+
+                if (reliabilityStatus == "failed")
                 {
                     Failure();
                 }
@@ -186,10 +186,10 @@ namespace EngineDecay
                     prevEIP = extraIgnitionsPercent;
                 }
 
-                if(checkMaintenance)
+                if (checkMaintenance)
                 {
                     maintenanceCost = (int)(knownPartCost * (1 + extraBurnTimePercent * maxCostRatedTimeCoeff / 100) * resourceCostRatio * usedBurnTime / (setBurnTime * (resourceExcessCoeff + 1)));
-                    if(maintenanceCost > 0)
+                    if (maintenanceCost > 0)
                     {
                         Events["Maintenance"].guiActiveEditor = true;
                         Events["Maintenance"].guiName = String.Format("maintenance: {0}", maintenanceCost);
@@ -206,7 +206,7 @@ namespace EngineDecay
             {
                 bool railWarping = IsRailWarping();
 
-                if(!railWarping)
+                if (!railWarping)
                 {
                     if (wasRailWarpingPrevTick)
                     {
@@ -223,13 +223,13 @@ namespace EngineDecay
                         Failure();
                     }
 
-                    if(ticksTillDisabling > 0)
+                    if (ticksTillDisabling > 0)
                     {
                         CutoffOnFailure();
                         ticksTillDisabling--;
                     }
 
-                    if(ticksTillDisabling == 0)
+                    if (ticksTillDisabling == 0)
                     {
                         Disable();
                         ticksTillDisabling = -1;
@@ -256,7 +256,7 @@ namespace EngineDecay
             }
         }
 
-        
+
 
         #region mass and cost modifiers implementation (game-called too)
 
@@ -277,7 +277,7 @@ namespace EngineDecay
                 knownPartCost = defaultCost;
             }
 
-            if(newBorn)
+            if (newBorn)
             {
                 return 0;
             }
@@ -367,7 +367,7 @@ namespace EngineDecay
 
         void LastIgnitionCheck()
         {
-            if(wasRunningPrevTick && !IsRunning() && ignitionsLeft == 0)
+            if (wasRunningPrevTick && !IsRunning() && ignitionsLeft == 0)
             {
                 Disable();
 
