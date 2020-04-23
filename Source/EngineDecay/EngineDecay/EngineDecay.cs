@@ -139,11 +139,19 @@ namespace EngineDecay
             if (state == StartState.Editor)
             {
                 notInEditor = false;
+                if (baseIgnitions == -1)
+                {
+                    Fields["extraIgnitionsPercent"].guiActive = false;
+                    Fields["extraIgnitionsPercent"].guiActiveEditor = false;
+
+                    Fields["ignitionsIndicator"].guiActive = false;
+                    Fields["ignitionsIndicator"].guiActiveEditor = false;
+                }
             }
             else
             {
                 notInEditor = true;
-
+                
                 ignoreIgnitionTill = Time.time + 0.5f;
 
                 if (!nominal)
@@ -236,13 +244,13 @@ namespace EngineDecay
                         ticksTillDisabling = -1;
                     }
 
-                    if (Time.time >= ignoreIgnitionTill)
+                    if (Time.time >= ignoreIgnitionTill && baseIgnitions != -1)
                     {
                         checkIgnition();
                     }
                 }
 
-                if (nominal)
+                if (nominal && baseIgnitions != -1)
                 {
                     LastIgnitionCheck();
                 }
