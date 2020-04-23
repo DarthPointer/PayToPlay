@@ -19,7 +19,7 @@ namespace EngineDecay
         public float maxRatedTime = 100;
 
         [KSPField(isPersistant = true, guiActive = false)]
-        public float resourceCostRatio = 0.5f;
+        public float maintenanceAtRatedTimeCoeff = 0.3f;
 
         [KSPField(isPersistant = true, guiActive = false)]
         public float maxMassRatedTimeCoeff = 0.2f;
@@ -169,7 +169,7 @@ namespace EngineDecay
             {
                 newBorn = false;
 
-                maintenanceCost = (int)(knownPartCost * (1 + extraBurnTimePercent * maxCostRatedTimeCoeff / 100) * resourceCostRatio * usedBurnTime / (setBurnTime * (resourceExcessCoeff + 1)));
+                maintenanceCost = (int)(knownPartCost * (1 + extraBurnTimePercent * maxCostRatedTimeCoeff / 100) * maintenanceAtRatedTimeCoeff * usedBurnTime / setBurnTime);
                 if (maintenanceCost > 0)
                 {
                     Events["Maintenance"].guiActiveEditor = true;
@@ -284,7 +284,7 @@ namespace EngineDecay
             else
             {
                 return (extraBurnTimePercent * maxCostRatedTimeCoeff * defaultCost / 100) + (extraIgnitionsPercent * maxCostIgnitionsCoeff * defaultCost / 100) -
-                    (defaultCost + extraBurnTimePercent * maxCostRatedTimeCoeff * defaultCost / 100) * resourceCostRatio * usedBurnTime / (setBurnTime * (resourceExcessCoeff + 1));
+                    (defaultCost + extraBurnTimePercent * maxCostRatedTimeCoeff * defaultCost / 100) * maintenanceAtRatedTimeCoeff * usedBurnTime / setBurnTime;
             }
         }
 
