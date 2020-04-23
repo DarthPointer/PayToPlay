@@ -21,7 +21,7 @@ Grab the latest release and make sure you have module manager (in order to patch
 - KCT: PayToPaly is designed to be used with KCT, it makes restoring recovered craft take time.
 
 #### Supported
-- Kerbalism: PayToPlay is provided a patch do disable engine reliability of kerbalism. Kerbalism has a lot of interesting features and it is unacceptable to be incompatible with it. Kerbakism has its own patch to do this but it is not released yet.
+- Kerbalism: PayToPlay is provided a patch do disable engine reliability of kerbalism. Kerbalism has a lot of interesting features and it is unacceptable to be incompatible with it. Kerbalism has its own patch to do this but it is not released yet.
 
 ## Some regards
 
