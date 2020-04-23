@@ -2,8 +2,11 @@
 
 public static class ProbabilityLib
 {
-    public static float PolynomialRandom(float exponent)                 //generates random value with distribution function = random^exponent, [0.0; 1)
+    public static float UltraExponentialRandom(float a, float argOf_1)                                  //see "Some_Thoughts_On_Engine_Failures.docx"
     {
-        return (float)Math.Pow(new Random().NextDouble(), 1 / exponent);
+        float r = (float)Math.Log(1 / a * Math.Log(100 * Math.Exp(a) - 99))/(float)Math.Log(argOf_1);
+        float k = 0.01f / ((float)Math.Exp(a) - 1);
+        float F = UnityEngine.Random.Range(0f, 1f);
+        return (float)Math.Pow((1 / a * Math.Log(F / k + 1)), 1 / r);
     }
 }

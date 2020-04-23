@@ -386,7 +386,7 @@ namespace EngineDecay
 
         void SetFailTimeRatio()
         {
-            failAtBurnTimeRatio = 1 + resourceExcessCoeff;      //placeholder
+            failAtBurnTimeRatio = ProbabilityLib.UltraExponentialRandom(2, 1 + resourceExcessCoeff);
         }
         #endregion
     }
