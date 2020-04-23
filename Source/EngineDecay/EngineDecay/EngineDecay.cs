@@ -42,7 +42,6 @@ namespace EngineDecay
         [KSPField(isPersistant = true, guiActive = false)]
         public float maxCostIgnitionsCoeff = 0.5f;
 
-
         [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Extra Burn Time Percent", guiFormat = "D"),
             UI_FloatEdit(scene = UI_Scene.Editor, minValue = 0, maxValue = 100, incrementLarge = 20, incrementSmall = 5, incrementSlide = 1)]
         float extraBurnTimePercent = 0;
@@ -80,7 +79,6 @@ namespace EngineDecay
 
         [KSPField(isPersistant = true, guiActive = false)]
         bool nominal = true;
-
 
         bool wasRunningPrevTick = false;
         bool wasRailWarpingPrevTick = false;
@@ -125,6 +123,8 @@ namespace EngineDecay
 
             Enable();
 
+            failAtBurnTimeRatio = -1;
+
             GameEvents.onEditorShipModified.Fire(EditorLogic.fetch.ship);
         }
 
@@ -139,7 +139,6 @@ namespace EngineDecay
             if (state == StartState.Editor)
             {
                 notInEditor = false;
-                failAtBurnTimeRatio = -1;
             }
             else
             {
@@ -196,6 +195,8 @@ namespace EngineDecay
 
                     prevEBTP = extraBurnTimePercent;
                     prevEIP = extraIgnitionsPercent;
+
+                    failAtBurnTimeRatio = -1;
                 }
             }
         }
