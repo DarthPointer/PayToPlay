@@ -34,7 +34,7 @@ namespace EngineDecay
         public int baseIgnitions = 1;
 
         [KSPField(isPersistant = true, guiActive = false)]
-        public int maxIgnitons = 100;
+        public int maxIgnitions = 100;
 
         [KSPField(isPersistant = true, guiActive = false)]
         public float maxMassIgnitionsCoeff = 0.1f;
@@ -186,7 +186,7 @@ namespace EngineDecay
                     setBurnTime = baseRatedTime + extraBurnTimePercent * (maxRatedTime - baseRatedTime) / 100;
                     usedBurnTime = 0;
 
-                    setIgnitions = (int)(baseIgnitions + extraIgnitionsPercent * (maxIgnitons - baseIgnitions) / 100);
+                    setIgnitions = (int)(baseIgnitions + extraIgnitionsPercent * (maxIgnitions - baseIgnitions) / 100);
                     ignitionsLeft = setIgnitions;
 
                     UpdateIndicators();
