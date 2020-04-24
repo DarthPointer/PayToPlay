@@ -141,15 +141,18 @@ namespace EngineDecay
                 notInEditor = false;
                 if (baseIgnitions == -1)
                 {
-                    Fields["extraIgnitionsPercent"].guiActive = false;
                     Fields["extraIgnitionsPercent"].guiActiveEditor = false;
-
-                    Fields["ignitionsIndicator"].guiActive = false;
                     Fields["ignitionsIndicator"].guiActiveEditor = false;
                 }
             }
             else
             {
+                if (baseIgnitions == -1)                                        //idk how does this hell work but disabling "ignitionsIndicator" in hangar does not affect the PAW in flight and causes console spam
+                {
+                    Fields["extraIgnitionsPercent"].guiActive = false;
+                    Fields["ignitionsIndicator"].guiActive = false;
+                }
+
                 notInEditor = true;
                 
                 ignoreIgnitionTill = Time.time + 0.5f;
