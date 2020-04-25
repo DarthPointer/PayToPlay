@@ -42,6 +42,30 @@ namespace EngineDecay
         [KSPField(isPersistant = true, guiActive = false)]
         public float maxCostIgnitionsCoeff = 0.5f;
 
+        [KSPField(isPersistant = true, guiActive = false)]
+        int modesNumber;
+
+        [KSPField(isPersistant = true, guiActive = false)]
+        public string decayRates;
+
+        [KSPField(isPersistant = true, guiActive = false)]
+        List<float> decayRatesList;
+
+        [KSPField(isPersistant = true, guiActive = false)]
+        public string ignitionsUsage;
+
+        [KSPField(isPersistant = true, guiActive = false)]
+        List<bool> ignitionsUsageList;
+
+        [KSPField(isPersistant = true, guiActive = false)]
+        public string ignitionsOnSwitch;
+
+        [KSPField(isPersistant = true, guiActive = false)]
+        List<bool> ignitionsOnSwitchList;
+
+        [KSPField(isPersistant = true, guiActive = false)]
+        bool usingMultymodalLogic = false;
+
         [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Extra Burn Time Percent", guiFormat = "D"),
             UI_FloatEdit(scene = UI_Scene.Editor, minValue = 0, maxValue = 100, incrementLarge = 20, incrementSmall = 5, incrementSlide = 1)]
         float extraBurnTimePercent = 0;
@@ -80,7 +104,7 @@ namespace EngineDecay
         [KSPField(isPersistant = true, guiActive = false)]
         bool nominal = true;
 
-        bool wasRunningPrevTick = false;
+        int modeRunningPrevTick = -1;
         bool wasRailWarpingPrevTick = false;
 
         [KSPField(isPersistant = true, guiActive = false)]
@@ -100,7 +124,7 @@ namespace EngineDecay
         int ticksTillDisabling = -1;
         float holdIndicatorsTill = 0;
 
-        private List<ModuleEngines> decaying_engines;
+        private List<ModuleEngines> decayingEngines;
 
         #endregion
 
@@ -134,7 +158,7 @@ namespace EngineDecay
 
         public override void OnStart(StartState state)
         {
-            decaying_engines = part.FindModulesImplementing<ModuleEngines>();
+            decayingEngines = part.FindModulesImplementing<ModuleEngines>();
 
             if (state == StartState.Editor)
             {
@@ -143,6 +167,35 @@ namespace EngineDecay
                 {
                     Fields["extraIgnitionsPercent"].guiActiveEditor = false;
                     Fields["ignitionsIndicator"].guiActiveEditor = false;
+                }
+
+                if(decayRates.Length > 0)
+                {
+                    foreach(string val in decayRates.Split(';'))
+                    {
+                        decayRatesList.Add(float.Parse(val));
+                    }
+
+                    foreach (string val in ignitionsUsage.Split(';'))
+                    {
+                        ignitionsUsageList.Add(int.Parse(val) != 0);
+                    }
+
+                    foreach (string val in ignitionsOnSwitch.Split(';'))
+                    {
+                        ignitionsOnSwitchList.Add(int.Parse(val) != 0);
+                    }
+
+                    modesNumber = decayRatesList.Count;
+
+                    if(ignitionsUsageList.Count == modesNumber && ignitionsOnSwitchList.Count == modesNumber * modesNumber)
+                    {
+                        usingMultymodalLogic = true;
+                    }
+                    else
+                    {
+                        usingMultymodalLogic = false;
+                    }
                 }
             }
             else
@@ -311,15 +364,19 @@ namespace EngineDecay
 
         #region internal methods
 
-        bool IsRunning()
+        int RunningMode()
         {
-            bool running = false;
-            foreach (var i in decaying_engines)
+            int result = -1, c = 0;
+            foreach (var i in decayingEngines)
             {
-                running = running || (i.currentThrottle > 0 && i.EngineIgnited);
+                if(i.currentThrottle > 0 && i.EngineIgnited)
+                {
+                    result = c;
+                }
+                c++;
             }
 
-            return running;
+            return result;
         }
 
         bool IsRailWarping()
@@ -329,8 +386,8 @@ namespace EngineDecay
 
         void checkIgnition()
         {
-            bool running = IsRunning();
-            if (running && !wasRunningPrevTick)
+            int mode = RunningMode();
+            if (mode != -1)                     //if we are running at any mode
             {
                 ignitionsLeft -= 1;
             }
@@ -349,7 +406,7 @@ namespace EngineDecay
 
         void CutoffOnFailure()
         {
-            foreach (ModuleEngines i in decaying_engines)
+            foreach (ModuleEngines i in decayingEngines)
             {
                 i.Shutdown();
                 i.currentThrottle = 0;
@@ -358,7 +415,7 @@ namespace EngineDecay
 
         void Disable()
         {
-            foreach (ModuleEngines i in decaying_engines)
+            foreach (ModuleEngines i in decayingEngines)
             {
                 i.Shutdown();
                 i.currentThrottle = 0;
@@ -369,7 +426,7 @@ namespace EngineDecay
 
         void Enable()
         {
-            foreach (ModuleEngines i in decaying_engines)
+            foreach (ModuleEngines i in decayingEngines)
             {
                 i.isEnabled = true;
                 i.enabled = true;
