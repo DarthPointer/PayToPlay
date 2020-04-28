@@ -196,26 +196,6 @@ namespace EngineDecay
             //if engine multimode data is consistent, we will access features for mulit-mode engines
             usingMultiModeLogic = decayRatesList.Count() == modesNumber && ignitionsUsageList.Count() == modesNumber && ignitionsOnSwitchList.Count() == modesNumber * modesNumber;
 
-            print("rates:");
-            foreach(float i in decayRatesList)
-            {
-                print(i);
-            }
-
-            print("ignitions usage:");
-            foreach (bool i in ignitionsUsageList)
-            {
-                print(i);
-            }
-
-            print("ignitions on switch:");
-            foreach (bool i in ignitionsOnSwitchList)
-            {
-                print(i);
-            }
-
-            print(String.Format("running MML: {0}", usingMultiModeLogic));
-
             if (baseIgnitions == -1)
             {
                 Fields["extraIgnitionsPercent"].guiActiveEditor = false;
@@ -296,6 +276,8 @@ namespace EngineDecay
             {
                 bool railWarping = IsRailWarping();
 
+                int runningMode = RunningMode();
+
                 if (!railWarping)
                 {
                     if (wasRailWarpingPrevTick)
@@ -303,9 +285,16 @@ namespace EngineDecay
                         ignoreIgnitionTill = Time.time + 0.5f;
                     }
 
-                    if (RunningMode() != -1)
+                    if (runningMode != -1)
                     {
-                        usedBurnTime += TimeWarp.fixedDeltaTime;
+                        if (!usingMultiModeLogic)
+                        {
+                            usedBurnTime += TimeWarp.fixedDeltaTime;
+                        }
+                        else
+                        {
+                            usedBurnTime += TimeWarp.fixedDeltaTime * decayRatesList[runningMode];
+                        }
                     }
 
                     if (usedBurnTime / setBurnTime > failAtBurnTimeRatio && nominal)
@@ -342,7 +331,7 @@ namespace EngineDecay
                 }
 
                 wasRailWarpingPrevTick = railWarping;
-                modeRunningPrevTick = RunningMode();
+                modeRunningPrevTick = runningMode;
             }
         }
 
