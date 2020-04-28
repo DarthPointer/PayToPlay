@@ -400,9 +400,23 @@ namespace EngineDecay
 
         void checkIgnition()
         {
-            if (RunningMode() != -1 && modeRunningPrevTick == -1)
+            if (!usingMultiModeLogic)
             {
-                ignitionsLeft -= 1;
+                if (RunningMode() != -1 && modeRunningPrevTick == -1)
+                {
+                    ignitionsLeft--;
+                }
+            }
+            else
+            {
+                int runningMode = RunningMode();
+                if(runningMode != -1)
+                {
+                    if(SwitchNeedsIgnition(modeRunningPrevTick, runningMode))
+                    {
+                        ignitionsLeft--;
+                    }
+                }
             }
         }
 
@@ -479,6 +493,18 @@ namespace EngineDecay
         void SetFailTimeRatio()
         {
             failAtBurnTimeRatio = ProbabilityLib.UltraExponentialRandom(2, 1 + resourceExcessCoeff);
+        }
+
+        bool SwitchNeedsIgnition(int fromMode, int toMode)
+        {
+            if (fromMode == -1)
+            {
+                return ignitionsUsageList[toMode];
+            }
+            else
+            {
+                return ignitionsOnSwitchList[fromMode * modesNumber + toMode];
+            }
         }
         #endregion
     }
