@@ -42,6 +42,27 @@ namespace EngineDecay
         [KSPField(isPersistant = true, guiActive = false)]
         public float maxCostIgnitionsCoeff = 0.5f;
 
+        [KSPField(isPersistant = true, guiActive = false)]
+        bool usingMultiModeLogic = false;
+
+        [KSPField(isPersistant = true, guiActive = false)]
+        int modesNumber = 1;
+
+        [KSPField(isPersistant = true, guiActive = false)]
+        public string decayRates;
+
+        List<float> decayRatesList = new List<float>();
+
+        [KSPField(isPersistant = true, guiActive = false)]
+        public string ignitionsUsage;
+
+        List<bool> ignitionsUsageList = new List<bool>();
+
+        [KSPField(isPersistant = true, guiActive = false)]
+        public string ignitionsOnSwitch;
+
+        List<bool> ignitionsOnSwitchList = new List<bool>();
+
         [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Extra Burn Time Percent", guiFormat = "D"),
             UI_FloatEdit(scene = UI_Scene.Editor, minValue = 0, maxValue = 100, incrementLarge = 20, incrementSmall = 5, incrementSlide = 1)]
         float extraBurnTimePercent = 0;
@@ -137,6 +158,63 @@ namespace EngineDecay
         {
             decayingEngines = part.FindModulesImplementing<ModuleEngines>();
             modeSwitcher = part.FindModuleImplementing<MultiModeEngine>();
+
+            modesNumber = decayingEngines.Count();
+
+            if (decayRates.Length != 0)
+            {
+                foreach (string i in decayRates.Split(';'))
+                {
+                    decayRatesList.Add(float.Parse(i));
+                }
+            }
+
+            if (ignitionsUsage.Length != 0)
+            {
+                foreach (string i in ignitionsUsage.Split(';'))
+                {
+                    ignitionsUsageList.Add(int.Parse(i) != 0);
+                }
+            }
+
+            if (ignitionsOnSwitch.Length != 0)
+            {
+                int c = 0;
+                foreach (string i in ignitionsOnSwitch.Split(';'))
+                {
+                    if (c % (modesNumber + 1) == 0)
+                    {
+                        ignitionsOnSwitchList.Add(false);
+                        c++;
+                    }
+                    ignitionsOnSwitchList.Add(int.Parse(i) != 0);
+                    c++;
+                }
+                ignitionsOnSwitchList.Add(false);
+            }
+
+            //if engine multimode data is consistent, we will access features for mulit-mode engines
+            usingMultiModeLogic = decayRatesList.Count() == modesNumber && ignitionsUsageList.Count() == modesNumber && ignitionsOnSwitchList.Count() == modesNumber * modesNumber;
+
+            print("rates:");
+            foreach(float i in decayRatesList)
+            {
+                print(i);
+            }
+
+            print("ignitions usage:");
+            foreach (bool i in ignitionsUsageList)
+            {
+                print(i);
+            }
+
+            print("ignitions on switch:");
+            foreach (bool i in ignitionsOnSwitchList)
+            {
+                print(i);
+            }
+
+            print(String.Format("running MML: {0}", usingMultiModeLogic));
 
             if (baseIgnitions == -1)
             {
