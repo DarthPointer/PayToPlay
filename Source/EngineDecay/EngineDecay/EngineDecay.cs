@@ -314,7 +314,7 @@ namespace EngineDecay
                         ticksTillDisabling = -1;
                     }
 
-                    if (Time.time >= ignoreIgnitionTill && baseIgnitions != -1)
+                    if (Time.time >= ignoreIgnitionTill && baseIgnitions != -1 && nominal)
                     {
                         checkIgnition();
                     }
@@ -473,12 +473,67 @@ namespace EngineDecay
 
         void LastIgnitionCheck()
         {
-            if (modeRunningPrevTick != -1 && RunningMode() == -1 && ignitionsLeft == 0)
+            if (!usingMultiModeLogic)
             {
-                Disable();
+                if (modeRunningPrevTick != -1 && RunningMode() == -1 && ignitionsLeft == 0)
+                {
+                    Disable();
 
-                reliabilityStatus = "out of ignitions";
-                nominal = false;
+                    reliabilityStatus = "out of ignitions";
+                    nominal = false;
+                }
+            }
+            else
+            {
+                if(ignitionsLeft == 0)
+                {
+                    int runningMode = RunningMode();
+
+                    if(runningMode == 0)
+                    {
+                        modeSwitcher.isEnabled = !SwitchNeedsIgnition(0, 1);            //we are allowed to switch mode if it does not need an ignition
+                    }
+
+                    if(runningMode == 1)
+                    {
+                        modeSwitcher.isEnabled = !SwitchNeedsIgnition(1, 0);
+                    }
+
+                    if(runningMode == -1)
+                    {
+                        if (ignitionsUsageList[0] && ignitionsUsageList[1])
+                        {
+                            Disable();
+
+                            reliabilityStatus = "out of ignitions";
+
+                            nominal = false;
+                        }
+                        else if (ignitionsUsageList[0])
+                        {
+                            modeSwitcher.SetSecondary(true);
+                            //decayingEngines[0].isEnabled = false;
+                            //decayingEngines[1].isEnabled = true;
+                            modeSwitcher.isEnabled = false;
+                        }
+                        else if (ignitionsUsageList[1])
+                        {
+                            modeSwitcher.SetPrimary(true);
+                            //decayingEngines[1].isEnabled = false;
+                            //decayingEngines[0].isEnabled = true;
+                            modeSwitcher.isEnabled = false;
+                        }
+                    }
+
+                    int c = 0;
+                    foreach(ModuleEngines i in decayingEngines)
+                    {
+                        if(SwitchNeedsIgnition(runningMode, c))
+                        {
+                            i.isEnabled = false;
+                        }
+                    }
+                }
             }
         }
 
