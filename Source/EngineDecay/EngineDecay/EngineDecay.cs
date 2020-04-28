@@ -42,30 +42,6 @@ namespace EngineDecay
         [KSPField(isPersistant = true, guiActive = false)]
         public float maxCostIgnitionsCoeff = 0.5f;
 
-        [KSPField(isPersistant = true, guiActive = false)]
-        int modesNumber;
-
-        [KSPField(isPersistant = true, guiActive = false)]
-        public string decayRates;
-
-        [KSPField(isPersistant = true, guiActive = false)]
-        List<float> decayRatesList = new List<float>();
-
-        [KSPField(isPersistant = true, guiActive = false)]
-        public string ignitionsUsage;
-
-        [KSPField(isPersistant = true, guiActive = false)]
-        List<bool> ignitionsUsageList = new List<bool>();
-
-        [KSPField(isPersistant = true, guiActive = false)]
-        public string ignitionsOnSwitch;
-
-        [KSPField(isPersistant = true, guiActive = false)]
-        List<bool> ignitionsOnSwitchList = new List<bool>();
-
-        [KSPField(isPersistant = true, guiActive = false)]
-        bool usingMultymodeLogic = false;
-
         [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Extra Burn Time Percent", guiFormat = "D"),
             UI_FloatEdit(scene = UI_Scene.Editor, minValue = 0, maxValue = 100, incrementLarge = 20, incrementSmall = 5, incrementSlide = 1)]
         float extraBurnTimePercent = 0;
@@ -104,7 +80,7 @@ namespace EngineDecay
         [KSPField(isPersistant = true, guiActive = false)]
         bool nominal = true;
 
-        int modeRunningPrevTick = -1;
+        bool wasRunningPrevTick = false;
         bool wasRailWarpingPrevTick = false;
 
         [KSPField(isPersistant = true, guiActive = false)]
@@ -124,8 +100,7 @@ namespace EngineDecay
         int ticksTillDisabling = -1;
         float holdIndicatorsTill = 0;
 
-        List<ModuleEngines> decayingEngines;
-        MultiModeEngine modeSwitcher;
+        private List<ModuleEngines> decaying_engines;
 
         #endregion
 
@@ -159,50 +134,15 @@ namespace EngineDecay
 
         public override void OnStart(StartState state)
         {
-            decayingEngines = part.FindModulesImplementing<ModuleEngines>();
-            modeSwitcher = part.FindModuleImplementing<MultiModeEngine>();
-
-            if (decayRates.Length > 0)
-            {
-                foreach (string val in decayRates.Split(';'))
-                {
-                    decayRatesList.Add(float.Parse(val));
-                }
-
-                foreach (string val in ignitionsUsage.Split(';'))
-                {
-                    ignitionsUsageList.Add(int.Parse(val) != 0);
-                }
-
-                modesNumber = decayRatesList.Count;
-
-                int c = 0;
-                foreach (string val in ignitionsOnSwitch.Split(';'))
-                {
-                    if ((c % (modesNumber + 1)) == 0)
-                    {
-                        ignitionsOnSwitchList.Add(false);
-                        c++;
-                    }
-                    ignitionsOnSwitchList.Add(int.Parse(val) != 0);
-                    c++;
-                }
-                ignitionsOnSwitchList.Add(false);
-
-                if (ignitionsUsageList.Count == modesNumber && ignitionsOnSwitchList.Count == modesNumber * modesNumber && modeSwitcher != null)
-                {
-                    usingMultymodeLogic = true;
-                }
-                else
-                {
-                    usingMultymodeLogic = false;
-                }
-            }
+            decaying_engines = part.FindModulesImplementing<ModuleEngines>();
 
             if (baseIgnitions == -1)
             {
                 Fields["extraIgnitionsPercent"].guiActiveEditor = false;
+                Fields["extraIgnitionsPercent"].guiActive = false;
+
                 Fields["ignitionsIndicator"].guiActiveEditor = false;
+                Fields["ignitionsIndicator"].guiActive = false;
             }
 
             if (state == StartState.Editor)
@@ -212,18 +152,24 @@ namespace EngineDecay
             else
             {
                 notInEditor = true;
-                
+
                 ignoreIgnitionTill = Time.time + 0.5f;
 
                 if (!nominal)
                 {
                     Disable();
                 }
-                else if(failAtBurnTimeRatio == -1)
+                else if (failAtBurnTimeRatio == -1)
                 {
                     SetFailTimeRatio();
                 }
             }
+        }
+
+        public override void OnAwake()
+        {
+            print("Awake!");
+
         }
 
         public void Update()
@@ -235,6 +181,8 @@ namespace EngineDecay
 
             if (!notInEditor)
             {
+                newBorn = false;
+
                 maintenanceCost = (int)(knownPartCost * (1 + extraBurnTimePercent * maxCostRatedTimeCoeff / 100) * maintenanceAtRatedTimeCoeff * usedBurnTime / setBurnTime);
                 if (maintenanceCost > 0)
                 {
@@ -265,8 +213,6 @@ namespace EngineDecay
 
                     failAtBurnTimeRatio = -1;
                 }
-                
-                newBorn = false;
             }
         }
 
@@ -283,18 +229,9 @@ namespace EngineDecay
                         ignoreIgnitionTill = Time.time + 0.5f;
                     }
 
-                    int mode = RunningMode();
-
-                    if (mode != -1)
+                    if (IsRunning())
                     {
-                        if (usingMultymodeLogic)
-                        {
-                            usedBurnTime += (float)TimeWarp.fixedDeltaTime * decayRatesList[mode];
-                        }
-                        else
-                        {
-                            usedBurnTime += (float)TimeWarp.fixedDeltaTime;
-                        }
+                        usedBurnTime += (float)TimeWarp.fixedDeltaTime;
                     }
 
                     if (usedBurnTime / setBurnTime > failAtBurnTimeRatio && nominal)
@@ -320,7 +257,7 @@ namespace EngineDecay
                     }
                 }
 
-                if (nominal && baseIgnitions != -1)
+                if (nominal)
                 {
                     LastIgnitionCheck();
                 }
@@ -331,7 +268,7 @@ namespace EngineDecay
                 }
 
                 wasRailWarpingPrevTick = railWarping;
-                modeRunningPrevTick = RunningMode();
+                wasRunningPrevTick = IsRunning();
             }
         }
 
@@ -378,19 +315,15 @@ namespace EngineDecay
 
         #region internal methods
 
-        int RunningMode()
+        bool IsRunning()
         {
-            int result = -1, c = 0;
-            foreach (ModuleEngines i in decayingEngines)
+            bool running = false;
+            foreach (var i in decaying_engines)
             {
-                if(i.currentThrottle > 0 && i.EngineIgnited)
-                {
-                    result = c;
-                }
-                c++;
+                running = running || (i.currentThrottle > 0 && i.EngineIgnited);
             }
 
-            return result;
+            return running;
         }
 
         bool IsRailWarping()
@@ -400,20 +333,10 @@ namespace EngineDecay
 
         void checkIgnition()
         {
-            int mode = RunningMode();
-            if (mode != -1)                     //if we are running at any mode
+            bool running = IsRunning();
+            if (running && !wasRunningPrevTick)
             {
-                if(usingMultymodeLogic)
-                {
-                    if (SwitchNeedsIgnition(modeRunningPrevTick, mode))
-                    {
-                        ignitionsLeft--;
-                    }
-                }
-                else if (modeRunningPrevTick == -1)
-                {
-                    ignitionsLeft--;
-                }
+                ignitionsLeft -= 1;
             }
         }
 
@@ -430,110 +353,42 @@ namespace EngineDecay
 
         void CutoffOnFailure()
         {
-            foreach (ModuleEngines i in decayingEngines)
+            foreach (ModuleEngines i in decaying_engines)
             {
+                i.Flameout("failure");
                 i.Shutdown();
+                i.EngineIgnited = false;
                 i.currentThrottle = 0;
             }
         }
 
         void Disable()
         {
-            foreach (ModuleEngines i in decayingEngines)
+            foreach (ModuleEngines i in decaying_engines)
             {
                 i.Shutdown();
                 i.currentThrottle = 0;
-                i.enabled = false;
                 i.isEnabled = false;
-            }
-
-            if (modeSwitcher != null)
-            {
-                modeSwitcher.enabled = false;
-                modeSwitcher.isEnabled = false;
             }
         }
 
         void Enable()
         {
-            foreach (ModuleEngines i in decayingEngines)
+            foreach (ModuleEngines i in decaying_engines)
             {
                 i.isEnabled = true;
-                i.enabled = true;
                 i.currentThrottle = 0;
-            }
-
-            if (modeSwitcher != null)
-            {
-                modeSwitcher.enabled = true;
-                modeSwitcher.isEnabled = true;
             }
         }
 
         void LastIgnitionCheck()
         {
-            if (usingMultymodeLogic)
+            if (wasRunningPrevTick && !IsRunning() && ignitionsLeft == 0)
             {
-                if(ignitionsLeft == 0)
-                {
-                    int mode = RunningMode();
-                    if(SwitchNeedsIgnition(mode, 0))
-                    {
-                        decayingEngines[0].enabled = false;
+                Disable();
 
-                        modeSwitcher.enabled = false;
-                        modeSwitcher.isEnabled = false;
-                    }
-                    else
-                    {
-                        decayingEngines[0].enabled = true;
-                    }
-                    if(SwitchNeedsIgnition(mode, 1))
-                    {
-                        decayingEngines[1].enabled = false;
-                        decayingEngines[1].isEnabled = false;
-
-                        modeSwitcher.enabled = false;
-                        modeSwitcher.isEnabled = false;
-                    }
-                    else
-                    {
-                        decayingEngines[1].enabled = true;
-                    }
-
-                    if (!decayingEngines[0].enabled && !decayingEngines[1].enabled)
-                    {
-                        reliabilityStatus = "out of ignitions";
-                        nominal = false;
-                    }
-                    else if(!SwitchNeedsIgnition(mode, 0) && !SwitchNeedsIgnition(mode, 1))
-                    {
-                        modeSwitcher.enabled = true;
-                        modeSwitcher.isEnabled = true;
-                    }
-                }
-            }
-            else
-            {
-                if (modeRunningPrevTick == -1 && RunningMode() == -1 && ignitionsLeft == 0)
-                {
-                    Disable();
-
-                    reliabilityStatus = "out of ignitions";
-                    nominal = false;
-                }
-            }
-        }
-
-        bool SwitchNeedsIgnition(int from_mode, int to_mode)
-        {
-            if(from_mode == -1)
-            {
-                return ignitionsUsageList[to_mode];
-            }
-            else
-            {
-                return ignitionsOnSwitchList[from_mode * modesNumber + to_mode];
+                reliabilityStatus = "out of ignitions";
+                nominal = false;
             }
         }
 
