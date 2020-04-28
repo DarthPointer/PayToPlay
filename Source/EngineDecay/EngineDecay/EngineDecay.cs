@@ -100,7 +100,8 @@ namespace EngineDecay
         int ticksTillDisabling = -1;
         float holdIndicatorsTill = 0;
 
-        private List<ModuleEngines> decaying_engines;
+        List<ModuleEngines> decayingEngines;
+        MultiModeEngine modeSwitcher;
 
         #endregion
 
@@ -134,7 +135,8 @@ namespace EngineDecay
 
         public override void OnStart(StartState state)
         {
-            decaying_engines = part.FindModulesImplementing<ModuleEngines>();
+            decayingEngines = part.FindModulesImplementing<ModuleEngines>();
+            modeSwitcher = part.FindModuleImplementing<MultiModeEngine>();
 
             if (baseIgnitions == -1)
             {
@@ -164,12 +166,6 @@ namespace EngineDecay
                     SetFailTimeRatio();
                 }
             }
-        }
-
-        public override void OnAwake()
-        {
-            print("Awake!");
-
         }
 
         public void Update()
@@ -318,7 +314,7 @@ namespace EngineDecay
         int RunningMode()
         {
             int mode = -1, c = 0;
-            foreach (var i in decaying_engines)
+            foreach (ModuleEngines i in decayingEngines)
             {
                 if(i.currentThrottle > 0 && i.EngineIgnited)
                 {
@@ -356,7 +352,7 @@ namespace EngineDecay
 
         void CutoffOnFailure()
         {
-            foreach (ModuleEngines i in decaying_engines)
+            foreach (ModuleEngines i in decayingEngines)
             {
                 i.Flameout("failure");
                 i.Shutdown();
@@ -367,20 +363,30 @@ namespace EngineDecay
 
         void Disable()
         {
-            foreach (ModuleEngines i in decaying_engines)
+            foreach (ModuleEngines i in decayingEngines)
             {
                 i.Shutdown();
                 i.currentThrottle = 0;
                 i.isEnabled = false;
             }
+
+            if (modeSwitcher != null)
+            {
+                modeSwitcher.isEnabled = false;
+            }
         }
 
         void Enable()
         {
-            foreach (ModuleEngines i in decaying_engines)
+            foreach (ModuleEngines i in decayingEngines)
             {
                 i.isEnabled = true;
                 i.currentThrottle = 0;
+            }
+
+            if (modeSwitcher != null)
+            {
+                modeSwitcher.isEnabled = true;
             }
         }
 
