@@ -80,7 +80,7 @@ namespace EngineDecay
         [KSPField(isPersistant = true, guiActive = false)]
         bool nominal = true;
 
-        bool wasRunningPrevTick = false;
+        int modeRunningPrevTick = -1;
         bool wasRailWarpingPrevTick = false;
 
         [KSPField(isPersistant = true, guiActive = false)]
@@ -229,9 +229,9 @@ namespace EngineDecay
                         ignoreIgnitionTill = Time.time + 0.5f;
                     }
 
-                    if (IsRunning())
+                    if (RunningMode() != -1)
                     {
-                        usedBurnTime += (float)TimeWarp.fixedDeltaTime;
+                        usedBurnTime += TimeWarp.fixedDeltaTime;
                     }
 
                     if (usedBurnTime / setBurnTime > failAtBurnTimeRatio && nominal)
@@ -268,7 +268,7 @@ namespace EngineDecay
                 }
 
                 wasRailWarpingPrevTick = railWarping;
-                wasRunningPrevTick = IsRunning();
+                modeRunningPrevTick = RunningMode();
             }
         }
 
@@ -315,15 +315,19 @@ namespace EngineDecay
 
         #region internal methods
 
-        bool IsRunning()
+        int RunningMode()
         {
-            bool running = false;
+            int mode = -1, c = 0;
             foreach (var i in decaying_engines)
             {
-                running = running || (i.currentThrottle > 0 && i.EngineIgnited);
+                if(i.currentThrottle > 0 && i.EngineIgnited)
+                {
+                    mode = c;
+                }
+                c++;
             }
 
-            return running;
+            return mode;
         }
 
         bool IsRailWarping()
@@ -333,8 +337,7 @@ namespace EngineDecay
 
         void checkIgnition()
         {
-            bool running = IsRunning();
-            if (running && !wasRunningPrevTick)
+            if (RunningMode() != -1 && modeRunningPrevTick == -1)
             {
                 ignitionsLeft -= 1;
             }
@@ -383,7 +386,7 @@ namespace EngineDecay
 
         void LastIgnitionCheck()
         {
-            if (wasRunningPrevTick && !IsRunning() && ignitionsLeft == 0)
+            if (modeRunningPrevTick != -1 && RunningMode() == -1 && ignitionsLeft == 0)
             {
                 Disable();
 
