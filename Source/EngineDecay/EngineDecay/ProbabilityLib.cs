@@ -11,5 +11,12 @@ namespace EngineDecay
             float F = UnityEngine.Random.Range(0f, 1f);                                                     //everything looks good for the initial implementation but I would like to know more about behaviour of this function
             return (float)Math.Pow((1 / a * Math.Log(F / k + 1)), 1 / r);
         }
+
+        public static float ATangentRandom(float r, float t1)                                               //see "Some_Thoughts_On_Engine_Failures.docx"
+        {
+            float k = (float)Math.Pow(Math.Tan(0.02/Math.PI), -8)/(1000 * t1);
+
+            return (float)(Math.Pow(Math.Tan(UnityEngine.Random.Range(0f, 1f) * Math.PI/2), 1 / r) * Math.Pow(10, 1 - 3 / r) / k);
+        }
     }
 }

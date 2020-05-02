@@ -111,7 +111,7 @@ namespace EngineDecay
         bool newBorn = true;
 
         [KSPField(isPersistant = true, guiActive = false)]
-        float failAtBurnTimeRatio = -1;
+        float failAtBurnTime = -1;
 
         [KSPField(isPersistant = true, guiActive = false)]
         int maintenanceCost = 0;
@@ -145,7 +145,7 @@ namespace EngineDecay
 
             Enable();
 
-            failAtBurnTimeRatio = -1;
+            failAtBurnTime = -1;
 
             GameEvents.onEditorShipModified.Fire(EditorLogic.fetch.ship);
         }
@@ -219,9 +219,9 @@ namespace EngineDecay
                 {
                     Disable();
                 }
-                else if (failAtBurnTimeRatio == -1)
+                else if (failAtBurnTime == -1)
                 {
-                    SetFailTimeRatio();
+                    SetFailTime();
                 }
             }
         }
@@ -265,7 +265,7 @@ namespace EngineDecay
                     prevEBTP = extraBurnTimePercent;
                     prevEIP = extraIgnitionsPercent;
 
-                    failAtBurnTimeRatio = -1;
+                    failAtBurnTime = -1;
                 }
             }
         }
@@ -297,7 +297,7 @@ namespace EngineDecay
                         }
                     }
 
-                    if (usedBurnTime / setBurnTime > failAtBurnTimeRatio && nominal)
+                    if (usedBurnTime > failAtBurnTime && nominal)
                     {
                         Failure();
                     }
@@ -512,15 +512,11 @@ namespace EngineDecay
                         else if (ignitionsUsageList[0])
                         {
                             modeSwitcher.SetSecondary(true);
-                            //decayingEngines[0].isEnabled = false;
-                            //decayingEngines[1].isEnabled = true;
                             modeSwitcher.isEnabled = false;
                         }
                         else if (ignitionsUsageList[1])
                         {
                             modeSwitcher.SetPrimary(true);
-                            //decayingEngines[1].isEnabled = false;
-                            //decayingEngines[0].isEnabled = true;
                             modeSwitcher.isEnabled = false;
                         }
                     }
@@ -545,9 +541,9 @@ namespace EngineDecay
             holdIndicatorsTill = Time.time + 0.5f;
         }
 
-        void SetFailTimeRatio()
+        void SetFailTime()
         {
-            failAtBurnTimeRatio = ProbabilityLib.UltraExponentialRandom(2, 1 + resourceExcessCoeff);
+            failAtBurnTime = ProbabilityLib.ATangentRandom(8, baseRatedTime);
         }
 
         bool SwitchNeedsIgnition(int fromMode, int toMode)
