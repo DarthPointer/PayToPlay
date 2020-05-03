@@ -116,7 +116,7 @@ namespace EngineDecay
         [KSPField(isPersistant = true, guiActive = false)]
         int maintenanceCost = 0;
 
-        bool notInEditor = false;
+        bool inEditor = true;
         float ignoreIgnitionTill = 0;
         int ticksTillDisabling = -1;
         float holdIndicatorsTill = 0;
@@ -207,11 +207,11 @@ namespace EngineDecay
 
             if (state == StartState.Editor)
             {
-                notInEditor = false;
+                inEditor = true;
             }
             else
             {
-                notInEditor = true;
+                inEditor = false;
 
                 ignoreIgnitionTill = Time.time + 0.5f;
 
@@ -228,17 +228,17 @@ namespace EngineDecay
 
         public void Update()
         {
-            if (notInEditor && newBorn)
+            if (!inEditor && newBorn)
             {
                 throw new Exception("EngineDecay MODULE thinks it is not in editor but not initialized yet");
             }
 
-            if (!notInEditor)
+            if (inEditor)
             {
                 newBorn = false;
 
                 maintenanceCost = (int)(knownPartCost * (1 + extraBurnTimePercent * maxCostRatedTimeCoeff / 100) * maintenanceAtRatedTimeCoeff * usedBurnTime / setBurnTime);
-                if (maintenanceCost > 0)
+                if (maintenanceCost > 0 || !nominal)
                 {
                     Events["Maintenance"].guiActiveEditor = true;
                     Events["Maintenance"].guiName = String.Format("maintenance: {0}", maintenanceCost);
@@ -272,7 +272,7 @@ namespace EngineDecay
 
         public void FixedUpdate()
         {
-            if (notInEditor)
+            if (!inEditor)
             {
                 bool railWarping = IsRailWarping();
 
