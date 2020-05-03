@@ -14,9 +14,10 @@ namespace EngineDecay
 
         public static float ATangentRandom(float r, float t1)                                               //see "Some_Thoughts_On_Engine_Failures.docx"
         {
-            float k = (float)(Math.Pow(Math.Tan(0.005 * Math.PI), 1/r) * Math.Pow(10, 5/8)/t1);
-
-            return (float)(Math.Pow(Math.Tan(UnityEngine.Random.Range(0f, 1f) * Math.PI/2), 1 / r) * Math.Pow(10, 1 - 3 / r) / k);
+            float k = (float)(Math.Pow(Math.Tan(0.005 * Math.PI), 1f/8f) * Math.Pow(10f, 5f/8f) / t1);
+            float F = UnityEngine.Random.Range(0f, 1f);
+            
+            return (float)(Math.Pow(Math.Tan(UnityEngine.Random.Range(0f, 1f) * Math.PI/2f), 1f/r) * Math.Pow(10f, 1f - 3f/r) / k);
         }
     }
 }
