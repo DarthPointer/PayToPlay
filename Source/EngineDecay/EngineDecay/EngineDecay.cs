@@ -28,9 +28,6 @@ namespace EngineDecay
         public float maxCostRatedTimeCoeff = 4;
 
         [KSPField(isPersistant = true, guiActive = false)]
-        public float resourceExcessCoeff = 0.5f;
-
-        [KSPField(isPersistant = true, guiActive = false)]
         public int baseIgnitions = 1;
 
         [KSPField(isPersistant = true, guiActive = false)]
