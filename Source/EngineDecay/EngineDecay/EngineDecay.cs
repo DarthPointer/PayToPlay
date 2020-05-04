@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
-using KSP.IO;
 
 namespace EngineDecay
 {
@@ -13,10 +12,16 @@ namespace EngineDecay
         #region fields
 
         [KSPField(isPersistant = true, guiActive = false)]
-        public float baseRatedTime = 10;
+        public float topBaseRatedTime = 10;
 
         [KSPField(isPersistant = true, guiActive = false)]
-        public float maxRatedTime = 100;
+        public float topMaxRatedTime = 100;
+
+        [KSPField(isPersistant = true, guiActive = false)]
+        float r = 0;
+
+        [KSPField(isPersistant = true, guiActive = false)]
+        float currentBaseRatedTime;
 
         [KSPField(isPersistant = true, guiActive = false)]
         public float maintenanceAtRatedTimeCoeff = 0.3f;
@@ -205,6 +210,11 @@ namespace EngineDecay
             if (state == StartState.Editor)
             {
                 inEditor = true;
+
+                if (r == 0)
+                {
+                    r = ReliabilityProgress.fetch.GetExponent(part.name);
+                }
             }
             else
             {
@@ -234,11 +244,18 @@ namespace EngineDecay
             {
                 newBorn = false;
 
-                maintenanceCost = (int)(knownPartCost * (1 + extraBurnTimePercent * maxCostRatedTimeCoeff / 100) * maintenanceAtRatedTimeCoeff * usedBurnTime / setBurnTime);
+                maintenanceCost = (int)(knownPartCost * (1f + extraBurnTimePercent * maxCostRatedTimeCoeff / 100f) * maintenanceAtRatedTimeCoeff * usedBurnTime / setBurnTime);
                 if (maintenanceCost > 0 || !nominal)
                 {
                     Events["Maintenance"].guiActiveEditor = true;
                     Events["Maintenance"].guiName = String.Format("maintenance: {0}", maintenanceCost);
+                }
+
+                print(maintenanceCost);
+                print(knownPartCost);
+                if(knownPartCost != -1 && maintenanceCost > knownPartCost * (1f + extraBurnTimePercent * maxCostRatedTimeCoeff / 100f))
+                {
+                    maintenanceCost = (int)(knownPartCost * (1f + (extraBurnTimePercent * maxCostRatedTimeCoeff / 100f)));
                 }
 
                 if (prevEBTP != extraBurnTimePercent || prevEIP != extraIgnitionsPercent)
@@ -248,7 +265,9 @@ namespace EngineDecay
                         Maintenance();
                     }
 
-                    setBurnTime = baseRatedTime + extraBurnTimePercent * (maxRatedTime - baseRatedTime) / 100;
+                    currentBaseRatedTime = ProbabilityLib.ATangentCumulativePercentArg(r, topBaseRatedTime);
+
+                    setBurnTime = currentBaseRatedTime * (1 + extraBurnTimePercent * (topMaxRatedTime/topBaseRatedTime - 1) / 100);
                     usedBurnTime = 0;
 
                     setIgnitions = (int)(baseIgnitions + extraIgnitionsPercent * (maxIgnitions - baseIgnitions) / 100);
@@ -266,6 +285,8 @@ namespace EngineDecay
                 }
             }
         }
+        ModuleScienceExperiment ab;
+        
 
         public void FixedUpdate()
         {
@@ -332,7 +353,24 @@ namespace EngineDecay
             }
         }
 
-
+        public void OnRecovered()
+        {
+            if (reliabilityStatus == "failed")
+            {
+                ReliabilityProgress.fetch.Improve(part.name, 0.3f, r);
+            }
+            else
+            {
+                if (usedBurnTime > setBurnTime)
+                {
+                    ReliabilityProgress.fetch.Improve(part.name, 0.1f, r);
+                }
+                else
+                {
+                    ReliabilityProgress.fetch.Improve(part.name, 0.1f * usedBurnTime / setBurnTime, r);
+                }
+            }
+        }
 
         #region mass and cost modifiers implementation (game-called too)
 
@@ -540,7 +578,7 @@ namespace EngineDecay
 
         void SetFailTime()
         {
-            failAtBurnTime = ProbabilityLib.ATangentRandom(8, baseRatedTime);
+            failAtBurnTime = ProbabilityLib.ATangentRandom(r, topBaseRatedTime);
         }
 
         bool SwitchNeedsIgnition(int fromMode, int toMode)
