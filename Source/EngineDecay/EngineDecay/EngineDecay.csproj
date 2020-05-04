@@ -53,6 +53,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="PayToPlayAddon.cs" />
     <Compile Include="ReliabilityProgress.cs" />
     <Compile Include="ProbabilityLib.cs" />
     <Compile Include="EngineDecay.cs" />
