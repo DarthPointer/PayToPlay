@@ -245,17 +245,16 @@ namespace EngineDecay
                 newBorn = false;
 
                 maintenanceCost = (int)(knownPartCost * (1f + extraBurnTimePercent * maxCostRatedTimeCoeff / 100f) * maintenanceAtRatedTimeCoeff * usedBurnTime / setBurnTime);
+
+                if (maintenanceCost > knownPartCost * (1f + extraBurnTimePercent * maxCostRatedTimeCoeff / 100f))
+                {
+                    maintenanceCost = (int)(knownPartCost * (1f + extraBurnTimePercent * maxCostRatedTimeCoeff / 100f));
+                }
+
                 if (maintenanceCost > 0 || !nominal)
                 {
                     Events["Maintenance"].guiActiveEditor = true;
                     Events["Maintenance"].guiName = String.Format("maintenance: {0}", maintenanceCost);
-                }
-
-                print(maintenanceCost);
-                print(knownPartCost);
-                if(knownPartCost != -1 && maintenanceCost > knownPartCost * (1f + extraBurnTimePercent * maxCostRatedTimeCoeff / 100f))
-                {
-                    maintenanceCost = (int)(knownPartCost * (1f + (extraBurnTimePercent * maxCostRatedTimeCoeff / 100f)));
                 }
 
                 if (prevEBTP != extraBurnTimePercent || prevEIP != extraIgnitionsPercent)
@@ -267,7 +266,7 @@ namespace EngineDecay
 
                     currentBaseRatedTime = ProbabilityLib.ATangentCumulativePercentArg(r, topBaseRatedTime);
 
-                    setBurnTime = currentBaseRatedTime * (1 + extraBurnTimePercent * (topMaxRatedTime/topBaseRatedTime - 1) / 100);
+                    setBurnTime = currentBaseRatedTime * (1 + extraBurnTimePercent * (topMaxRatedTime / topBaseRatedTime - 1) / 100);
                     usedBurnTime = 0;
 
                     setIgnitions = (int)(baseIgnitions + extraIgnitionsPercent * (maxIgnitions - baseIgnitions) / 100);
@@ -285,8 +284,6 @@ namespace EngineDecay
                 }
             }
         }
-        ModuleScienceExperiment ab;
-        
 
         public void FixedUpdate()
         {
@@ -370,6 +367,8 @@ namespace EngineDecay
                     ReliabilityProgress.fetch.Improve(part.name, 0.1f * usedBurnTime / setBurnTime, r);
                 }
             }
+
+            print("It works!");
         }
 
         #region mass and cost modifiers implementation (game-called too)
@@ -397,8 +396,16 @@ namespace EngineDecay
             }
             else
             {
-                return (extraBurnTimePercent * maxCostRatedTimeCoeff * defaultCost / 100) + (extraIgnitionsPercent * maxCostIgnitionsCoeff * defaultCost / 100) -
+                if(setBurnTime/usedBurnTime > maintenanceAtRatedTimeCoeff)
+                {
+                    return (extraBurnTimePercent * maxCostRatedTimeCoeff * defaultCost / 100) + (extraIgnitionsPercent * maxCostIgnitionsCoeff * defaultCost / 100) -
                     (defaultCost + extraBurnTimePercent * maxCostRatedTimeCoeff * defaultCost / 100) * maintenanceAtRatedTimeCoeff * usedBurnTime / setBurnTime;
+                }
+                else
+                {
+                    return (extraBurnTimePercent * maxCostRatedTimeCoeff * defaultCost / 100) + (extraIgnitionsPercent * maxCostIgnitionsCoeff * defaultCost / 100) -
+                    (defaultCost + extraBurnTimePercent * maxCostRatedTimeCoeff * defaultCost / 100);
+                }
             }
         }
 
