@@ -137,6 +137,10 @@ namespace EngineDecay
         void Maintenance()
         {
             usedBurnTime = 0;
+            usageExperienceCoeff = 0;
+            r = ReliabilityProgress.fetch.GetExponent(part.name);
+            currentBaseRatedTime = ProbabilityLib.ATangentCumulativePercentArg(r, topBaseRatedTime);
+            setBurnTime = currentBaseRatedTime * (1 + extraBurnTimePercent * (topMaxRatedTime / topBaseRatedTime - 1) / 100);
 
             ignitionsLeft = setIgnitions;
 
@@ -151,8 +155,6 @@ namespace EngineDecay
             Enable();
 
             failAtBurnTime = -1;
-
-            usageExperienceCoeff = 0;
 
             GameEvents.onEditorShipModified.Fire(EditorLogic.fetch.ship);
         }

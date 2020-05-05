@@ -40,7 +40,7 @@ namespace EngineDecay
 
                     if (engineDecay != null)
                     {
-                        ReliabilityProgress.fetch.Improve(engineDecay.name, float.Parse(engineDecay.GetValue("usageExperienceCoeff")), float.Parse(engineDecay.GetValue("r")));
+                        ReliabilityProgress.fetch.Improve(engineDecay.GetValue("name"), float.Parse(engineDecay.GetValue("usageExperienceCoeff")), float.Parse(engineDecay.GetValue("r")));
                     }
                 }
             }
