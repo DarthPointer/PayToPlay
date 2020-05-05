@@ -5,9 +5,9 @@ using UnityEngine;
 namespace EngineDecay
 {
     [KSPAddon(KSPAddon.Startup.EditorAny | KSPAddon.Startup.Flight | KSPAddon.Startup.SpaceCentre | KSPAddon.Startup.TrackingStation, true)]
-    class PayToPlayAddon
+    class PayToPlayAddon : MonoBehaviour
     {
-        public void Start()
+        public void Awake()
         {
             GameEvents.onVesselRecovered.Add(ModuleReader.Read);
         }

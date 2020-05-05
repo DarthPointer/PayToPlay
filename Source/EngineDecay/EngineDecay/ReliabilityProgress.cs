@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace EngineDecay
 {
-    [KSPScenario(ScenarioCreationOptions.AddToAllGames, new[] { GameScenes.FLIGHT, GameScenes.EDITOR, GameScenes.TRACKSTATION, GameScenes.SPACECENTER })]
+    [KSPScenario(ScenarioCreationOptions.AddToAllGames, new[] { GameScenes.FLIGHT, GameScenes.EDITOR, GameScenes.TRACKSTATION, GameScenes.SPACECENTER, GameScenes.LOADING, GameScenes.LOADINGBUFFER })]
     public class ReliabilityProgress : ScenarioModule
     {
         public static ReliabilityProgress fetch;
@@ -78,7 +78,7 @@ namespace EngineDecay
         {
             if(!exponents.ContainsKey(partName))
             {
-                throw new Exception("An improvement event has been called for a part with no reliability data recorded");
+                exponents["partName"] = 2;
             }
 
 
