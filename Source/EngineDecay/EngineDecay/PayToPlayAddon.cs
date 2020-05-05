@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace EngineDecay
 {
-    [KSPAddon(KSPAddon.Startup.EditorAny | KSPAddon.Startup.Flight | KSPAddon.Startup.SpaceCentre | KSPAddon.Startup.TrackingStation, true)]
+    [KSPAddon(KSPAddon.Startup.EditorAny | KSPAddon.Startup.Flight | KSPAddon.Startup.SpaceCentre | KSPAddon.Startup.TrackingStation, false)]
     class PayToPlayAddon : MonoBehaviour
     {
         public void Start()
