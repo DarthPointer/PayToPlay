@@ -440,6 +440,17 @@ namespace EngineDecay
                 if (RunningMode() != -1 && modeRunningPrevTick == -1)
                 {
                     ignitionsLeft--;
+
+                    float luck = UnityEngine.Random.Range(0f, 1f);
+                    if (luck < 0.0005f)
+                    {
+                        Failure();
+                    }
+                    else if(luck < 0.001f)
+                    {
+                        FlightLogger.fetch?.LogEvent(String.Format("Bad ignition of {0}, shutdown performed to prevent consequences", part.name));
+                        CutoffOnFailure();
+                    }
                 }
             }
             else
@@ -450,6 +461,17 @@ namespace EngineDecay
                     if(SwitchNeedsIgnition(modeRunningPrevTick, runningMode))
                     {
                         ignitionsLeft--;
+
+                        float luck = UnityEngine.Random.Range(0f, 1f);
+                        if (luck < 0.0005f)
+                        {
+                            Failure();
+                        }
+                        else if (luck < 0.001f)
+                        {
+                            FlightLogger.fetch?.LogEvent(String.Format("Bad ignition of {0}, shutdown performed to prevent consequences", part.name));
+                            CutoffOnFailure();
+                        }
                     }
                 }
             }
@@ -457,6 +479,15 @@ namespace EngineDecay
 
         void Failure()
         {
+            if(UnityEngine.Random.Range(0f, 1f) < 0.05f)
+            {
+                BadaBoom();
+            }
+            else
+            {
+                FlightLogger.fetch?.LogEvent(string.Format("{0} failed", part.name));
+            }
+
             ticksTillDisabling = 5;
 
             CutoffOnFailure();
@@ -507,6 +538,12 @@ namespace EngineDecay
             {
                 modeSwitcher.isEnabled = true;
             }
+        }
+
+        void BadaBoom()
+        {
+            FlightLogger.fetch?.LogEvent(string.Format("A critical maulfunction has destroyed {0}", part.name));        //placeholder using internal part name
+            part.explode();
         }
 
         void LastIgnitionCheck()
