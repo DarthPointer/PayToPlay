@@ -1,5 +1,5 @@
 ﻿//Coded with help of kerbalism's open source and Gotmachine's advce.
-//Kerbalism project was virtually the main step to make PayToPlay any possible
+//Kerbalism project was virtually the main step to make PayToPlay any possible.
 
 using System;
 using System.Collections.Generic;
@@ -78,7 +78,7 @@ namespace EngineDecay
         {
             if(!exponents.ContainsKey(partName))
             {
-                exponents["partName"] = 2;
+                exponents[partName] = 2;
             }
 
 

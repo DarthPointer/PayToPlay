@@ -86,6 +86,9 @@ namespace EngineDecay
         float usedBurnTime;
 
         [KSPField(isPersistant = true, guiActive = false)]
+        float usageExperienceCoeff = 0;
+
+        [KSPField(isPersistant = true, guiActive = false)]
         int setIgnitions;
 
         [KSPField(isPersistant = true, guiActive = false)]
@@ -148,6 +151,8 @@ namespace EngineDecay
             Enable();
 
             failAtBurnTime = -1;
+
+            usageExperienceCoeff = 0;
 
             GameEvents.onEditorShipModified.Fire(EditorLogic.fetch.ship);
         }
@@ -310,11 +315,18 @@ namespace EngineDecay
                         {
                             usedBurnTime += TimeWarp.fixedDeltaTime * decayRatesList[runningMode];
                         }
+
+                        if(usedBurnTime <= setBurnTime)
+                        {
+                            usageExperienceCoeff = 0.1f * usedBurnTime / setBurnTime;
+                        }
                     }
 
                     if (usedBurnTime > failAtBurnTime && nominal)
                     {
                         Failure();
+
+                        usageExperienceCoeff = 0.3f;
                     }
 
                     if (ticksTillDisabling > 0)
@@ -348,27 +360,6 @@ namespace EngineDecay
                 wasRailWarpingPrevTick = railWarping;
                 modeRunningPrevTick = runningMode;
             }
-        }
-
-        public void OnRecovered()
-        {
-            if (reliabilityStatus == "failed")
-            {
-                ReliabilityProgress.fetch.Improve(part.name, 0.3f, r);
-            }
-            else
-            {
-                if (usedBurnTime > setBurnTime)
-                {
-                    ReliabilityProgress.fetch.Improve(part.name, 0.1f, r);
-                }
-                else
-                {
-                    ReliabilityProgress.fetch.Improve(part.name, 0.1f * usedBurnTime / setBurnTime, r);
-                }
-            }
-
-            print("It works!");
         }
 
         #region mass and cost modifiers implementation (game-called too)
@@ -481,6 +472,7 @@ namespace EngineDecay
                 i.Shutdown();
                 i.EngineIgnited = false;
                 i.currentThrottle = 0;
+                i.stagingEnabled = false;
             }
         }
 
@@ -491,6 +483,7 @@ namespace EngineDecay
                 i.Shutdown();
                 i.currentThrottle = 0;
                 i.isEnabled = false;
+                i.stagingEnabled = false;
             }
 
             if (modeSwitcher != null)
@@ -505,6 +498,7 @@ namespace EngineDecay
             {
                 i.isEnabled = true;
                 i.currentThrottle = 0;
+                i.stagingEnabled = true;
             }
 
             if (modeSwitcher != null)

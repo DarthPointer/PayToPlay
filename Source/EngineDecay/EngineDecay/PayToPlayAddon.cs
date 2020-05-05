@@ -1,57 +1,52 @@
-﻿using System.Collections.Generic;
+﻿//Coded with help of kerbalism's open source and Gotmachine's advce.
+
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 
 namespace EngineDecay
 {
-    [KSPAddon(KSPAddon.Startup.EditorAny | KSPAddon.Startup.Flight | KSPAddon.Startup.SpaceCentre | KSPAddon.Startup.TrackingStation, false)]
-    class PayToPlayAddon : MonoBehaviour
+    [KSPAddon(KSPAddon.Startup.AllGameScenes, false)]
+    public class PayToPlayAddon : MonoBehaviour
     {
         public void Start()
         {
             UnityEngine.Debug.Log("=== P2PAddon has been started ===");
-            GameEvents.onVesselRecovered.Add(ModuleReader.Read);
+            GameEvents.onVesselRecovered.Add(Read);
         }
 
         public void OnDestroy()
         {
-            GameEvents.onVesselRecovered.Remove(ModuleReader.Read);
+            GameEvents.onVesselRecovered.Remove(Read);
         }
-    }
 
-    public static class ModuleReader
-    {
-        public static void Read(ProtoVessel v, bool wtf)
+        public void Read(ProtoVessel v, bool wtf)
         {
-            UnityEngine.Debug.Log("=== onVesselRacovered has successfully called ModuleReader.Read ===");
+            UnityEngine.Debug.Log("=== onVesselRacovered has successfully called Read ===");
 
-            List<ProtoPartSnapshot> parts =  v.protoPartSnapshots;
+            List<ProtoPartSnapshot> parts = v.protoPartSnapshots;
 
-            foreach (ProtoPartSnapshot part in parts)
+            if(ReliabilityProgress.fetch == null)
             {
-                ConfigNode engineDecay = part.FindModule("EngineDecay").moduleValues;
+                throw new Exception("ReliabilityProgress SCENARIO had not been booted when it was time to retrieve usage experience");
+            }
 
-                if (engineDecay != null)
+            if (parts != null)
+            {
+                foreach (ProtoPartSnapshot part in parts)
                 {
-                    if (engineDecay.GetValue("reliabilityStatus") == "failed")
-                    {
-                        ReliabilityProgress.fetch.Improve(part.partName, 0.3f, float.Parse(engineDecay.GetValue("r")));
-                    }
-                    else
-                    {
-                        float usedBurnTime = float.Parse(engineDecay.GetValue("usedBurnTime"));
-                        float setBurnTime = float.Parse(engineDecay.GetValue("setBurnTime"));
+                    ConfigNode engineDecay = part.FindModule("EngineDecay")?.moduleValues;
 
-                        if(usedBurnTime / setBurnTime > 1)
-                        {
-                            ReliabilityProgress.fetch.Improve(part.partName, 0.1f, float.Parse(engineDecay.GetValue("r")));
-                        }
-                        else
-                        {
-                            ReliabilityProgress.fetch.Improve(part.partName, 0.1f * usedBurnTime / setBurnTime, float.Parse(engineDecay.GetValue("r")));
-                        }
+                    if (engineDecay != null)
+                    {
+                        ReliabilityProgress.fetch.Improve(engineDecay.name, float.Parse(engineDecay.GetValue("usageExperienceCoeff")), float.Parse(engineDecay.GetValue("r")));
                     }
                 }
+            }
+            else
+            {
+                UnityEngine.Debug.Log("given ProtoVessel.protoPartSnapshots was null, cannot retrieve usage experience of the recovered vessel");
             }
         }
     }
