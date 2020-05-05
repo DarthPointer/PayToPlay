@@ -7,9 +7,15 @@ namespace EngineDecay
     [KSPAddon(KSPAddon.Startup.EditorAny | KSPAddon.Startup.Flight | KSPAddon.Startup.SpaceCentre | KSPAddon.Startup.TrackingStation, true)]
     class PayToPlayAddon : MonoBehaviour
     {
-        public void Awake()
+        public void Start()
         {
+            UnityEngine.Debug.Log("=== P2PAddon has been started ===");
             GameEvents.onVesselRecovered.Add(ModuleReader.Read);
+        }
+
+        public void OnDestroy()
+        {
+            GameEvents.onVesselRecovered.Remove(ModuleReader.Read);
         }
     }
 
@@ -17,6 +23,8 @@ namespace EngineDecay
     {
         public static void Read(ProtoVessel v, bool wtf)
         {
+            UnityEngine.Debug.Log("=== onVesselRacovered has successfully called ModuleReader.Read ===");
+
             List<ProtoPartSnapshot> parts =  v.protoPartSnapshots;
 
             foreach (ProtoPartSnapshot part in parts)
