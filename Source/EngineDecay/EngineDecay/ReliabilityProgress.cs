@@ -1,9 +1,12 @@
-﻿using System;
+﻿//Coded with help of kerbalism's open source and Gotmachine's advce.
+//Kerbalism project was virtually the main step to make PayToPlay any possible
+
+using System;
 using System.Collections.Generic;
 
 namespace EngineDecay
 {
-    [KSPScenario(ScenarioCreationOptions.AddToAllGames, new[] { GameScenes.FLIGHT, GameScenes.EDITOR })]
+    [KSPScenario(ScenarioCreationOptions.AddToAllGames, new[] { GameScenes.FLIGHT, GameScenes.EDITOR, GameScenes.TRACKSTATION, GameScenes.SPACECENTER })]
     public class ReliabilityProgress : ScenarioModule
     {
         public static ReliabilityProgress fetch;
@@ -37,23 +40,19 @@ namespace EngineDecay
 
         public override void OnLoad(ConfigNode node)
         {
-            int c = 0;
-            foreach (ConfigNode.Value val in node.values)
+            foreach (ConfigNode.Value val in node.GetNodes("Engines")[0].values)
             {
-                if (c >= 2)
-                {
-                    exponents[val.name] = float.Parse(val.value);
-                }
-                c++;
+                exponents[val.name] = float.Parse(val.value);
             }
         }
 
         public override void OnSave(ConfigNode node)
         {
             Dictionary<string, float>.Enumerator i = exponents.GetEnumerator();
+            ConfigNode Engines = node.AddNode("Engines");
             while (i.MoveNext())
             {
-                node.AddValue(i.Current.Key, i.Current.Value);
+                Engines.AddValue(i.Current.Key, i.Current.Value);
             }
         }
 
