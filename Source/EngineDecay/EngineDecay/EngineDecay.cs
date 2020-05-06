@@ -113,6 +113,9 @@ namespace EngineDecay
         float knownPartCost = -1;
 
         [KSPField(isPersistant = true, guiActive = false)]
+        bool subtractResourcesCost = false;
+
+        [KSPField(isPersistant = true, guiActive = false)]
         bool newBorn = true;
 
         [KSPField(isPersistant = true, guiActive = false)]
@@ -380,6 +383,14 @@ namespace EngineDecay
         {
             if (knownPartCost == -1)            //It is assumed not to change. It makes procedural engines have issues.
             {
+                if(subtractResourcesCost)
+                {
+                    foreach(PartResource i in part.Resources.ToList())
+                    {
+                        defaultCost -= (float)i.maxAmount * PartResourceLibrary.Instance.GetDefinition(i.resourceName).unitCost;
+                    }
+                }
+
                 knownPartCost = defaultCost;
             }
 
@@ -391,13 +402,13 @@ namespace EngineDecay
             {
                 if(setBurnTime/usedBurnTime > maintenanceAtRatedTimeCoeff)
                 {
-                    return (extraBurnTimePercent * maxCostRatedTimeCoeff * defaultCost / 100) + (extraIgnitionsPercent * maxCostIgnitionsCoeff * defaultCost / 100) -
-                    (defaultCost + extraBurnTimePercent * maxCostRatedTimeCoeff * defaultCost / 100) * maintenanceAtRatedTimeCoeff * usedBurnTime / setBurnTime;
+                    return (extraBurnTimePercent * maxCostRatedTimeCoeff * knownPartCost / 100) + (extraIgnitionsPercent * maxCostIgnitionsCoeff * knownPartCost / 100) -
+                    (knownPartCost + extraBurnTimePercent * maxCostRatedTimeCoeff * knownPartCost / 100) * maintenanceAtRatedTimeCoeff * usedBurnTime / setBurnTime;
                 }
                 else
                 {
-                    return (extraBurnTimePercent * maxCostRatedTimeCoeff * defaultCost / 100) + (extraIgnitionsPercent * maxCostIgnitionsCoeff * defaultCost / 100) -
-                    (defaultCost + extraBurnTimePercent * maxCostRatedTimeCoeff * defaultCost / 100);
+                    return (extraBurnTimePercent * maxCostRatedTimeCoeff * knownPartCost / 100) + (extraIgnitionsPercent * maxCostIgnitionsCoeff * knownPartCost / 100) -
+                    (knownPartCost + extraBurnTimePercent * maxCostRatedTimeCoeff * knownPartCost / 100);
                 }
             }
         }
