@@ -51,17 +51,17 @@ namespace EngineDecay
         int modesNumber = 1;
 
         [KSPField(isPersistant = true, guiActive = false)]
-        public string decayRates;
+        public string decayRates = "";
 
         List<float> decayRatesList = new List<float>();
 
         [KSPField(isPersistant = true, guiActive = false)]
-        public string ignitionsUsage;
+        public string ignitionsUsage = "";
 
         List<bool> ignitionsUsageList = new List<bool>();
 
         [KSPField(isPersistant = true, guiActive = false)]
-        public string ignitionsOnSwitch;
+        public string ignitionsOnSwitch = "";
 
         List<bool> ignitionsOnSwitchList = new List<bool>();
 
