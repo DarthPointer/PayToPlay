@@ -95,10 +95,10 @@ namespace EngineDecay
         int ignitionsLeft;
 
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Burn Time Used", guiFormat = "F2")]
-        string burnTimeIndicator;
+        string burnTimeIndicator = "";
 
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Ignitions Left", guiFormat = "F2")]
-        string ignitionsIndicator;
+        string ignitionsIndicator = "";
 
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Reliability Status", guiFormat = "F2")]
         string reliabilityStatus = "nominal";
