@@ -80,7 +80,7 @@ namespace EngineDecay
         float prevEIP = -1;
 
         [KSPField(isPersistant = true, guiActive = false)]
-        float setBurnTime;
+        float setBurnTime = 1;
 
         [KSPField(isPersistant = true, guiActive = false)]
         float usedBurnTime;
@@ -208,6 +208,15 @@ namespace EngineDecay
             //if engine multimode data is consistent, we will access features for mulit-mode engines
             usingMultiModeLogic = decayRatesList.Count() == modesNumber && ignitionsUsageList.Count() == modesNumber && ignitionsOnSwitchList.Count() == modesNumber * modesNumber;
 
+            if (topBaseRatedTime == -1)
+            {
+                Fields["extraBurnTimePercent"].guiActiveEditor = false;
+                Fields["extraBurnTimePercent"].guiActive = false;
+
+                Fields["burnTimeIndicator"].guiActiveEditor = false;
+                Fields["burnTimeIndicator"].guiActive = false;
+            }
+
             if (baseIgnitions == -1)
             {
                 Fields["extraIgnitionsPercent"].guiActiveEditor = false;
@@ -221,7 +230,7 @@ namespace EngineDecay
             {
                 inEditor = true;
 
-                if (r == 0)
+                if (r == 0 && topBaseRatedTime != -1)
                 {
                     r = ReliabilityProgress.fetch.GetExponent(part.name);
                 }
@@ -274,13 +283,19 @@ namespace EngineDecay
                         Maintenance();
                     }
 
-                    currentBaseRatedTime = ProbabilityLib.ATangentCumulativePercentArg(r, topBaseRatedTime);
+                    if (topBaseRatedTime != -1)
+                    {
+                        currentBaseRatedTime = ProbabilityLib.ATangentCumulativePercentArg(r, topBaseRatedTime);
 
-                    setBurnTime = currentBaseRatedTime * (1 + extraBurnTimePercent * (topMaxRatedTime / topBaseRatedTime - 1) / 100);
-                    usedBurnTime = 0;
+                        setBurnTime = currentBaseRatedTime * (1 + extraBurnTimePercent * (topMaxRatedTime / topBaseRatedTime - 1) / 100);
+                        usedBurnTime = 0;
+                    }
 
-                    setIgnitions = (int)(baseIgnitions + extraIgnitionsPercent * (maxIgnitions - baseIgnitions) / 100);
-                    ignitionsLeft = setIgnitions;
+                    if (baseIgnitions != -1)
+                    {
+                        setIgnitions = (int)(baseIgnitions + extraIgnitionsPercent * (maxIgnitions - baseIgnitions) / 100);
+                        ignitionsLeft = setIgnitions;
+                    }
 
                     UpdateIndicators();
 
@@ -310,40 +325,43 @@ namespace EngineDecay
                         ignoreIgnitionTill = Time.time + 0.5f;
                     }
 
-                    if (runningMode != -1)
+                    if (topBaseRatedTime != -1)
                     {
-                        if (!usingMultiModeLogic)
+                        if (runningMode != -1)
                         {
-                            usedBurnTime += TimeWarp.fixedDeltaTime;
+                            if (!usingMultiModeLogic)
+                            {
+                                usedBurnTime += TimeWarp.fixedDeltaTime;
+                            }
+                            else
+                            {
+                                usedBurnTime += TimeWarp.fixedDeltaTime * decayRatesList[runningMode];
+                            }
+
+                            if (usedBurnTime <= setBurnTime)
+                            {
+                                usageExperienceCoeff = 0.1f * usedBurnTime / setBurnTime;
+                            }
                         }
-                        else
+
+                        if (usedBurnTime > failAtBurnTime && nominal)
                         {
-                            usedBurnTime += TimeWarp.fixedDeltaTime * decayRatesList[runningMode];
+                            Failure();
+
+                            usageExperienceCoeff = 0.3f;
                         }
 
-                        if(usedBurnTime <= setBurnTime)
+                        if (ticksTillDisabling > 0)
                         {
-                            usageExperienceCoeff = 0.1f * usedBurnTime / setBurnTime;
+                            CutoffOnFailure();
+                            ticksTillDisabling--;
                         }
-                    }
 
-                    if (usedBurnTime > failAtBurnTime && nominal)
-                    {
-                        Failure();
-
-                        usageExperienceCoeff = 0.3f;
-                    }
-
-                    if (ticksTillDisabling > 0)
-                    {
-                        CutoffOnFailure();
-                        ticksTillDisabling--;
-                    }
-
-                    if (ticksTillDisabling == 0)
-                    {
-                        Disable();
-                        ticksTillDisabling = -1;
+                        if (ticksTillDisabling == 0)
+                        {
+                            Disable();
+                            ticksTillDisabling = -1;
+                        }
                     }
 
                     if (Time.time >= ignoreIgnitionTill && baseIgnitions != -1 && nominal)
@@ -352,7 +370,7 @@ namespace EngineDecay
                     }
                 }
 
-                if (nominal)
+                if (nominal && baseIgnitions != -1)
                 {
                     LastIgnitionCheck();
                 }
