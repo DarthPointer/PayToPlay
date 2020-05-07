@@ -217,7 +217,7 @@ namespace EngineDecay
                 Fields["burnTimeIndicator"].guiActive = false;
             }
 
-            if (baseIgnitions == -1)
+            if (baseIgnitions == -1 || baseIgnitions == maxIgnitions)
             {
                 Fields["extraIgnitionsPercent"].guiActiveEditor = false;
                 Fields["extraIgnitionsPercent"].guiActive = false;
