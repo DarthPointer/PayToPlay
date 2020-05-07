@@ -2,6 +2,6 @@
   "NAME": "PayToPlay",
   "URL": "https://raw.githubusercontent.com/DarthPointer/PayToPlay/master/GameData/PayToPlay/PlayToPlay.version",
   "DOWNLOAD": "https://github.com/DarthPointer/PayToPlay/releases",
-  "VERSION": {"MAJOR": 1, "MINOR": 0, "PATCH": 0, "BUILD": 0},
+  "VERSION": {"MAJOR": 1, "MINOR": 1, "PATCH": 0, "BUILD": 0},
   "KSP_VERSION": {"MAJOR": 1, "MINOR": 8, "PATCH": 1}
 }
