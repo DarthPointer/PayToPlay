@@ -116,6 +116,9 @@ namespace EngineDecay
         bool subtractResourcesCost = false;
 
         [KSPField(isPersistant = true, guiActive = false)]
+        bool useSRBCost = false;
+
+        [KSPField(isPersistant = true, guiActive = false)]
         bool newBorn = true;
 
         [KSPField(isPersistant = true, guiActive = false)]
@@ -418,15 +421,29 @@ namespace EngineDecay
             }
             else
             {
-                if(setBurnTime/usedBurnTime > maintenanceAtRatedTimeCoeff)
+                if (!useSRBCost)
                 {
-                    return (extraBurnTimePercent * maxCostRatedTimeCoeff * knownPartCost / 100) + (extraIgnitionsPercent * maxCostIgnitionsCoeff * knownPartCost / 100) -
-                    (knownPartCost + extraBurnTimePercent * maxCostRatedTimeCoeff * knownPartCost / 100) * maintenanceAtRatedTimeCoeff * usedBurnTime / setBurnTime;
+                    if (setBurnTime / usedBurnTime > maintenanceAtRatedTimeCoeff)
+                    {
+                        return (extraBurnTimePercent * maxCostRatedTimeCoeff * knownPartCost / 100) + (extraIgnitionsPercent * maxCostIgnitionsCoeff * knownPartCost / 100) -
+                        (knownPartCost + extraBurnTimePercent * maxCostRatedTimeCoeff * knownPartCost / 100) * maintenanceAtRatedTimeCoeff * usedBurnTime / setBurnTime;
+                    }
+                    else
+                    {
+                        return (extraBurnTimePercent * maxCostRatedTimeCoeff * knownPartCost / 100) + (extraIgnitionsPercent * maxCostIgnitionsCoeff * knownPartCost / 100) -
+                        (knownPartCost + extraBurnTimePercent * maxCostRatedTimeCoeff * knownPartCost / 100);
+                    }
                 }
                 else
                 {
-                    return (extraBurnTimePercent * maxCostRatedTimeCoeff * knownPartCost / 100) + (extraIgnitionsPercent * maxCostIgnitionsCoeff * knownPartCost / 100) -
-                    (knownPartCost + extraBurnTimePercent * maxCostRatedTimeCoeff * knownPartCost / 100);
+                    if (ignitionsLeft == setIgnitions)
+                    {
+                        return 0;
+                    }
+                    else
+                    {
+                        return -knownPartCost * maintenanceAtRatedTimeCoeff;
+                    }
                 }
             }
         }
