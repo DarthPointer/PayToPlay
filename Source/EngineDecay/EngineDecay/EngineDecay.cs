@@ -253,8 +253,6 @@ namespace EngineDecay
                     SetFailTime();
                 }
             }
-
-            print(subtractResourcesCost);
         }
 
         public void Update()
@@ -420,15 +418,10 @@ namespace EngineDecay
         {
             if (defaultCost != 0)
             {
-                print(defaultCost);
-                print(knownPartCost);
-
                 if (knownPartCost == -1)            //It is assumed not to change. It makes procedural engines have issues.
                 {
-                    print("knownPartCost was -1, calculating it");
                     if (subtractResourcesCost)
                     {
-                        print("subtractResourcesCost is true");
                         foreach (PartResource i in part.Resources.ToList())
                         {
                             defaultCost -= (float)i.maxAmount * PartResourceLibrary.Instance.GetDefinition(i.resourceName).unitCost;
@@ -437,9 +430,6 @@ namespace EngineDecay
 
                     knownPartCost = defaultCost;
                 }
-
-                print(knownPartCost);
-                print("===");
             }
 
             if (newBorn)
