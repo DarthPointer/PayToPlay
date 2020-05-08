@@ -427,7 +427,6 @@ namespace EngineDecay
                 {
                     if (i != this)
                     {
-                        print(i.GetModuleCost(0, sit));
                         defaultCost += i.GetModuleCost(0, sit);                                     //We assume there are no other cost modifiers besides procedural-related and EngineDecay
                     }
                 }

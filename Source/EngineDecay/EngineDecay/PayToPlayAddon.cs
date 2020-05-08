@@ -12,7 +12,6 @@ namespace EngineDecay
     {
         public void Start()
         {
-            UnityEngine.Debug.Log("=== P2PAddon has been started ===");
             GameEvents.onVesselRecovered.Add(Read);
         }
 
@@ -23,7 +22,7 @@ namespace EngineDecay
 
         public void Read(ProtoVessel v, bool wtf)
         {
-            UnityEngine.Debug.Log("=== onVesselRacovered has successfully called Read ===");
+            UnityEngine.Debug.Log("P2P: onVesselRacovered has successfully called Read");
 
             List<ProtoPartSnapshot> parts = v.protoPartSnapshots;
 
