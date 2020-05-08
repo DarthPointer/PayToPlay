@@ -118,6 +118,9 @@ namespace EngineDecay
         [KSPField(isPersistant = true, guiActive = false)]
         public bool useSRBCost = false;
 
+        [KSPField(isPersistant = true, guiActive = false)]                                      //use mass and cost logic for Procedural Parts mod
+        public bool procPart = false;
+
         [KSPField(isPersistant = true, guiActive = false)]
         bool newBorn = true;
 
@@ -416,6 +419,21 @@ namespace EngineDecay
 
         float IPartCostModifier.GetModuleCost(float defaultCost, ModifierStagingSituation sit)
         {
+            if(procPart)
+            {
+                defaultCost = 0;
+
+                foreach (IPartCostModifier i in part.FindModulesImplementing<IPartCostModifier>())
+                {
+                    if (i != this)
+                    {
+                        print(i.GetModuleCost(0, sit));
+                        defaultCost += i.GetModuleCost(0, sit);                                     //We assume there are no other cost modifiers besides procedural-related and EngineDecay
+                    }
+                }
+            }
+
+
             if (defaultCost != 0)
             {
                 if (knownPartCost == -1)            //It is assumed not to change. It makes procedural engines have issues.
