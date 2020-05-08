@@ -113,10 +113,10 @@ namespace EngineDecay
         float knownPartCost = -1;
 
         [KSPField(isPersistant = true, guiActive = false)]
-        bool subtractResourcesCost = false;
+        public bool subtractResourcesCost = false;
 
         [KSPField(isPersistant = true, guiActive = false)]
-        bool useSRBCost = false;
+        public bool useSRBCost = false;
 
         [KSPField(isPersistant = true, guiActive = false)]
         bool newBorn = true;
@@ -253,6 +253,8 @@ namespace EngineDecay
                     SetFailTime();
                 }
             }
+
+            print(subtractResourcesCost);
         }
 
         public void Update()
@@ -266,11 +268,25 @@ namespace EngineDecay
             {
                 newBorn = false;
 
-                maintenanceCost = (int)(knownPartCost * (1f + extraBurnTimePercent * maxCostRatedTimeCoeff / 100f) * maintenanceAtRatedTimeCoeff * usedBurnTime / setBurnTime);
-
-                if (maintenanceCost > knownPartCost * (1f + extraBurnTimePercent * maxCostRatedTimeCoeff / 100f))
+                if (!useSRBCost)
                 {
-                    maintenanceCost = (int)(knownPartCost * (1f + extraBurnTimePercent * maxCostRatedTimeCoeff / 100f));
+                    maintenanceCost = (int)(knownPartCost * (1f + extraBurnTimePercent * maxCostRatedTimeCoeff / 100f) * maintenanceAtRatedTimeCoeff * usedBurnTime / setBurnTime);
+                    
+                    if (maintenanceCost > knownPartCost * (1f + extraBurnTimePercent * maxCostRatedTimeCoeff / 100f))
+                    {
+                        maintenanceCost = (int)(knownPartCost * (1f + extraBurnTimePercent * maxCostRatedTimeCoeff / 100f));
+                    }
+                }
+                else
+                {
+                    if (ignitionsLeft == setIgnitions)
+                    {
+                        maintenanceCost = 0;
+                    }
+                    else
+                    {
+                        maintenanceCost = (int)(knownPartCost * maintenanceAtRatedTimeCoeff);
+                    }
                 }
 
                 if (maintenanceCost > 0 || !nominal)
@@ -402,17 +418,28 @@ namespace EngineDecay
 
         float IPartCostModifier.GetModuleCost(float defaultCost, ModifierStagingSituation sit)
         {
-            if (knownPartCost == -1)            //It is assumed not to change. It makes procedural engines have issues.
+            if (defaultCost != 0)
             {
-                if(subtractResourcesCost)
+                print(defaultCost);
+                print(knownPartCost);
+
+                if (knownPartCost == -1)            //It is assumed not to change. It makes procedural engines have issues.
                 {
-                    foreach(PartResource i in part.Resources.ToList())
+                    print("knownPartCost was -1, calculating it");
+                    if (subtractResourcesCost)
                     {
-                        defaultCost -= (float)i.maxAmount * PartResourceLibrary.Instance.GetDefinition(i.resourceName).unitCost;
+                        print("subtractResourcesCost is true");
+                        foreach (PartResource i in part.Resources.ToList())
+                        {
+                            defaultCost -= (float)i.maxAmount * PartResourceLibrary.Instance.GetDefinition(i.resourceName).unitCost;
+                        }
                     }
+
+                    knownPartCost = defaultCost;
                 }
 
-                knownPartCost = defaultCost;
+                print(knownPartCost);
+                print("===");
             }
 
             if (newBorn)
