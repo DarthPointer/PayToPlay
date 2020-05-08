@@ -435,7 +435,7 @@ namespace EngineDecay
 
             if (defaultCost != 0)
             {
-                if (knownPartCost == -1)            //It is assumed not to change. It makes procedural engines have issues.
+                if (knownPartCost == -1 || procPart)            //It is assumed not to change only for procedural parts. Probably this check will have to be removed
                 {
                     if (subtractResourcesCost)
                     {
