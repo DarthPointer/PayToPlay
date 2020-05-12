@@ -67,11 +67,18 @@ namespace EngineDecay
 
         public float GetExponent(string partName)
         {
-            if(!exponents.ContainsKey(partName))
+            if (PayToPlaySettings.ReliabilityProgress)
             {
-                exponents[partName] = 2;
+                if (!exponents.ContainsKey(partName))
+                {
+                    exponents[partName] = PayToPlaySettings.StartingReliability;
+                }
+                return exponents[partName];
             }
-            return exponents[partName];
+            else
+            {
+                return 8;
+            }
         }
 
         public void Improve(string partName, float coeff, float generationExp)

@@ -174,266 +174,234 @@ namespace EngineDecay
 
         public override void OnStart(StartState state)
         {
-            if (PayToPlaySettings.Enable)
+            decayingEngines = part.FindModulesImplementing<ModuleEngines>();
+            modeSwitcher = part.FindModuleImplementing<MultiModeEngine>();
+
+            modesNumber = decayingEngines.Count();
+
+            if (decayRates.Length != 0)
             {
-                decayingEngines = part.FindModulesImplementing<ModuleEngines>();
-                modeSwitcher = part.FindModuleImplementing<MultiModeEngine>();
-
-                modesNumber = decayingEngines.Count();
-
-                if (decayRates.Length != 0)
+                foreach (string i in decayRates.Split(';'))
                 {
-                    foreach (string i in decayRates.Split(';'))
-                    {
-                        decayRatesList.Add(float.Parse(i));
-                    }
-                }
-
-                if (ignitionsUsage.Length != 0)
-                {
-                    foreach (string i in ignitionsUsage.Split(';'))
-                    {
-                        ignitionsUsageList.Add(int.Parse(i) != 0);
-                    }
-                }
-
-                if (ignitionsOnSwitch.Length != 0)
-                {
-                    int c = 0;
-                    foreach (string i in ignitionsOnSwitch.Split(';'))
-                    {
-                        if (c % (modesNumber + 1) == 0)
-                        {
-                            ignitionsOnSwitchList.Add(false);
-                            c++;
-                        }
-                        ignitionsOnSwitchList.Add(int.Parse(i) != 0);
-                        c++;
-                    }
-                    ignitionsOnSwitchList.Add(false);
-                }
-
-                //if engine multimode data is consistent, we will access features for mulit-mode engines
-                usingMultiModeLogic = decayRatesList.Count() == modesNumber && ignitionsUsageList.Count() == modesNumber && ignitionsOnSwitchList.Count() == modesNumber * modesNumber;
-
-                if (topBaseRatedTime == -1)
-                {
-                    Fields["extraBurnTimePercent"].guiActiveEditor = false;
-                    Fields["extraBurnTimePercent"].guiActive = false;
-
-                    Fields["burnTimeIndicator"].guiActiveEditor = false;
-                    Fields["burnTimeIndicator"].guiActive = false;
-                }
-
-                if (baseIgnitions == -1 || baseIgnitions == maxIgnitions)
-                {
-                    Fields["extraIgnitionsPercent"].guiActiveEditor = false;
-                    Fields["extraIgnitionsPercent"].guiActive = false;
-
-                    Fields["ignitionsIndicator"].guiActiveEditor = false;
-                    Fields["ignitionsIndicator"].guiActive = false;
-                }
-
-                if (state == StartState.Editor)
-                {
-                    inEditor = true;
-
-                    if (r == 0 && topBaseRatedTime != -1)
-                    {
-                        r = ReliabilityProgress.fetch.GetExponent(part.name);
-                    }
-                }
-                else
-                {
-                    inEditor = false;
-
-                    ignoreIgnitionTill = Time.time + 0.5f;
-
-                    if (!nominal)
-                    {
-                        Disable();
-                    }
-                    else if (failAtBurnTime == -1)
-                    {
-                        SetFailTime();
-                    }
+                    decayRatesList.Add(float.Parse(i));
                 }
             }
-            else
+
+            if (ignitionsUsage.Length != 0)
+            {
+                foreach (string i in ignitionsUsage.Split(';'))
+                {
+                    ignitionsUsageList.Add(int.Parse(i) != 0);
+                }
+            }
+
+            if (ignitionsOnSwitch.Length != 0)
+            {
+                int c = 0;
+                foreach (string i in ignitionsOnSwitch.Split(';'))
+                {
+                    if (c % (modesNumber + 1) == 0)
+                    {
+                        ignitionsOnSwitchList.Add(false);
+                        c++;
+                    }
+                    ignitionsOnSwitchList.Add(int.Parse(i) != 0);
+                    c++;
+                }
+                ignitionsOnSwitchList.Add(false);
+            }
+
+            //if engine multimode data is consistent, we will access features for mulit-mode engines
+            usingMultiModeLogic = decayRatesList.Count() == modesNumber && ignitionsUsageList.Count() == modesNumber && ignitionsOnSwitchList.Count() == modesNumber * modesNumber;
+
+            if (topBaseRatedTime == -1)
             {
                 Fields["extraBurnTimePercent"].guiActiveEditor = false;
                 Fields["extraBurnTimePercent"].guiActive = false;
 
                 Fields["burnTimeIndicator"].guiActiveEditor = false;
                 Fields["burnTimeIndicator"].guiActive = false;
+            }
 
-
+            if (baseIgnitions == -1 || baseIgnitions == maxIgnitions)
+            {
                 Fields["extraIgnitionsPercent"].guiActiveEditor = false;
                 Fields["extraIgnitionsPercent"].guiActive = false;
 
                 Fields["ignitionsIndicator"].guiActiveEditor = false;
                 Fields["ignitionsIndicator"].guiActive = false;
+            }
 
+            if (state == StartState.Editor)
+            {
+                inEditor = true;
 
-                Fields["reliabilityStatus"].guiActiveEditor = false;
-                Fields["reliabilityStatus"].guiActive = false;
+                if (r == 0 && topBaseRatedTime != -1)
+                {
+                    r = ReliabilityProgress.fetch.GetExponent(part.name);
+                }
+            }
+            else
+            {
+                inEditor = false;
 
+                ignoreIgnitionTill = Time.time + 0.5f;
 
-                Events["Maintenance"].guiActiveEditor = false;
-                Events["Maintenance"].guiActive = false;
+                if (!nominal)
+                {
+                    Disable();
+                }
+                else if (failAtBurnTime == -1)
+                {
+                    SetFailTime();
+                }
             }
         }
 
         public void Update()
         {
-            if (PayToPlaySettings.Enable)
+            if (!inEditor && newBorn)
             {
-                if (!inEditor && newBorn)
-                {
-                    throw new Exception("EngineDecay MODULE thinks it is not in editor but not initialized yet");
-                }
+                throw new Exception("EngineDecay MODULE thinks it is not in editor but not initialized yet");
+            }
 
-                if (inEditor)
-                {
-                    newBorn = false;
+            if (inEditor)
+            {
+                newBorn = false;
 
-                    if (!useSRBCost)
+                if (!useSRBCost)
+                {
+                    maintenanceCost = (int)(knownPartCost * (1f + extraBurnTimePercent * maxCostRatedTimeCoeff / 100f) * maintenanceAtRatedTimeCoeff * usedBurnTime / setBurnTime);
+                    
+                    if (maintenanceCost > knownPartCost * (1f + extraBurnTimePercent * maxCostRatedTimeCoeff / 100f))
                     {
-                        maintenanceCost = (int)(knownPartCost * (1f + extraBurnTimePercent * maxCostRatedTimeCoeff / 100f) * maintenanceAtRatedTimeCoeff * usedBurnTime / setBurnTime);
-
-                        if (maintenanceCost > knownPartCost * (1f + extraBurnTimePercent * maxCostRatedTimeCoeff / 100f))
-                        {
-                            maintenanceCost = (int)(knownPartCost * (1f + extraBurnTimePercent * maxCostRatedTimeCoeff / 100f));
-                        }
+                        maintenanceCost = (int)(knownPartCost * (1f + extraBurnTimePercent * maxCostRatedTimeCoeff / 100f));
+                    }
+                }
+                else
+                {
+                    if (ignitionsLeft == setIgnitions)
+                    {
+                        maintenanceCost = 0;
                     }
                     else
                     {
-                        if (ignitionsLeft == setIgnitions)
-                        {
-                            maintenanceCost = 0;
-                        }
-                        else
-                        {
-                            maintenanceCost = (int)(knownPartCost * maintenanceAtRatedTimeCoeff);
-                        }
+                        maintenanceCost = (int)(knownPartCost * maintenanceAtRatedTimeCoeff);
                     }
+                }
 
-                    if (maintenanceCost > 0 || !nominal)
+                if (maintenanceCost > 0 || !nominal)
+                {
+                    Events["Maintenance"].guiActiveEditor = true;
+                    Events["Maintenance"].guiName = String.Format("maintenance: {0}", maintenanceCost);
+                }
+
+                if (prevEBTP != extraBurnTimePercent || prevEIP != extraIgnitionsPercent)
+                {
+                    if (maintenanceCost > 0)
                     {
-                        Events["Maintenance"].guiActiveEditor = true;
-                        Events["Maintenance"].guiName = String.Format("maintenance: {0}", maintenanceCost);
+                        Maintenance();
                     }
 
-                    if (prevEBTP != extraBurnTimePercent || prevEIP != extraIgnitionsPercent)
+                    if (topBaseRatedTime != -1)
                     {
-                        if (maintenanceCost > 0)
-                        {
-                            Maintenance();
-                        }
+                        currentBaseRatedTime = ProbabilityLib.ATangentCumulativePercentArg(r, topBaseRatedTime);
 
-                        if (topBaseRatedTime != -1)
-                        {
-                            currentBaseRatedTime = ProbabilityLib.ATangentCumulativePercentArg(r, topBaseRatedTime);
-
-                            setBurnTime = currentBaseRatedTime * (1 + extraBurnTimePercent * (topMaxRatedTime / topBaseRatedTime - 1) / 100);
-                            usedBurnTime = 0;
-                        }
-
-                        if (baseIgnitions != -1)
-                        {
-                            setIgnitions = (int)(baseIgnitions + extraIgnitionsPercent * (maxIgnitions - baseIgnitions) / 100);
-                            ignitionsLeft = setIgnitions;
-                        }
-
-                        UpdateIndicators();
-
-                        maintenanceCost = 0;
-                        Events["Maintenance"].guiActiveEditor = false;
-
-                        prevEBTP = extraBurnTimePercent;
-                        prevEIP = extraIgnitionsPercent;
-
-                        failAtBurnTime = -1;
+                        setBurnTime = currentBaseRatedTime * (1 + extraBurnTimePercent * (topMaxRatedTime / topBaseRatedTime - 1) / 100);
+                        usedBurnTime = 0;
                     }
+
+                    if (baseIgnitions != -1)
+                    {
+                        setIgnitions = (int)(baseIgnitions + extraIgnitionsPercent * (maxIgnitions - baseIgnitions) / 100);
+                        ignitionsLeft = setIgnitions;
+                    }
+
+                    UpdateIndicators();
+
+                    maintenanceCost = 0;
+                    Events["Maintenance"].guiActiveEditor = false;
+
+                    prevEBTP = extraBurnTimePercent;
+                    prevEIP = extraIgnitionsPercent;
+
+                    failAtBurnTime = -1;
                 }
             }
         }
 
         public void FixedUpdate()
         {
-            if (PayToPlaySettings.Enable)
+            if (!inEditor)
             {
-                if (!inEditor)
+                bool railWarping = IsRailWarping();
+
+                int runningMode = RunningMode();
+
+                if (!railWarping)
                 {
-                    bool railWarping = IsRailWarping();
-
-                    int runningMode = RunningMode();
-
-                    if (!railWarping)
+                    if (wasRailWarpingPrevTick)
                     {
-                        if (wasRailWarpingPrevTick)
+                        ignoreIgnitionTill = Time.time + 0.5f;
+                    }
+
+                    if (topBaseRatedTime != -1)
+                    {
+                        if (runningMode != -1)
                         {
-                            ignoreIgnitionTill = Time.time + 0.5f;
-                        }
-
-                        if (topBaseRatedTime != -1)
-                        {
-                            if (runningMode != -1)
+                            if (!usingMultiModeLogic)
                             {
-                                if (!usingMultiModeLogic)
-                                {
-                                    usedBurnTime += TimeWarp.fixedDeltaTime;
-                                }
-                                else
-                                {
-                                    usedBurnTime += TimeWarp.fixedDeltaTime * decayRatesList[runningMode];
-                                }
-
-                                if (usedBurnTime <= setBurnTime)
-                                {
-                                    usageExperienceCoeff = 0.1f * usedBurnTime / setBurnTime;
-                                }
+                                usedBurnTime += TimeWarp.fixedDeltaTime;
+                            }
+                            else
+                            {
+                                usedBurnTime += TimeWarp.fixedDeltaTime * decayRatesList[runningMode];
                             }
 
-                            if (usedBurnTime > failAtBurnTime && nominal)
+                            if (usedBurnTime <= setBurnTime)
                             {
-                                Failure();
-
-                                usageExperienceCoeff = 0.3f;
-                            }
-
-                            if (ticksTillDisabling > 0)
-                            {
-                                CutoffOnFailure();
-                                ticksTillDisabling--;
-                            }
-
-                            if (ticksTillDisabling == 0)
-                            {
-                                Disable();
-                                ticksTillDisabling = -1;
+                                usageExperienceCoeff = 0.1f * usedBurnTime / setBurnTime;
                             }
                         }
 
-                        if (Time.time >= ignoreIgnitionTill && baseIgnitions != -1 && nominal)
+                        if (usedBurnTime > failAtBurnTime && nominal)
                         {
-                            checkIgnition();
+                            Failure();
+
+                            usageExperienceCoeff = 0.3f;
+                        }
+
+                        if (ticksTillDisabling > 0)
+                        {
+                            CutoffOnFailure();
+                            ticksTillDisabling--;
+                        }
+
+                        if (ticksTillDisabling == 0)
+                        {
+                            Disable();
+                            ticksTillDisabling = -1;
                         }
                     }
 
-                    if (nominal && baseIgnitions != -1)
+                    if (Time.time >= ignoreIgnitionTill && baseIgnitions != -1 && nominal)
                     {
-                        LastIgnitionCheck();
+                        checkIgnition();
                     }
-
-                    if (Time.time > holdIndicatorsTill)
-                    {
-                        UpdateIndicators();
-                    }
-
-                    wasRailWarpingPrevTick = railWarping;
-                    modeRunningPrevTick = runningMode;
                 }
+
+                if (nominal && baseIgnitions != -1)
+                {
+                    LastIgnitionCheck();
+                }
+
+                if (Time.time > holdIndicatorsTill)
+                {
+                    UpdateIndicators();
+                }
+
+                wasRailWarpingPrevTick = railWarping;
+                modeRunningPrevTick = runningMode;
             }
         }
 
@@ -650,6 +618,16 @@ namespace EngineDecay
             {
                 modeSwitcher.isEnabled = true;
             }
+
+            typeof(KSP.UI.Screens.StageManager).GetMethod("SortIcons",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance, null,
+                new Type[] { typeof(bool), typeof(Part), typeof(bool) }, null).
+                Invoke(KSP.UI.Screens.StageManager.Instance, new object[] { true, part, false });
+
+            typeof(KSP.UI.Screens.StageManager).GetMethod("SortIcons",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance, null,
+                new Type[] { typeof(bool), typeof(Part), typeof(bool) }, null).
+                Invoke(KSP.UI.Screens.StageManager.Instance, new object[] { true, part, false });
         }
 
         void BadaBoom()
