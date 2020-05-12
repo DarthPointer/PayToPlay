@@ -275,6 +275,10 @@ namespace EngineDecay
                 Fields["ignitionsIndicator"].guiActive = false;
 
 
+                Fields["reliabilityStatus"].guiActiveEditor = false;
+                Fields["reliabilityStatus"].guiActive = false;
+
+
                 Events["Maintenance"].guiActiveEditor = false;
                 Events["Maintenance"].guiActive = false;
             }
