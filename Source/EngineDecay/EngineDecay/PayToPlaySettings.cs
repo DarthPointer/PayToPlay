@@ -10,8 +10,8 @@ namespace EngineDecay
     {
         #region params
 
-        [GameParameters.CustomParameterUI("Should failures happen?", newGameOnly = true)]
-        public bool on = true;
+        [GameParameters.CustomParameterUI("Enable", newGameOnly = true, toolTip = "Burn time, ignitions and maintenance")]
+        public bool enable = true;
 
         [GameParameters.CustomParameterUI("Reliability progress", newGameOnly = true, toolTip = "Parts have full reliability only after enough experience recovered")]
         public bool reliabilityProgress = true;
@@ -23,16 +23,16 @@ namespace EngineDecay
 
         #region logics
 
-        public static bool On
+        public static bool Enable
         {
             get
             {
-                return HighLogic.CurrentGame.Parameters.CustomParams<PayToPlaySettings>().on;
+                return HighLogic.CurrentGame.Parameters.CustomParams<PayToPlaySettings>().enable;
             }
 
             set
             {
-                HighLogic.CurrentGame.Parameters.CustomParams<PayToPlaySettings>().on = value;
+                HighLogic.CurrentGame.Parameters.CustomParams<PayToPlaySettings>().enable = value;
             }
         }
 
