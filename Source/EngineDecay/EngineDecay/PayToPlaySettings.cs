@@ -16,7 +16,7 @@ namespace EngineDecay
         [GameParameters.CustomParameterUI("Reliability progress", newGameOnly = true, toolTip = "Parts have full reliability only after enough experience recovered")]
         public bool reliabilityProgress = true;
 
-        [GameParameters.CustomFloatParameterUI("Starting reliability exponent", newGameOnly = true, displayFormat = "F1", minValue = 2, maxValue = 8, toolTip = "see the .docx in the mod dir")]
+        [GameParameters.CustomFloatParameterUI("Starting reliability exponent", newGameOnly = true, displayFormat = "F1", minValue = 2, maxValue = 8, toolTip = "See the .docx in the mod dir")]
         public float startingReliability = 2;
 
         #endregion
