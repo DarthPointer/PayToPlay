@@ -159,6 +159,8 @@ namespace EngineDecay
                 {
                     UnityEngine.Debug.Log("EngineDecay found a counterpart without EngineDecay, it is really WEIRD!");
                 }
+
+                CounterpartMaintenance(maintenanceCost);                            // the counterpart is the same part for this case, we call it to update symmetry maintenance button
             }
 
             Maintenance();
