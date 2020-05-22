@@ -433,7 +433,7 @@ namespace EngineDecay
                             }
                         }
 
-                        if (symmetryMaintenanceCost != 0)
+                        if (symmetryMaintenanceCost > 0)
                         {
                             Events["SymmetryMaintenance"].guiName = string.Format("Symmetry Maintenance: {0}", symmetryMaintenanceCost);
                             Events["SymmetryMaintenance"].guiActiveEditor = true;
