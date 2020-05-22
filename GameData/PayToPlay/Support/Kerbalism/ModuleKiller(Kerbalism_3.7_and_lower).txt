@@ -1,0 +1,6 @@
+// Rename this into a .cfg one if you use Kerbalism 3.7 or an older version
+
+@PART[*]:HAS[@MODULE[ModuleEngines*],@MODULE[Reliability]]:NEEDS[KerbalismDefault]:FINAL
+{
+	!MODULE[Reliability] {}
+}
