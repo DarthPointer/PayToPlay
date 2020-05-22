@@ -130,6 +130,9 @@ namespace EngineDecay
         [KSPField(isPersistant = true, guiActive = false)]
         int maintenanceCost = 0;
 
+        [KSPField(isPersistant = true, guiActive = false)]
+        int symmetryMaintenanceCost = 0;
+
         bool inEditor = true;
         float ignoreIgnitionTill = 0;
         int ticksTillDisabling = -1;
@@ -140,9 +143,29 @@ namespace EngineDecay
 
         #endregion
 
-        #region actions and events
+        #region maintenance
 
-        [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "maintenance")]
+        [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "Maintenance")]
+        void MaintenanceEvent()
+        {
+            foreach (Part i in part.symmetryCounterparts)
+            {
+                EngineDecay engineDecay = i.FindModuleImplementing<EngineDecay>();
+                if (i != null)
+                {
+                    engineDecay.CounterpartMaintenance(maintenanceCost);
+                }
+                else
+                {
+                    UnityEngine.Debug.Log("EngineDecay found a counterpart without EngineDecay, it is really WEIRD!");
+                }
+            }
+
+            Maintenance();
+
+            GameEvents.onEditorShipModified.Fire(EditorLogic.fetch.ship);
+        }
+
         void Maintenance()
         {
             usedBurnTime = 0;
@@ -158,14 +181,86 @@ namespace EngineDecay
             reliabilityStatus = "nominal";
             nominal = true;
 
-            maintenanceCost = 0;
-            Events["Maintenance"].guiActiveEditor = false;
-
             Enable();
 
             failAtBurnTime = -1;
 
-            GameEvents.onEditorShipModified.Fire(EditorLogic.fetch.ship);
+            maintenanceCost = 0;
+            Events["MaintenanceEvent"].guiActiveEditor = false;
+        }
+
+        [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "Symmetry Maintenance")]
+        void SymmetryMaintenance()
+        {
+            foreach (Part i in part.symmetryCounterparts)
+            {
+                EngineDecay engineDecay = i.FindModuleImplementing<EngineDecay>();
+                if(i != null)
+                {
+                    engineDecay.MaintenanceFromCounterpart();
+                }
+                else
+                {
+                    UnityEngine.Debug.Log("EngineDecay found a counterpart without EngineDecay, it is really WEIRD!");
+                }
+            }
+        }
+
+        void MaintenanceFromCounterpart()
+        {
+            Maintenance();
+
+            symmetryMaintenanceCost = 0;
+            Events["SymmetryMaintenance"].guiActiveEditor = false;
+        }
+
+        void CounterpartMaintenance(int cost)
+        {
+            if (symmetryMaintenanceCost != 0)
+            {
+                symmetryMaintenanceCost -= cost;
+
+                if (symmetryMaintenanceCost != 0)
+                {
+                    Events["SymmetryMaintenance"].guiName = string.Format("Symmetry Maintenance: {0}", symmetryMaintenanceCost);
+                }
+                else
+                {
+                    Events["SymmetryMaintenance"].guiActiveEditor = false;
+                }
+            }
+        }
+
+        int UpdateMaintenanceCost()
+        {
+            if (!useSRBCost)
+            {
+                maintenanceCost = (int)(knownPartCost * (1f + extraBurnTimePercent * maxCostRatedTimeCoeff / 100f) * maintenanceAtRatedTimeCoeff * usedBurnTime / setBurnTime);
+
+                if (maintenanceCost > knownPartCost * (1f + extraBurnTimePercent * maxCostRatedTimeCoeff / 100f))
+                {
+                    maintenanceCost = (int)(knownPartCost * (1f + extraBurnTimePercent * maxCostRatedTimeCoeff / 100f));
+                }
+            }
+            else
+            {
+                if (ignitionsLeft == setIgnitions)
+                {
+                    maintenanceCost = 0;
+                }
+                else
+                {
+                    maintenanceCost = (int)(knownPartCost * maintenanceAtRatedTimeCoeff);
+                }
+            }
+
+            if (maintenanceCost > 0 || !nominal)
+            {
+                Events["MaintenanceEvent"].guiActiveEditor = true;
+                Events["MaintenanceEvent"].guiName = String.Format("Maintenance: {0}", maintenanceCost);
+            }
+
+            return maintenanceCost;
         }
 
         #endregion
@@ -279,8 +374,8 @@ namespace EngineDecay
                 Fields["reliabilityStatus"].guiActive = false;
 
 
-                Events["Maintenance"].guiActiveEditor = false;
-                Events["Maintenance"].guiActive = false;
+                Events["MaintenanceEvent"].guiActiveEditor = false;
+                Events["MaintenanceEvent"].guiActive = false;
             }
         }
 
@@ -297,38 +392,54 @@ namespace EngineDecay
                 {
                     newBorn = false;
 
-                    if (!useSRBCost)
-                    {
-                        maintenanceCost = (int)(knownPartCost * (1f + extraBurnTimePercent * maxCostRatedTimeCoeff / 100f) * maintenanceAtRatedTimeCoeff * usedBurnTime / setBurnTime);
+                    UpdateMaintenanceCost();
 
-                        if (maintenanceCost > knownPartCost * (1f + extraBurnTimePercent * maxCostRatedTimeCoeff / 100f))
-                        {
-                            maintenanceCost = (int)(knownPartCost * (1f + extraBurnTimePercent * maxCostRatedTimeCoeff / 100f));
-                        }
-                    }
-                    else
+                    List<Part> counterparts = part.symmetryCounterparts;
+                    if(counterparts.Count() != 0)
                     {
-                        if (ignitionsLeft == setIgnitions)
+                        if(symmetryMaintenanceCost == 0)
                         {
-                            maintenanceCost = 0;
-                        }
-                        else
-                        {
-                            maintenanceCost = (int)(knownPartCost * maintenanceAtRatedTimeCoeff);
-                        }
-                    }
+                            foreach (Part i in counterparts)
+                            {
+                                EngineDecay engineDecay = i.FindModuleImplementing<EngineDecay>();
+                                if (engineDecay != null)
+                                {
+                                    symmetryMaintenanceCost += engineDecay.UpdateMaintenanceCost();
+                                }
+                                else
+                                {
+                                    UnityEngine.Debug.Log("EngineDecay found a counterpart without EngineDecay, it is really WEIRD!");
+                                }
+                            }
 
-                    if (maintenanceCost > 0 || !nominal)
-                    {
-                        Events["Maintenance"].guiActiveEditor = true;
-                        Events["Maintenance"].guiName = String.Format("maintenance: {0}", maintenanceCost);
+                            foreach (Part i in counterparts)
+                            {
+                                EngineDecay engineDecay = i.FindModuleImplementing<EngineDecay>();
+                                if (engineDecay != null)
+                                {
+                                    engineDecay.symmetryMaintenanceCost = symmetryMaintenanceCost;
+                                    if(symmetryMaintenanceCost > 0)
+                                    {
+                                        engineDecay.Events["SymmetryMaintenance"].guiName = string.Format("Symmetry Maintenance: {0}", symmetryMaintenanceCost);
+                                        engineDecay.Events["SymmetryMaintenance"].guiActiveEditor = true;
+                                    }
+                                }
+                                else
+                                {
+                                    UnityEngine.Debug.Log("EngineDecay found a counterpart without EngineDecay, it is really WEIRD!");
+                                }
+                            }
+                        }
+
+                        Events["SymmetryMaintenance"].guiName = string.Format("Symmetry Maintenance: {0}", symmetryMaintenanceCost);
+                        Events["SymmetryMaintenance"].guiActiveEditor = true;
                     }
 
                     if (prevEBTP != extraBurnTimePercent || prevEIP != extraIgnitionsPercent)
                     {
                         if (maintenanceCost > 0)
                         {
-                            Maintenance();
+                            MaintenanceEvent();
                         }
 
                         if (topBaseRatedTime != -1)
@@ -348,7 +459,7 @@ namespace EngineDecay
                         UpdateIndicators();
 
                         maintenanceCost = 0;
-                        Events["Maintenance"].guiActiveEditor = false;
+                        Events["MaintenanceEvent"].guiActiveEditor = false;
 
                         prevEBTP = extraBurnTimePercent;
                         prevEIP = extraIgnitionsPercent;
