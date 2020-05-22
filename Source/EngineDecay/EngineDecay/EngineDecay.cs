@@ -204,6 +204,8 @@ namespace EngineDecay
                     UnityEngine.Debug.Log("EngineDecay found a counterpart without EngineDecay, it is really WEIRD!");
                 }
             }
+
+            Maintenance();
         }
 
         void MaintenanceFromCounterpart()
@@ -431,8 +433,11 @@ namespace EngineDecay
                             }
                         }
 
-                        Events["SymmetryMaintenance"].guiName = string.Format("Symmetry Maintenance: {0}", symmetryMaintenanceCost);
-                        Events["SymmetryMaintenance"].guiActiveEditor = true;
+                        if (symmetryMaintenanceCost != 0)
+                        {
+                            Events["SymmetryMaintenance"].guiName = string.Format("Symmetry Maintenance: {0}", symmetryMaintenanceCost);
+                            Events["SymmetryMaintenance"].guiActiveEditor = true;
+                        }
                     }
 
                     if (prevEBTP != extraBurnTimePercent || prevEIP != extraIgnitionsPercent)
