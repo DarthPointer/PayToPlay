@@ -207,7 +207,7 @@ namespace EngineDecay
                 }
             }
 
-            Maintenance();
+            MaintenanceFromCounterpart();
         }
 
         void MaintenanceFromCounterpart()
