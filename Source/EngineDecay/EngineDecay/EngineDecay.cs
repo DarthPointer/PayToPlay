@@ -448,7 +448,7 @@ namespace EngineDecay
                     {
                         if (maintenanceCost > 0)
                         {
-                            MaintenanceEvent();
+                            SymmetryMaintenance();
                         }
 
                         if (topBaseRatedTime != -1)
