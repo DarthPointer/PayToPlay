@@ -354,6 +354,8 @@ namespace EngineDecay
                     {
                         SetFailTime();
                     }
+
+                    symmetryMaintenanceCost = -1;
                 }
             }
             else
@@ -399,7 +401,7 @@ namespace EngineDecay
                     List<Part> counterparts = part.symmetryCounterparts;
                     if(counterparts.Count() != 0)
                     {
-                        if(symmetryMaintenanceCost == 0)
+                        if(symmetryMaintenanceCost == -1)
                         {
                             foreach (Part i in counterparts)
                             {
