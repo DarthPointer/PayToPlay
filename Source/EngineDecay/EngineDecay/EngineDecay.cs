@@ -133,15 +133,6 @@ namespace EngineDecay
         [KSPField(isPersistant = true, guiActive = false)]
         int symmetryMaintenanceCost = 0;
 
-        [KSPField(isPersistant = true, guiActive = false)]
-        float procDiameter;
-
-        [KSPField(isPersistant = true, guiActive = false)]
-        float procLength;
-
-        [KSPField(isPersistant = true, guiActive = false)]
-        float procThrust;
-
         bool inEditor = true;
         float ignoreIgnitionTill = 0;
         int ticksTillDisabling = -1;
@@ -404,8 +395,16 @@ namespace EngineDecay
                     {
                         if (i.moduleName == "ProceduralShapeCylinder")
                         {
-                            print(i.snapshot.moduleValues.GetValue("diameter"));
-                            print(i.snapshot.moduleValues.GetValue("length"));
+                            ConfigNode a = new ConfigNode(i);
+                            if (a != null)
+                            {
+                                print(a.GetValue("diameter"));
+                                print(a.GetValue("length"));
+                            }
+                            else
+                            {
+                                print("could not get confignode of a module");
+                            }
                         }
                     }
                 }
