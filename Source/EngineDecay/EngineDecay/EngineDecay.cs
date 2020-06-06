@@ -389,14 +389,6 @@ namespace EngineDecay
         {
             if (PayToPlaySettings.Enable)
             {
-                if(procPart)
-                {
-                    foreach (PartModule i in part.Modules)
-                    {
-                        print(i.moduleName);
-                    }
-                }
-
                 if (!inEditor && newBorn)
                 {
                     throw new Exception("EngineDecay MODULE thinks it is not in editor but not initialized yet");
@@ -404,6 +396,23 @@ namespace EngineDecay
 
                 if (inEditor)
                 {
+                    if(procPart)
+                    {
+                        foreach (PartModule i in part.Modules)
+                        {
+                            if (i.moduleName == "ProceduralShapeCylinder")
+                            {
+                                print(i.Fields["diameter"].GetValue(i));
+                                print(i.Fields["length"].GetValue(i));
+                            }
+                            if (i.moduleName == "ProceduralSRB")
+                            {
+                                print(i.Fields["thrust"].GetValue(i));
+                                print(i.Fields["selectedBellName"].GetValue(i));
+                            }
+                        }
+                    }
+
                     newBorn = false;
 
                     UpdateMaintenanceCost();

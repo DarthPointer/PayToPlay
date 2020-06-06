@@ -19,6 +19,15 @@ namespace EngineDecay
         [GameParameters.CustomFloatParameterUI("Starting reliability exponent", newGameOnly = true, displayFormat = "F1", minValue = 2, maxValue = 8, toolTip = "See the .docx in the mod dir")]
         public float startingReliability = 2;
 
+        [GameParameters.CustomFloatParameterUI("Failure on chance multiplier (%)", newGameOnly = true, displayFormat = "F1", minValue = 0.01f, maxValue = 1, toolTip = "Chance to cause a failure at max reliability")]
+        public float failureOnIgnitionPercent = 0.05f;
+
+        [GameParameters.CustomFloatParameterUI("Ignition failure chance multiplier (%)", newGameOnly = true, displayFormat = "F1", minValue = 0.01f, maxValue = 1, toolTip = "Ignition attempt fails (no consequences for the engine) at max reliability")]
+        public float ignitionFailurePercent = 0.05f;
+
+        [GameParameters.CustomFloatParameterUI("Part destruction on failure chance (%)", newGameOnly = true, displayFormat = "F1", minValue = 1, maxValue = 10, toolTip = "Does NOT affect wasted ignitions")]
+        public float destructionOnFailurePercent = 5;
+
         #endregion
 
         #region logics
