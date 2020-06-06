@@ -393,19 +393,7 @@ namespace EngineDecay
                 {
                     foreach (PartModule i in part.Modules)
                     {
-                        if (i.moduleName == "ProceduralShapeCylinder")
-                        {
-                            ConfigNode a = new ConfigNode(i);
-                            if (a != null)
-                            {
-                                print(a.GetValue("diameter"));
-                                print(a.GetValue("length"));
-                            }
-                            else
-                            {
-                                print("could not get confignode of a module");
-                            }
-                        }
+                        print(i.moduleName);
                     }
                 }
 
