@@ -389,6 +389,18 @@ namespace EngineDecay
         {
             if (PayToPlaySettings.Enable)
             {
+                if(procPart)
+                {
+                    foreach (PartModule i in part.Modules)
+                    {
+                        if (i.moduleName == "ProceduralShapeCylinder")
+                        {
+                            print(i.Fields["diameter"]);
+                            print(i.Fields["length"]);
+                        }
+                    }
+                }
+
                 if (!inEditor && newBorn)
                 {
                     throw new Exception("EngineDecay MODULE thinks it is not in editor but not initialized yet");
