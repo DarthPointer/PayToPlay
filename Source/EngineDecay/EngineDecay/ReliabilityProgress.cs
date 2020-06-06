@@ -21,19 +21,6 @@ namespace EngineDecay
             fetch = this;
         }
 
-        public ReliabilityProgress(ConfigNode node)
-        {
-            int c = 0;
-            foreach (ConfigNode.Value val in node.values)
-            {
-                if (c >= 2)
-                {
-                    exponents[val.name] = float.Parse(val.value);
-                }
-                c++;
-            }
-        }
-
         #endregion
 
         #region ScenarioModule stuff
