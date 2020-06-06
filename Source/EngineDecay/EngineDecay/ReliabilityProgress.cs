@@ -85,7 +85,7 @@ namespace EngineDecay
         {
             if(!exponents.ContainsKey(partName))
             {
-                exponents[partName] = 2;
+                exponents[partName] = PayToPlaySettings.StartingReliability;
             }
 
 
