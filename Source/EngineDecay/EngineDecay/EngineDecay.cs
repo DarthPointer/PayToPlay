@@ -133,6 +133,15 @@ namespace EngineDecay
         [KSPField(isPersistant = true, guiActive = false)]
         int symmetryMaintenanceCost = 0;
 
+        [KSPField(isPersistant = true, guiActive = false)]
+        float procSRBDiameter;
+
+        [KSPField(isPersistant = true, guiActive = false)]
+        float procSRBThrust;
+
+        [KSPField(isPersistant = true, guiActive = false)]
+        string procSRBNozzleName;
+
         bool inEditor = true;
         float ignoreIgnitionTill = 0;
         int ticksTillDisabling = -1;
@@ -140,6 +149,9 @@ namespace EngineDecay
 
         List<ModuleEngines> decayingEngines;
         MultiModeEngine modeSwitcher;
+
+        PartModule procSRBTank;
+        PartModule procSRB;
 
         #endregion
 
@@ -340,6 +352,34 @@ namespace EngineDecay
                     if (r == 0 && topBaseRatedTime != -1)
                     {
                         r = ReliabilityProgress.fetch.GetExponent(part.name);
+                    }
+
+                    if (procPart)
+                    {
+                        foreach (PartModule i in part.Modules)
+                        {
+                            if (i.moduleName == "ProceduralShapeCylinder")
+                            {
+                                procSRBTank = i;
+                            }
+
+                            else if (i.moduleName == "ProceduralSRB")
+                            {
+                                procSRB = i;
+                            }
+                        }
+
+                        if ((procSRBTank == null) || (procSRB == null))
+                        {
+                            Debug.LogError("An EngineDecay module marked as a one for ProceduralParts SRB could not find relevant modules. Switched to non-procedural logic");
+                            procPart = false;
+                        }
+                        else
+                        {
+                            ProcUpdateDiameter(procSRBTank.Fields["diameter"], null);
+                            ProcUpdateNozzleName(procSRB.Fields["thrust"], null);
+                            ProcUpdateThrust(procSRB.Fields["selectedBellName"], null);
+                        }
                     }
                 }
                 else
@@ -881,6 +921,25 @@ namespace EngineDecay
                 return ignitionsOnSwitchList[fromMode * modesNumber + toMode];
             }
         }
+        #endregion
+
+        #region ProcPart Callbacks
+
+        public void ProcUpdateDiameter(BaseField diameter, object obj)
+        {
+            print(string.Format("Field diameter is {0}", diameter.GetValue(procSRBTank)));
+        }
+
+        public void ProcUpdateThrust(BaseField thrust, object obj)
+        {
+            print(string.Format("Field diameter is {0}", thrust.GetValue(procSRBTank)));
+        }
+
+        public void ProcUpdateNozzleName(BaseField nozzleName, object obj)
+        {
+            print(string.Format("Field diameter is {0}", nozzleName.GetValue(procSRBTank)));
+        }
+
         #endregion
     }
 }
