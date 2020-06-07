@@ -356,29 +356,14 @@ namespace EngineDecay
 
                     if (procPart)
                     {
-                        foreach (PartModule i in part.Modules)
-                        {
-                            if (i.moduleName == "ProceduralShapeCylinder")
-                            {
-                                procSRBTank = i;
-                            }
-
-                            else if (i.moduleName == "ProceduralSRB")
-                            {
-                                procSRB = i;
-                            }
-                        }
+                        part.Modules["ProceduralShapeCylinder"].Fields["diabmeter"].uiControlEditor.onFieldChanged += ProcUpdateDiameter;
+                        part.Modules["ProceduralSRB"].Fields["thrust"].uiControlEditor.onFieldChanged += ProcUpdateThrust;
+                        part.Modules["ProceduralSRB"].Fields["selectedBellName"].uiControlEditor.onFieldChanged += ProcUpdateNozzleName;
 
                         if ((procSRBTank == null) || (procSRB == null))
                         {
                             Debug.LogError("An EngineDecay module marked as a one for ProceduralParts SRB could not find relevant modules. Switched to non-procedural logic");
                             procPart = false;
-                        }
-                        else
-                        {
-                            ProcUpdateDiameter(procSRBTank.Fields["diameter"], null);
-                            ProcUpdateNozzleName(procSRB.Fields["thrust"], null);
-                            ProcUpdateThrust(procSRB.Fields["selectedBellName"], null);
                         }
                     }
                 }
@@ -436,24 +421,14 @@ namespace EngineDecay
 
                 if (inEditor)
                 {
-                    if(procPart)
+                    if (newBorn)
                     {
-                        foreach (PartModule i in part.Modules)
-                        {
-                            if (i.moduleName == "ProceduralShapeCylinder")
-                            {
-                                print(i.Fields["diameter"].GetValue(i));
-                                print(i.Fields["length"].GetValue(i));
-                            }
-                            if (i.moduleName == "ProceduralSRB")
-                            {
-                                print(i.Fields["thrust"].GetValue(i));
-                                print(i.Fields["selectedBellName"].GetValue(i));
-                            }
-                        }
-                    }
+                        newBorn = false;
 
-                    newBorn = false;
+                        /*ProcUpdateDiameter(procSRBTank.Fields["diameter"], null);
+                        ProcUpdateNozzleName(procSRB.Fields["thrust"], null);
+                        ProcUpdateThrust(procSRB.Fields["selectedBellName"], null);*/
+                    }
 
                     UpdateMaintenanceCost();
 
@@ -927,17 +902,17 @@ namespace EngineDecay
 
         public void ProcUpdateDiameter(BaseField diameter, object obj)
         {
-            print(string.Format("Field diameter is {0}", diameter.GetValue(procSRBTank)));
+            print(string.Format("Field diameter is {0}", diameter.GetValue(obj)));
         }
 
         public void ProcUpdateThrust(BaseField thrust, object obj)
         {
-            print(string.Format("Field diameter is {0}", thrust.GetValue(procSRBTank)));
+            print(string.Format("Field diameter is {0}", thrust.GetValue(obj)));
         }
 
         public void ProcUpdateNozzleName(BaseField nozzleName, object obj)
         {
-            print(string.Format("Field diameter is {0}", nozzleName.GetValue(procSRBTank)));
+            print(string.Format("Field diameter is {0}", nozzleName.GetValue(obj)));
         }
 
         #endregion
