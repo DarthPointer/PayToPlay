@@ -140,7 +140,7 @@ namespace EngineDecay
         float procSRBThrust;
 
         [KSPField(isPersistant = true, guiActive = false)]
-        string procSRBNozzleName = "";
+        string procSRBbellName = "";
 
         bool inEditor = true;
         float ignoreIgnitionTill = 0;
@@ -369,7 +369,7 @@ namespace EngineDecay
                         {
                             procSRBCylinder.Fields["diameter"].uiControlEditor.onFieldChanged += ProcUpdateDiameter;
                             procSRB.Fields["thrust"].uiControlEditor.onFieldChanged += ProcUpdateThrust;
-                            procSRB.Fields["selectedBellName"].uiControlEditor.onFieldChanged += ProcUpdateNozzleName;
+                            procSRB.Fields["selectedBellName"].uiControlEditor.onFieldChanged += ProcUpdateBellName;
                         }
                     }
                 }
@@ -432,7 +432,7 @@ namespace EngineDecay
                         newBorn = false;
 
                         ProcUpdateDiameter(procSRBCylinder.Fields["diameter"], null);
-                        ProcUpdateNozzleName(procSRB.Fields["selectedBellName"], null);
+                        ProcUpdateBellName(procSRB.Fields["selectedBellName"], null);
                         ProcUpdateThrust(procSRB.Fields["thrust"], null);
                     }
 
@@ -916,9 +916,9 @@ namespace EngineDecay
             print(string.Format("Field thrust is {0}", thrust.GetValue(procSRB)));
         }
 
-        public void ProcUpdateNozzleName(BaseField nozzleName, object obj)
+        public void ProcUpdateBellName(BaseField bellName, object obj)
         {
-            print(string.Format("Field nozzleName is {0}", nozzleName.GetValue(procSRB)));
+            print(string.Format("Field bellName is {0}", bellName.GetValue(procSRB)));
         }
 
         #endregion
