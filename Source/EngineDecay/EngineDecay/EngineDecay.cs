@@ -140,7 +140,7 @@ namespace EngineDecay
         float procSRBThrust;
 
         [KSPField(isPersistant = true, guiActive = false)]
-        string procSRBNozzleName;
+        string procSRBNozzleName = "";
 
         bool inEditor = true;
         float ignoreIgnitionTill = 0;
@@ -150,7 +150,7 @@ namespace EngineDecay
         List<ModuleEngines> decayingEngines;
         MultiModeEngine modeSwitcher;
 
-        PartModule procSRBTank;
+        PartModule procSRBCyllinder;
         PartModule procSRB;
 
         #endregion
@@ -356,14 +356,20 @@ namespace EngineDecay
 
                     if (procPart)
                     {
-                        part.Modules["ProceduralShapeCylinder"].Fields["diabmeter"].uiControlEditor.onFieldChanged += ProcUpdateDiameter;
-                        part.Modules["ProceduralSRB"].Fields["thrust"].uiControlEditor.onFieldChanged += ProcUpdateThrust;
-                        part.Modules["ProceduralSRB"].Fields["selectedBellName"].uiControlEditor.onFieldChanged += ProcUpdateNozzleName;
+                        procSRBCyllinder = part.Modules["ProceduralShapeCylinder"];
+                        procSRB = part.Modules["ProceduralSRB"];
 
-                        if ((procSRBTank == null) || (procSRB == null))
+                        if ((procSRBCyllinder == null) || (procSRB == null))
                         {
+                            print("An EngineDecay module marked as a one for ProceduralParts SRB could not find relevant modules. Switched to non-procedural logic");
                             Debug.LogError("An EngineDecay module marked as a one for ProceduralParts SRB could not find relevant modules. Switched to non-procedural logic");
                             procPart = false;
+                        }
+                        else
+                        {
+                            procSRBCyllinder.Fields["diameter"].uiControlEditor.onFieldChanged += ProcUpdateDiameter;
+                            procSRB.Fields["thrust"].uiControlEditor.onFieldChanged += ProcUpdateThrust;
+                            procSRB.Fields["selectedBellName"].uiControlEditor.onFieldChanged += ProcUpdateNozzleName;
                         }
                     }
                 }
