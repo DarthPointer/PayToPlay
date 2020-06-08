@@ -140,7 +140,7 @@ namespace EngineDecay
         float procSRBThrust;
 
         [KSPField(isPersistant = true, guiActive = false)]
-        string procSRBbellName = "";
+        string procSRBBellName = "";
 
         bool inEditor = true;
         float ignoreIgnitionTill = 0;
@@ -908,17 +908,17 @@ namespace EngineDecay
 
         public void ProcUpdateDiameter(BaseField diameter, object obj)
         {
-            print(string.Format("Field diameter is {0}", diameter.GetValue(procSRBCylinder)));
+            procSRBDiameter = (float)diameter.GetValue(procSRBCylinder);
         }
 
         public void ProcUpdateThrust(BaseField thrust, object obj)
         {
-            print(string.Format("Field thrust is {0}", thrust.GetValue(procSRB)));
+            procSRBThrust = (float)thrust.GetValue(procSRB);
         }
 
         public void ProcUpdateBellName(BaseField bellName, object obj)
         {
-            print(string.Format("Field bellName is {0}", bellName.GetValue(procSRB)));
+            procSRBBellName = (string)bellName.GetValue(procSRB);
         }
 
         #endregion
