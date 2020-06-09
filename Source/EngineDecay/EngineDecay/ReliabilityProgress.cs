@@ -35,9 +35,13 @@ namespace EngineDecay
                 exponents[val.name] = float.Parse(val.value);
             }
 
+
             foreach (ConfigNode nd in node.GetNodes("Engines")[0].nodes)
             {
-                procSRBs[nd.name] = new ProcSRBProgress(nd);
+                if (nd != null)
+                {
+                    procSRBs[nd.name] = new ProcSRBProgress(nd);
+                }
             }
         }
 
@@ -53,7 +57,7 @@ namespace EngineDecay
             Dictionary<string, ProcSRBProgress>.Enumerator j = procSRBs.GetEnumerator();
             while (j.MoveNext())
             {
-                ConfigNode procSRBPart = engines.AddNode(i.Current.Key);
+                ConfigNode procSRBPart = engines.AddNode(j.Current.Key);
                 j.Current.Value.ToConfigNode(procSRBPart);
             }
         }
@@ -115,6 +119,7 @@ namespace EngineDecay
             }
             public ProcSRBProgress(ConfigNode node)
             {
+                models = new Dictionary<ProcSRBData, float>();
                 foreach (ConfigNode.Value val in node.values)
                 {
                     models[new ProcSRBData(val.name)] = float.Parse(val.value);
@@ -141,22 +146,22 @@ namespace EngineDecay
             public ProcSRBData() { }
             public ProcSRBData(string name)
             {
-                string []a = name.Split('|');
-                if (a.Length == 3)
+                string []a = name.Split('_');
+                if (a.Length == 4)
                 {
-                    diameter = float.Parse(a[0]);
-                    thrust = float.Parse(a[1]);
-                    bellName = a[2];
+                    diameter = float.Parse(a[1].Replace('d', '.'));
+                    thrust = float.Parse(a[2].Replace('d', '.'));
+                    bellName = a[3];
                 }
                 else
                 {
-                    throw new Exception("Error while reading procedural SRB model data: number of \"fields\" is not 3");
+                    throw new Exception("Error while reading procedural SRB model data: number of separators '_' is not 3");
                 }
             }
 
             public override string ToString()
             {
-                return (string.Format("{0}|{1}|{2}", diameter, thrust, bellName));
+                return (string.Format("m_{0}_{1}_{2}", diameter.ToString().Replace('.', 'd'), thrust.ToString().Replace('.', 'd'), bellName));
             }
 
             public bool fits (ProcSRBData data)
