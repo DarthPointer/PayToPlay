@@ -12,12 +12,15 @@ namespace EngineDecay
         public static ReliabilityProgress fetch;
 
         Dictionary<string, float> exponents;
+        Dictionary<string, ProcSRBProgress> procSRBs;
 
         #region Constructors
 
         public ReliabilityProgress()
         {
             exponents = new Dictionary<string, float>();
+            procSRBs = new Dictionary<string, ProcSRBProgress>();
+
             fetch = this;
         }
 
@@ -31,15 +34,27 @@ namespace EngineDecay
             {
                 exponents[val.name] = float.Parse(val.value);
             }
+
+            foreach (ConfigNode nd in node.GetNodes("Engines")[0].nodes)
+            {
+                procSRBs[nd.name] = new ProcSRBProgress(nd);
+            }
         }
 
         public override void OnSave(ConfigNode node)
         {
             Dictionary<string, float>.Enumerator i = exponents.GetEnumerator();
-            ConfigNode Engines = node.AddNode("Engines");
+            ConfigNode engines = node.AddNode("Engines");
             while (i.MoveNext())
             {
-                Engines.AddValue(i.Current.Key, i.Current.Value);
+                engines.AddValue(i.Current.Key, i.Current.Value);
+            }
+
+            Dictionary<string, ProcSRBProgress>.Enumerator j = procSRBs.GetEnumerator();
+            while (j.MoveNext())
+            {
+                ConfigNode procSRBPart = engines.AddNode(i.Current.Key);
+                j.Current.Value.ToConfigNode(procSRBPart);
             }
         }
 
@@ -89,5 +104,62 @@ namespace EngineDecay
         }
 
         #endregion
+
+        class ProcSRBProgress
+        {
+            public Dictionary<ProcSRBData, float> models;
+
+            public ProcSRBProgress() { }
+            public ProcSRBProgress(ConfigNode node)
+            {
+                foreach (ConfigNode.Value val in node.values)
+                {
+                    models[new ProcSRBData(val.name)] = float.Parse(val.value);
+                }
+            }
+
+            public void ToConfigNode(ConfigNode node)
+            {
+                Dictionary<ProcSRBData, float>.Enumerator i = models.GetEnumerator();
+
+                while (i.MoveNext())
+                {
+                    node.AddValue(i.Current.Key.ToString(), i.Current.Value);
+                }
+            }
+        }
+
+        class ProcSRBData
+        {
+            public float diameter;
+            public float thrust;
+            public string bellName;
+
+            public ProcSRBData() { }
+            public ProcSRBData(string name)
+            {
+                string []a = name.Split('|');
+                if (a.Length == 3)
+                {
+                    diameter = float.Parse(a[0]);
+                    thrust = float.Parse(a[1]);
+                    bellName = a[2];
+                }
+                else
+                {
+                    throw new Exception("Error while reading procedural SRB model data: number of \"fields\" is not 3");
+                }
+            }
+
+            public override string ToString()
+            {
+                return (string.Format("{0}|{1}|{2}", diameter, thrust, bellName));
+            }
+
+            public bool fits (ProcSRBData data)
+            {
+                return ((thrust * 1.1 > data.thrust) && (thrust * 0.9 < data.thrust) && (diameter * 1.04 > data.diameter) && (diameter * 0.96 < data.diameter) && (bellName == data.bellName));
+            }
+        }
     }
 }
