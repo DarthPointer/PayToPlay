@@ -107,9 +107,12 @@ namespace EngineDecay
 
         class ProcSRBProgress
         {
-            public Dictionary<ProcSRBData, float> models;
+            Dictionary<ProcSRBData, float> models;
 
-            public ProcSRBProgress() { }
+            public ProcSRBProgress() 
+            {
+                models = new Dictionary<ProcSRBData, float>();
+            }
             public ProcSRBProgress(ConfigNode node)
             {
                 foreach (ConfigNode.Value val in node.values)
