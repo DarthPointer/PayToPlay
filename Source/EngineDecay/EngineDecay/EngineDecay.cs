@@ -383,6 +383,10 @@ namespace EngineDecay
                                 procSRBCylinder.Fields["diameter"].uiControlEditor.onFieldChanged += ProcUpdateDiameter;
                                 procSRB.Fields["thrust"].uiControlEditor.onFieldChanged += ProcUpdateThrust;
                                 procSRB.Fields["selectedBellName"].uiControlEditor.onFieldChanged += ProcUpdateBellName;
+
+                                ProcUpdateDiameter(procSRBCylinder.Fields["diameter"], null);
+                                ProcUpdateBellName(procSRB.Fields["selectedBellName"], null);
+                                ProcUpdateThrust(procSRB.Fields["thrust"], null);
                             }
                         }
                     }
@@ -441,18 +445,6 @@ namespace EngineDecay
 
                 if (inEditor)
                 {
-                    if (newBorn)
-                    {
-                        newBorn = false;
-
-                        if (procPart)
-                        {
-                            ProcUpdateDiameter(procSRBCylinder.Fields["diameter"], null);
-                            ProcUpdateBellName(procSRB.Fields["selectedBellName"], null);
-                            ProcUpdateThrust(procSRB.Fields["thrust"], null);
-                        }
-                    }
-
                     UpdateMaintenanceCost();
 
                     List<Part> counterparts = part.symmetryCounterparts;

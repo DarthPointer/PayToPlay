@@ -153,11 +153,14 @@ namespace EngineDecay
                 newExp = 8;
             }
 
-            ProcSRBProgress partProgress = procSRBs[partName];
-            if (partProgress == null)
+            ProcSRBProgress partProgress;
+            if (!procSRBs.TryGetValue(partName, out partProgress))
             {
                 partProgress = procSRBs[partName] = new ProcSRBProgress();
             }
+
+            partProgress = procSRBs[partName] = new ProcSRBProgress();
+
 
             ProcSRBData key = new ProcSRBData(diameter, thrust, bellName);
             if (partProgress.models.TryGetValue(key , out float oldExp))
