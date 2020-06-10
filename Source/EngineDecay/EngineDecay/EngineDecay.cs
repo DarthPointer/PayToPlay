@@ -287,6 +287,7 @@ namespace EngineDecay
         void SetAsANewProcSRBModel()
         {
             ReliabilityProgress.fetch.CreateModel(part.name, procSRBDiameter, procSRBThrust, procSRBBellName);
+            Events["SetAsANewProcSRBModel"].guiActiveEditor = false;
         }
 
         #endregion
