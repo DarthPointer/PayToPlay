@@ -366,8 +366,7 @@ namespace EngineDecay
                         {
                             r = ReliabilityProgress.fetch.GetExponent(part.name);
                         }
-
-                        if (procPart)
+                        else
                         {
                             procSRBCylinder = part.Modules["ProceduralShapeCylinder"];
                             procSRB = part.Modules["ProceduralSRB"];
