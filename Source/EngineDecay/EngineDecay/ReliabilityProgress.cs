@@ -159,9 +159,6 @@ namespace EngineDecay
                 partProgress = procSRBs[partName] = new ProcSRBProgress();
             }
 
-            partProgress = procSRBs[partName] = new ProcSRBProgress();
-
-
             ProcSRBData key = new ProcSRBData(diameter, thrust, bellName);
             if (partProgress.models.TryGetValue(key , out float oldExp))
             {
@@ -242,6 +239,26 @@ namespace EngineDecay
             public bool Fits (float _diameter, float _thrust, string _bellName)
             {
                 return ((thrust * 1.1 > _thrust) && (thrust * 0.9 < _thrust) && (diameter * 1.04 > _diameter) && (diameter * 0.96 < _diameter) && (bellName == _bellName));
+            }
+
+            public override bool Equals(Object obj)
+            {
+                if (obj == null)
+                {
+                    return false;
+                }
+
+                if (obj as ProcSRBData == null)
+                {
+                    return false;
+                }
+
+                return (diameter == (obj as ProcSRBData).diameter) && (thrust == (obj as ProcSRBData).thrust) && (bellName == (obj as ProcSRBData).bellName);
+            }
+
+            public override int GetHashCode()
+            {
+                return (int)diameter + (int)thrust + bellName.GetHashCode();
             }
         }
     }

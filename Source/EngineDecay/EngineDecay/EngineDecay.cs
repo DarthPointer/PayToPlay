@@ -443,6 +443,8 @@ namespace EngineDecay
                     throw new Exception("EngineDecay MODULE thinks it is not in editor but not initialized yet");
                 }
 
+                newBorn = false;
+
                 if (inEditor)
                 {
                     UpdateMaintenanceCost();
