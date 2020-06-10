@@ -192,12 +192,28 @@ namespace EngineDecay
             else
             {
                 r = ReliabilityProgress.fetch.CheckProcSRBProgress(part.name, ref procSRBDiameter, ref procSRBThrust, ref procSRBBellName);
+
+                if (r == -1)
+                {
+                    r = PayToPlaySettings.StartingReliability;
+                    Events["SetAsANewProcSRBModel"].guiActiveEditor = true;
+                }
+                else
+                {
+                    Events["SetAsANewProcSRBModel"].guiActiveEditor = false;
+                }
             }
 
-            currentBaseRatedTime = ProbabilityLib.ATangentCumulativePercentArg(r, topBaseRatedTime);
-            setBurnTime = currentBaseRatedTime * (1 + extraBurnTimePercent * (topMaxRatedTime / topBaseRatedTime - 1) / 100);
+            if (topBaseRatedTime != -1)
+            {
+                currentBaseRatedTime = ProbabilityLib.ATangentCumulativePercentArg(r, topBaseRatedTime);
+                setBurnTime = currentBaseRatedTime * (1 + extraBurnTimePercent * (topMaxRatedTime / topBaseRatedTime - 1) / 100);
+            }
 
-            ignitionsLeft = setIgnitions;
+            if (baseIgnitions != -1)
+            {
+                ignitionsLeft = setIgnitions;
+            }
 
             UpdateIndicators();
 
@@ -925,22 +941,22 @@ namespace EngineDecay
         public void ProcUpdateDiameter(BaseField diameter, object obj)
         {
             procSRBDiameter = (float)diameter.GetValue(procSRBCylinder);
-            UpdateModelState();
+            UpdateModelState(obj != null);
         }
 
         public void ProcUpdateThrust(BaseField thrust, object obj)
         {
             procSRBThrust = (float)thrust.GetValue(procSRB);
-            UpdateModelState();
+            UpdateModelState(obj != null);
         }
 
         public void ProcUpdateBellName(BaseField bellName, object obj)
         {
             procSRBBellName = (string)bellName.GetValue(procSRB);
-            UpdateModelState();
+            UpdateModelState(obj != null);
         }
 
-        void UpdateModelState()
+        void UpdateModelState(bool hardReset)
         {
             r = ReliabilityProgress.fetch.CheckProcSRBProgress(part.name, ref procSRBDiameter, ref procSRBThrust, ref procSRBBellName);
 
@@ -954,11 +970,34 @@ namespace EngineDecay
                 Events["SetAsANewProcSRBModel"].guiActiveEditor = false;
             }
 
-            currentBaseRatedTime = ProbabilityLib.ATangentCumulativePercentArg(r, topBaseRatedTime);
+            if (hardReset)
+            {
+                if (maintenanceCost > 0)
+                {
+                    SymmetryMaintenance();
+                }
 
-            setBurnTime = currentBaseRatedTime * (1 + extraBurnTimePercent * (topMaxRatedTime / topBaseRatedTime - 1) / 100);
+                if (topBaseRatedTime != -1)
+                {
+                    currentBaseRatedTime = ProbabilityLib.ATangentCumulativePercentArg(r, topBaseRatedTime);
 
-            UpdateIndicators();
+                    setBurnTime = currentBaseRatedTime * (1 + extraBurnTimePercent * (topMaxRatedTime / topBaseRatedTime - 1) / 100);
+                    usedBurnTime = 0;
+                }
+
+                if (baseIgnitions != -1)
+                {
+                    setIgnitions = (int)(baseIgnitions + extraIgnitionsPercent * (maxIgnitions - baseIgnitions) / 100);
+                    ignitionsLeft = setIgnitions;
+                }
+
+                UpdateIndicators();
+
+                maintenanceCost = 0;
+                Events["MaintenanceEvent"].guiActiveEditor = false;
+
+                failAtBurnTime = -1;
+            }
         }
 
         #endregion
