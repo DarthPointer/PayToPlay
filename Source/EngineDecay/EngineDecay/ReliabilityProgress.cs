@@ -136,8 +136,8 @@ namespace EngineDecay
 
         public void CreateModel(string partName, float diameter, float thrust, string bellName)
         {
-            ProcSRBProgress partProgress = procSRBs[partName];
-            if (partProgress == null)
+            ProcSRBProgress partProgress;
+            if (!procSRBs.TryGetValue(partName, out partProgress))
             {
                 partProgress = procSRBs[partName] = new ProcSRBProgress();
             }
