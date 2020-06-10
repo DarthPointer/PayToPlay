@@ -947,6 +947,12 @@ namespace EngineDecay
             {
                 Events["SetAsANewProcSRBModel"].guiActiveEditor = false;
             }
+
+            currentBaseRatedTime = ProbabilityLib.ATangentCumulativePercentArg(r, topBaseRatedTime);
+
+            setBurnTime = currentBaseRatedTime * (1 + extraBurnTimePercent * (topMaxRatedTime / topBaseRatedTime - 1) / 100);
+
+            UpdateIndicators();
         }
 
         #endregion
