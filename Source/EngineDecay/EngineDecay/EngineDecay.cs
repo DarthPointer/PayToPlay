@@ -184,7 +184,16 @@ namespace EngineDecay
         {
             usedBurnTime = 0;
             usageExperienceCoeff = 0;
-            r = ReliabilityProgress.fetch.GetExponent(part.name);
+
+            if (!procPart)
+            {
+                r = ReliabilityProgress.fetch.GetExponent(part.name);
+            }
+            else
+            {
+                r = ReliabilityProgress.fetch.CheckProcSRBProgress(part.name, ref procSRBDiameter, ref procSRBThrust, ref procSRBBellName);
+            }
+
             currentBaseRatedTime = ProbabilityLib.ATangentCumulativePercentArg(r, topBaseRatedTime);
             setBurnTime = currentBaseRatedTime * (1 + extraBurnTimePercent * (topMaxRatedTime / topBaseRatedTime - 1) / 100);
 
