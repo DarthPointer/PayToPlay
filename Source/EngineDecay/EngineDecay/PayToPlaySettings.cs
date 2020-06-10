@@ -10,22 +10,22 @@ namespace EngineDecay
     {
         #region params
 
-        [GameParameters.CustomParameterUI("Enable", newGameOnly = true, toolTip = "Burn time, ignitions and maintenance")]
+        [GameParameters.CustomParameterUI("Enable", newGameOnly = false, toolTip = "Burn time, ignitions and maintenance")]
         public bool enable = true;
 
-        [GameParameters.CustomParameterUI("Reliability progress", newGameOnly = true, toolTip = "Parts have full reliability only after enough experience recovered")]
+        [GameParameters.CustomParameterUI("Reliability progress", newGameOnly = false, toolTip = "Parts have full reliability only after enough experience recovered")]
         public bool reliabilityProgress = true;
 
-        [GameParameters.CustomFloatParameterUI("Starting reliability exponent", newGameOnly = true, displayFormat = "F1", minValue = 2, maxValue = 8, toolTip = "See the .docx in the mod dir")]
+        [GameParameters.CustomFloatParameterUI("Starting reliability exponent", newGameOnly = false, displayFormat = "F1", minValue = 2, maxValue = 8, toolTip = "See the .docx in the mod dir")]
         public float startingReliability = 2;
 
-        [GameParameters.CustomFloatParameterUI("Failure on chance multiplier (%)", newGameOnly = true, displayFormat = "F1", minValue = 0.01f, maxValue = 1, toolTip = "Chance to cause a failure at max reliability")]
+        [GameParameters.CustomFloatParameterUI("Failure on ignition chance (%)", newGameOnly = false, displayFormat = "F1", minValue = 0.01f, maxValue = 1, toolTip = "Chance to cause a failure at max reliability")]
         public float failureOnIgnitionPercent = 0.05f;
 
-        [GameParameters.CustomFloatParameterUI("Ignition failure chance multiplier (%)", newGameOnly = true, displayFormat = "F1", minValue = 0.01f, maxValue = 1, toolTip = "Ignition attempt fails (no consequences for the engine) at max reliability")]
+        [GameParameters.CustomFloatParameterUI("Ignition failure chance (%)", newGameOnly = false, displayFormat = "F1", minValue = 0.01f, maxValue = 1, toolTip = "Ignition attempt fails (no consequences for the engine) at max reliability")]
         public float ignitionFailurePercent = 0.05f;
 
-        [GameParameters.CustomFloatParameterUI("Part destruction on failure chance (%)", newGameOnly = true, displayFormat = "F1", minValue = 1, maxValue = 10, toolTip = "Does NOT affect wasted ignitions")]
+        [GameParameters.CustomFloatParameterUI("Part destruction on failure (%)", newGameOnly = false, displayFormat = "F1", minValue = 1, maxValue = 10, toolTip = "Does NOT affect wasted ignitions")]
         public float destructionOnFailurePercent = 5;
 
         #endregion
