@@ -134,10 +134,10 @@ namespace EngineDecay
         int symmetryMaintenanceCost = 0;
 
         [KSPField(isPersistant = true, guiActive = false)]
-        public float procSRBDiameter;
+        public float procSRBDiameter = 0;
 
         [KSPField(isPersistant = true, guiActive = false)]
-        public float procSRBThrust;
+        public float procSRBThrust = 0;
 
         [KSPField(isPersistant = true, guiActive = false)]
         public string procSRBBellName = "";
@@ -359,27 +359,30 @@ namespace EngineDecay
                 {
                     inEditor = true;
 
-                    if (r == 0 && topBaseRatedTime != -1)
+                    if (r == 0)
                     {
-                        r = ReliabilityProgress.fetch.GetExponent(part.name);
-                    }
-
-                    if (procPart)
-                    {
-                        procSRBCylinder = part.Modules["ProceduralShapeCylinder"];
-                        procSRB = part.Modules["ProceduralSRB"];
-
-                        if ((procSRBCylinder == null) || (procSRB == null))
+                        if (!procPart)
                         {
-                            print("An EngineDecay module marked as a one for ProceduralParts SRB could not find relevant modules. Switched to non-procedural logic");
-                            Debug.LogError("An EngineDecay module marked as a one for ProceduralParts SRB could not find relevant modules. Switched to non-procedural logic");
-                            procPart = false;
+                            r = ReliabilityProgress.fetch.GetExponent(part.name);
                         }
-                        else
+
+                        if (procPart)
                         {
-                            procSRBCylinder.Fields["diameter"].uiControlEditor.onFieldChanged += ProcUpdateDiameter;
-                            procSRB.Fields["thrust"].uiControlEditor.onFieldChanged += ProcUpdateThrust;
-                            procSRB.Fields["selectedBellName"].uiControlEditor.onFieldChanged += ProcUpdateBellName;
+                            procSRBCylinder = part.Modules["ProceduralShapeCylinder"];
+                            procSRB = part.Modules["ProceduralSRB"];
+
+                            if ((procSRBCylinder == null) || (procSRB == null))
+                            {
+                                print("An EngineDecay module marked as a one for ProceduralParts SRB could not find relevant modules. Switched to non-procedural logic");
+                                Debug.LogError("An EngineDecay module marked as a one for ProceduralParts SRB could not find relevant modules. Switched to non-procedural logic");
+                                procPart = false;
+                            }
+                            else
+                            {
+                                procSRBCylinder.Fields["diameter"].uiControlEditor.onFieldChanged += ProcUpdateDiameter;
+                                procSRB.Fields["thrust"].uiControlEditor.onFieldChanged += ProcUpdateThrust;
+                                procSRB.Fields["selectedBellName"].uiControlEditor.onFieldChanged += ProcUpdateBellName;
+                            }
                         }
                     }
                 }
@@ -446,8 +449,6 @@ namespace EngineDecay
                             ProcUpdateDiameter(procSRBCylinder.Fields["diameter"], null);
                             ProcUpdateBellName(procSRB.Fields["selectedBellName"], null);
                             ProcUpdateThrust(procSRB.Fields["thrust"], null);
-
-                            UpdateModelState();
                         }
                     }
 
@@ -947,6 +948,10 @@ namespace EngineDecay
             {
                 r = PayToPlaySettings.StartingReliability;
                 Events["SetAsANewProcSRBModel"].guiActiveEditor = true;
+            }
+            else
+            {
+                Events["SetAsANewProcSRBModel"].guiActiveEditor = false;
             }
         }
 
