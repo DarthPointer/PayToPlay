@@ -134,13 +134,13 @@ namespace EngineDecay
         int symmetryMaintenanceCost = 0;
 
         [KSPField(isPersistant = true, guiActive = false)]
-        float procSRBDiameter;
+        public float procSRBDiameter;
 
         [KSPField(isPersistant = true, guiActive = false)]
-        float procSRBThrust;
+        public float procSRBThrust;
 
         [KSPField(isPersistant = true, guiActive = false)]
-        string procSRBBellName = "";
+        public string procSRBBellName = "";
 
         bool inEditor = true;
         float ignoreIgnitionTill = 0;
@@ -277,6 +277,16 @@ namespace EngineDecay
             }
 
             return maintenanceCost;
+        }
+
+        #endregion
+
+        #region proc SRB events
+
+        [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "Set as a new model")]
+        void SetAsANewProcSRBModel()
+        {
+            ReliabilityProgress.fetch.CreateModel(part.name, procSRBDiameter, procSRBThrust, procSRBBellName);
         }
 
         #endregion
@@ -431,9 +441,14 @@ namespace EngineDecay
                     {
                         newBorn = false;
 
-                        ProcUpdateDiameter(procSRBCylinder.Fields["diameter"], null);
-                        ProcUpdateBellName(procSRB.Fields["selectedBellName"], null);
-                        ProcUpdateThrust(procSRB.Fields["thrust"], null);
+                        if (procPart)
+                        {
+                            ProcUpdateDiameter(procSRBCylinder.Fields["diameter"], null);
+                            ProcUpdateBellName(procSRB.Fields["selectedBellName"], null);
+                            ProcUpdateThrust(procSRB.Fields["thrust"], null);
+
+                            UpdateModelState();
+                        }
                     }
 
                     UpdateMaintenanceCost();
@@ -904,21 +919,35 @@ namespace EngineDecay
         }
         #endregion
 
-        #region ProcPart Callbacks
+        #region ProcSRB Internal Methods
 
         public void ProcUpdateDiameter(BaseField diameter, object obj)
         {
             procSRBDiameter = (float)diameter.GetValue(procSRBCylinder);
+            UpdateModelState();
         }
 
         public void ProcUpdateThrust(BaseField thrust, object obj)
         {
             procSRBThrust = (float)thrust.GetValue(procSRB);
+            UpdateModelState();
         }
 
         public void ProcUpdateBellName(BaseField bellName, object obj)
         {
             procSRBBellName = (string)bellName.GetValue(procSRB);
+            UpdateModelState();
+        }
+
+        void UpdateModelState()
+        {
+            r = ReliabilityProgress.fetch.CheckProcSRBProgress(part.name, ref procSRBDiameter, ref procSRBThrust, ref procSRBBellName);
+
+            if (r == -1)
+            {
+                r = PayToPlaySettings.StartingReliability;
+                Events["SetAsANewProcSRBModel"].guiActiveEditor = true;
+            }
         }
 
         #endregion
