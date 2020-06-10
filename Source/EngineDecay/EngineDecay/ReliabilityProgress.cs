@@ -109,8 +109,8 @@ namespace EngineDecay
 
         public float CheckProcSRBProgress(string partName, ref float diameter, ref float thrust, ref string bellName)           // -1 if no registered model fits specified stats
         {                                                                                                                       // It CHANGES procedural data of EngineDecay in order to specify which model it is to prevent possible reliability progress issues
-            ProcSRBProgress partProgress = procSRBs[partName];
-            if (partProgress != null)
+            ProcSRBProgress partProgress;
+            if (procSRBs.TryGetValue(partName, out partProgress))
             {
                 Dictionary<ProcSRBData, float>.Enumerator i = partProgress.models.GetEnumerator();
 
