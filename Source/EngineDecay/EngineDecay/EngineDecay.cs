@@ -337,6 +337,8 @@ namespace EngineDecay
             {
                 usingTimeFormat = 0;
             }
+
+            UpdateIndicators();
         }
 
         void UpdateIndicators()

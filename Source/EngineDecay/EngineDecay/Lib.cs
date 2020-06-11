@@ -12,7 +12,7 @@ namespace EngineDecay
         {
             if (formatCode == 0)
             {
-                return seconds + "s";
+                return (int)seconds + "s";
             }
 
             else if (formatCode == 1)
