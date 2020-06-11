@@ -97,6 +97,9 @@ namespace EngineDecay
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Burn Time Used", guiFormat = "F2")]
         string burnTimeIndicator = "";
 
+        [KSPField(isPersistant = true, guiActive = false)]
+        int usingTimeFormat = 0;
+
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Ignitions Left", guiFormat = "F2")]
         string ignitionsIndicator = "";
 
@@ -308,7 +311,7 @@ namespace EngineDecay
 
         #region proc SRB events
 
-        [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "Set as a new model")]
+        [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "Set as a New Model")]
         void SetAsANewProcSRBModel()
         {
             ReliabilityProgress.fetch.CreateModel(part.name, procSRBDiameter, procSRBThrust, procSRBBellName);
@@ -317,7 +320,36 @@ namespace EngineDecay
 
         #endregion
 
-        #region game-called methods
+        #region Indicators
+
+        [KSPEvent(guiActive = true, guiActiveEditor = true, guiName = "Switch Time Format")]
+        void SwitchTimeFormat()
+        {
+            if (usingTimeFormat == 0 && PayToPlaySettings.UseNonstandardLongTimeFormat)
+            {
+                usingTimeFormat = 2;
+            }
+            else if (usingTimeFormat == 0 && !PayToPlaySettings.UseNonstandardLongTimeFormat)
+            {
+                usingTimeFormat = 1;
+            }
+            else //if (usingTimeFormat == 2 || usingTimeFormat ==1)
+            {
+                usingTimeFormat = 0;
+            }
+        }
+
+        void UpdateIndicators()
+        {
+            burnTimeIndicator = string.Format("{0} / {1}", Lib.Format(usedBurnTime, usingTimeFormat), Lib.Format(setBurnTime, usingTimeFormat));
+            ignitionsIndicator = string.Format("{0} / {1}", ignitionsLeft, setIgnitions);
+
+            holdIndicatorsTill = Time.time + 0.5f;
+        }
+
+        #endregion
+
+        #region Game-called Methods
 
         public override void OnStart(StartState state)
         {
@@ -908,14 +940,6 @@ namespace EngineDecay
                     }
                 }
             }
-        }
-
-        void UpdateIndicators()
-        {
-            burnTimeIndicator = string.Format("{0}h:{1}:{2} / {3}h:{4}:{5}", ((int)usedBurnTime) / 3600, (((int)usedBurnTime) % 3600) / 60, ((int)usedBurnTime) % 60, ((int)setBurnTime) / 3600, (((int)setBurnTime) % 3600) / 60, ((int)setBurnTime) % 60);
-            ignitionsIndicator = string.Format("{0} / {1}", ignitionsLeft, setIgnitions);
-
-            holdIndicatorsTill = Time.time + 0.5f;
         }
 
         void SetFailTime()

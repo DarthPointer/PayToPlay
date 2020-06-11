@@ -34,6 +34,9 @@ namespace EngineDecay
         [GameParameters.CustomFloatParameterUI("Procedural SRB thrust model margin (%)", newGameOnly = false, displayFormat = "F1", minValue = 0.1f, maxValue = 20)]
         public float procSRBThrustModelMarginPercent = 10;
 
+        [GameParameters.CustomFloatParameterUI("Non-standard long time display", newGameOnly = false, toolTip = "Stanrdad format is xx:xx:xx (hh:mm:ss), turn this option on for xh:m:s")]
+        public bool useNonstandardLongTimeFormat = false;
+
         #endregion
 
         #region logics
@@ -100,6 +103,18 @@ namespace EngineDecay
             set
             {
                 HighLogic.CurrentGame.Parameters.CustomParams<PayToPlaySettings>().procSRBThrustModelMarginPercent = value;
+            }
+        }
+
+        public static bool UseNonstandardLongTimeFormat
+        {
+            get
+            {
+                return HighLogic.CurrentGame.Parameters.CustomParams<PayToPlaySettings>().useNonstandardLongTimeFormat;
+            }
+            set
+            {
+                HighLogic.CurrentGame.Parameters.CustomParams<PayToPlaySettings>().useNonstandardLongTimeFormat = value;
             }
         }
 
