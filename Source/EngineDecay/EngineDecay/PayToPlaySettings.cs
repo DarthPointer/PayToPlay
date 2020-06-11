@@ -28,6 +28,12 @@ namespace EngineDecay
         [GameParameters.CustomFloatParameterUI("Part destruction on failure (%)", newGameOnly = false, displayFormat = "F1", minValue = 1, maxValue = 10, toolTip = "Does NOT affect wasted ignitions")]
         public float destructionOnFailurePercent = 5;
 
+        [GameParameters.CustomFloatParameterUI("Procedural SRB diameter model margin (%)", newGameOnly = false, displayFormat = "F1", minValue = 0.1f, maxValue = 10)]
+        public float procSRBDiameterModelMarginPercent = 4;
+
+        [GameParameters.CustomFloatParameterUI("Procedural SRB thrust model margin (%)", newGameOnly = false, displayFormat = "F1", minValue = 0.1f, maxValue = 20)]
+        public float procSRBThrustModelMarginPercent = 10;
+
         #endregion
 
         #region logics
@@ -68,6 +74,32 @@ namespace EngineDecay
             set
             {
                 HighLogic.CurrentGame.Parameters.CustomParams<PayToPlaySettings>().startingReliability = value;
+            }
+        }
+
+        public static float ProcSRBDiameterModelMarginPercent
+        {
+            get
+            {
+                return HighLogic.CurrentGame.Parameters.CustomParams<PayToPlaySettings>().procSRBDiameterModelMarginPercent;
+            }
+
+            set
+            {
+                HighLogic.CurrentGame.Parameters.CustomParams<PayToPlaySettings>().procSRBDiameterModelMarginPercent = value;
+            }
+        }
+
+        public static float ProcSRBThrustModelMarginPercent
+        {
+            get
+            {
+                return HighLogic.CurrentGame.Parameters.CustomParams<PayToPlaySettings>().procSRBThrustModelMarginPercent;
+            }
+
+            set
+            {
+                HighLogic.CurrentGame.Parameters.CustomParams<PayToPlaySettings>().procSRBThrustModelMarginPercent = value;
             }
         }
 

@@ -238,10 +238,16 @@ namespace EngineDecay
 
             public bool Fits (float _diameter, float _thrust, string _bellName)
             {
-                return ((thrust * 1.1 > _thrust) && (thrust * 0.9 < _thrust) && (diameter * 1.04 > _diameter) && (diameter * 0.96 < _diameter) && (bellName == _bellName));
+                float maxDiameter = diameter * (1 + PayToPlaySettings.ProcSRBDiameterModelMarginPercent/100);
+                float minDiameter = diameter * (1 - PayToPlaySettings.ProcSRBDiameterModelMarginPercent/100);
+
+                float maxThrust = thrust * (1 + PayToPlaySettings.ProcSRBThrustModelMarginPercent / 100);
+                float minThrust = thrust * (1 - PayToPlaySettings.ProcSRBThrustModelMarginPercent / 100);
+
+                return ((maxDiameter >= _diameter) && (minDiameter <= _diameter) && (maxThrust >= _thrust) && (minThrust <= _thrust) && (bellName == _bellName));
             }
 
-            public override bool Equals(Object obj)
+            public override bool Equals(object obj)
             {
                 if (obj == null)
                 {
