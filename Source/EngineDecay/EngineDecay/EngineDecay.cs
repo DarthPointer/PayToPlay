@@ -785,13 +785,13 @@ namespace EngineDecay
                     ignitionsLeft--;
 
                     float luck = UnityEngine.Random.Range(0f, 1f);
-                    if (luck < 0.0005f)
+                    if (luck < PayToPlaySettings.FailureOnIgnitionPercent/100 * (9 - r))        // 9 stands for 8 is max r, thus settings are relevant for max-reliability parts
                     {
                         Failure();
 
                         usageExperienceCoeff = 0.3f;
                     }
-                    else if(luck < 0.001f)
+                    else if(luck < (PayToPlaySettings.FailureOnIgnitionPercent + PayToPlaySettings.IgnitionFailurePercent) / 100 * (9 - r))
                     {
                         FlightLogger.fetch?.LogEvent(String.Format("Bad ignition of {0}, shutdown performed to prevent consequences", part.name));
                         CutoffOnFailure();
@@ -826,7 +826,7 @@ namespace EngineDecay
 
         void Failure()
         {
-            if(UnityEngine.Random.Range(0f, 1f) < 0.05f)
+            if(UnityEngine.Random.Range(0f, 1f) < PayToPlaySettings.DestructionOnFailurePercent/100 * (9 - r))
             {
                 BadaBoom();
             }

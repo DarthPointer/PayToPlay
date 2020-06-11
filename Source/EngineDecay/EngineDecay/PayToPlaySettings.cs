@@ -118,6 +118,45 @@ namespace EngineDecay
             }
         }
 
+        public static float FailureOnIgnitionPercent
+        {
+            get
+            {
+                return HighLogic.CurrentGame.Parameters.CustomParams<PayToPlaySettings>().failureOnIgnitionPercent;
+            }
+
+            set
+            {
+                HighLogic.CurrentGame.Parameters.CustomParams<PayToPlaySettings>().failureOnIgnitionPercent = value;
+            }
+        }
+
+        public static float IgnitionFailurePercent
+        {
+            get
+            {
+                return HighLogic.CurrentGame.Parameters.CustomParams<PayToPlaySettings>().ignitionFailurePercent;
+            }
+
+            set
+            {
+                HighLogic.CurrentGame.Parameters.CustomParams<PayToPlaySettings>().ignitionFailurePercent = value;
+            }
+        }
+
+        public static float DestructionOnFailurePercent
+        {
+            get
+            {
+                return HighLogic.CurrentGame.Parameters.CustomParams<PayToPlaySettings>().destructionOnFailurePercent;
+            }
+
+            set
+            {
+                HighLogic.CurrentGame.Parameters.CustomParams<PayToPlaySettings>().destructionOnFailurePercent = value;
+            }
+        }
+
         #endregion
 
         #region CustomParameterNode
