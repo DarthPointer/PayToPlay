@@ -295,6 +295,8 @@ namespace EngineDecay
                 else
                 {
                     maintenanceCost = (int)(knownPartCost * maintenanceAtRatedTimeCoeff);
+
+                    usageExperienceCoeff = 0.1f;
                 }
             }
 
@@ -784,6 +786,8 @@ namespace EngineDecay
                     if (luck < 0.0005f)
                     {
                         Failure();
+
+                        usageExperienceCoeff = 0.3f;
                     }
                     else if(luck < 0.001f)
                     {
@@ -805,6 +809,8 @@ namespace EngineDecay
                         if (luck < 0.0005f)
                         {
                             Failure();
+
+                            usageExperienceCoeff = 0.3f;
                         }
                         else if (luck < 0.001f)
                         {
