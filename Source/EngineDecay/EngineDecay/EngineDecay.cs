@@ -404,6 +404,9 @@ namespace EngineDecay
 
                     Fields["burnTimeIndicator"].guiActiveEditor = false;
                     Fields["burnTimeIndicator"].guiActive = false;
+
+                    Events["SwitchTimeFormat"].guiActiveEditor = false;
+                    Events["SwitchTimeFormat"].guiActive = false;
                 }
 
                 if (baseIgnitions == -1 || baseIgnitions == maxIgnitions)
