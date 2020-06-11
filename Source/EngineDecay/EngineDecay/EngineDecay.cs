@@ -97,6 +97,9 @@ namespace EngineDecay
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Burn Time Used", guiFormat = "F2")]
         string burnTimeIndicator = "";
 
+        [KSPField(isPersistant = true, guiActive = false)]
+        int usingTimeFormat = 0;
+
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Ignitions Left", guiFormat = "F2")]
         string ignitionsIndicator = "";
 
@@ -133,6 +136,15 @@ namespace EngineDecay
         [KSPField(isPersistant = true, guiActive = false)]
         int symmetryMaintenanceCost = 0;
 
+        [KSPField(isPersistant = true, guiActive = false)]
+        public float procSRBDiameter = 0;
+
+        [KSPField(isPersistant = true, guiActive = false)]
+        public float procSRBThrust = 0;
+
+        [KSPField(isPersistant = true, guiActive = false)]
+        public string procSRBBellName = "";
+
         bool inEditor = true;
         float ignoreIgnitionTill = 0;
         int ticksTillDisabling = -1;
@@ -140,6 +152,9 @@ namespace EngineDecay
 
         List<ModuleEngines> decayingEngines;
         MultiModeEngine modeSwitcher;
+
+        PartModule procSRBCylinder;
+        PartModule procSRB;
 
         #endregion
 
@@ -172,11 +187,36 @@ namespace EngineDecay
         {
             usedBurnTime = 0;
             usageExperienceCoeff = 0;
-            r = ReliabilityProgress.fetch.GetExponent(part.name);
-            currentBaseRatedTime = ProbabilityLib.ATangentCumulativePercentArg(r, topBaseRatedTime);
-            setBurnTime = currentBaseRatedTime * (1 + extraBurnTimePercent * (topMaxRatedTime / topBaseRatedTime - 1) / 100);
 
-            ignitionsLeft = setIgnitions;
+            if (!procPart)
+            {
+                r = ReliabilityProgress.fetch.GetExponent(part.name);
+            }
+            else
+            {
+                r = ReliabilityProgress.fetch.CheckProcSRBProgress(part.name, ref procSRBDiameter, ref procSRBThrust, ref procSRBBellName);
+
+                if (r == -1)
+                {
+                    r = PayToPlaySettings.StartingReliability;
+                    Events["SetAsANewProcSRBModel"].guiActiveEditor = true;
+                }
+                else
+                {
+                    Events["SetAsANewProcSRBModel"].guiActiveEditor = false;
+                }
+            }
+
+            if (topBaseRatedTime != -1)
+            {
+                currentBaseRatedTime = ProbabilityLib.ATangentCumulativePercentArg(r, topBaseRatedTime);
+                setBurnTime = currentBaseRatedTime * (1 + extraBurnTimePercent * (topMaxRatedTime / topBaseRatedTime - 1) / 100);
+            }
+
+            if (baseIgnitions != -1)
+            {
+                ignitionsLeft = setIgnitions;
+            }
 
             UpdateIndicators();
 
@@ -269,7 +309,49 @@ namespace EngineDecay
 
         #endregion
 
-        #region game-called methods
+        #region proc SRB events
+
+        [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "Set as a New Model")]
+        void SetAsANewProcSRBModel()
+        {
+            ReliabilityProgress.fetch.CreateModel(part.name, procSRBDiameter, procSRBThrust, procSRBBellName);
+            Events["SetAsANewProcSRBModel"].guiActiveEditor = false;
+        }
+
+        #endregion
+
+        #region Indicators
+
+        [KSPEvent(guiActive = true, guiActiveEditor = true, guiName = "Switch Time Format")]
+        void SwitchTimeFormat()
+        {
+            if (usingTimeFormat == 0 && PayToPlaySettings.UseNonstandardLongTimeFormat)
+            {
+                usingTimeFormat = 2;
+            }
+            else if (usingTimeFormat == 0 && !PayToPlaySettings.UseNonstandardLongTimeFormat)
+            {
+                usingTimeFormat = 1;
+            }
+            else //if (usingTimeFormat == 2 || usingTimeFormat ==1)
+            {
+                usingTimeFormat = 0;
+            }
+
+            UpdateIndicators();
+        }
+
+        void UpdateIndicators()
+        {
+            burnTimeIndicator = string.Format("{0} / {1}", Lib.Format(usedBurnTime, usingTimeFormat), Lib.Format(setBurnTime, usingTimeFormat));
+            ignitionsIndicator = string.Format("{0} / {1}", ignitionsLeft, setIgnitions);
+
+            holdIndicatorsTill = Time.time + 0.5f;
+        }
+
+        #endregion
+
+        #region Game-called Methods
 
         public override void OnStart(StartState state)
         {
@@ -322,6 +404,9 @@ namespace EngineDecay
 
                     Fields["burnTimeIndicator"].guiActiveEditor = false;
                     Fields["burnTimeIndicator"].guiActive = false;
+
+                    Events["SwitchTimeFormat"].guiActiveEditor = false;
+                    Events["SwitchTimeFormat"].guiActive = false;
                 }
 
                 if (baseIgnitions == -1 || baseIgnitions == maxIgnitions)
@@ -337,9 +422,31 @@ namespace EngineDecay
                 {
                     inEditor = true;
 
-                    if (r == 0 && topBaseRatedTime != -1)
+                    if (!procPart)
                     {
                         r = ReliabilityProgress.fetch.GetExponent(part.name);
+                    }
+                    else
+                    {
+                        procSRBCylinder = part.Modules["ProceduralShapeCylinder"];
+                        procSRB = part.Modules["ProceduralSRB"];
+
+                        if ((procSRBCylinder == null) || (procSRB == null))
+                        {
+                            print("An EngineDecay module marked as a one for ProceduralParts SRB could not find relevant modules. Switched to non-procedural logic");
+                            Debug.LogError("An EngineDecay module marked as a one for ProceduralParts SRB could not find relevant modules. Switched to non-procedural logic");
+                            procPart = false;
+                        }
+                        else
+                        {
+                            procSRBCylinder.Fields["diameter"].uiControlEditor.onFieldChanged += ProcUpdateDiameter;
+                            procSRB.Fields["thrust"].uiControlEditor.onFieldChanged += ProcUpdateThrust;
+                            procSRB.Fields["selectedBellName"].uiControlEditor.onFieldChanged += ProcUpdateBellName;
+
+                            ProcUpdateDiameter(procSRBCylinder.Fields["diameter"], null);
+                            ProcUpdateBellName(procSRB.Fields["selectedBellName"], null);
+                            ProcUpdateThrust(procSRB.Fields["thrust"], null);
+                        }
                     }
                 }
                 else
@@ -394,10 +501,10 @@ namespace EngineDecay
                     throw new Exception("EngineDecay MODULE thinks it is not in editor but not initialized yet");
                 }
 
+                newBorn = false;
+
                 if (inEditor)
                 {
-                    newBorn = false;
-
                     UpdateMaintenanceCost();
 
                     List<Part> counterparts = part.symmetryCounterparts;
@@ -533,6 +640,10 @@ namespace EngineDecay
                                 Disable();
                                 ticksTillDisabling = -1;
                             }
+                        }
+                        else
+                        {
+                            usageExperienceCoeff = 0.1f;
                         }
 
                         if (Time.time >= ignoreIgnitionTill && baseIgnitions != -1 && nominal)
@@ -674,11 +785,13 @@ namespace EngineDecay
                     ignitionsLeft--;
 
                     float luck = UnityEngine.Random.Range(0f, 1f);
-                    if (luck < 0.0005f)
+                    if (luck < PayToPlaySettings.FailureOnIgnitionPercent/100 * (9 - r))        // 9 stands for 8 is max r, thus settings are relevant for max-reliability parts
                     {
                         Failure();
+
+                        usageExperienceCoeff = 0.3f;
                     }
-                    else if(luck < 0.001f)
+                    else if(luck < (PayToPlaySettings.FailureOnIgnitionPercent + PayToPlaySettings.IgnitionFailurePercent) / 100 * (9 - r))
                     {
                         FlightLogger.fetch?.LogEvent(String.Format("Bad ignition of {0}, shutdown performed to prevent consequences", part.name));
                         CutoffOnFailure();
@@ -698,6 +811,8 @@ namespace EngineDecay
                         if (luck < 0.0005f)
                         {
                             Failure();
+
+                            usageExperienceCoeff = 0.3f;
                         }
                         else if (luck < 0.001f)
                         {
@@ -711,7 +826,7 @@ namespace EngineDecay
 
         void Failure()
         {
-            if(UnityEngine.Random.Range(0f, 1f) < 0.05f)
+            if(UnityEngine.Random.Range(0f, 1f) < PayToPlaySettings.DestructionOnFailurePercent/100 * (9 - r))
             {
                 BadaBoom();
             }
@@ -840,14 +955,6 @@ namespace EngineDecay
             }
         }
 
-        void UpdateIndicators()
-        {
-            burnTimeIndicator = string.Format("{0}h:{1}:{2} / {3}h:{4}:{5}", ((int)usedBurnTime) / 3600, (((int)usedBurnTime) % 3600) / 60, ((int)usedBurnTime) % 60, ((int)setBurnTime) / 3600, (((int)setBurnTime) % 3600) / 60, ((int)setBurnTime) % 60);
-            ignitionsIndicator = string.Format("{0} / {1}", ignitionsLeft, setIgnitions);
-
-            holdIndicatorsTill = Time.time + 0.5f;
-        }
-
         void SetFailTime()
         {
             failAtBurnTime = ProbabilityLib.ATangentRandom(r, topBaseRatedTime);
@@ -864,6 +971,72 @@ namespace EngineDecay
                 return ignitionsOnSwitchList[fromMode * modesNumber + toMode];
             }
         }
+        #endregion
+
+        #region ProcSRB Internal Methods
+
+        public void ProcUpdateDiameter(BaseField diameter, object obj)
+        {
+            procSRBDiameter = (float)diameter.GetValue(procSRBCylinder);
+            UpdateModelState(obj != null);
+        }
+
+        public void ProcUpdateThrust(BaseField thrust, object obj)
+        {
+            procSRBThrust = (float)thrust.GetValue(procSRB);
+            UpdateModelState(obj != null);
+        }
+
+        public void ProcUpdateBellName(BaseField bellName, object obj)
+        {
+            procSRBBellName = (string)bellName.GetValue(procSRB);
+            UpdateModelState(obj != null);
+        }
+
+        void UpdateModelState(bool hardReset)
+        {
+            r = ReliabilityProgress.fetch.CheckProcSRBProgress(part.name, ref procSRBDiameter, ref procSRBThrust, ref procSRBBellName);
+
+            if (r == -1)
+            {
+                r = PayToPlaySettings.StartingReliability;
+                Events["SetAsANewProcSRBModel"].guiActiveEditor = true;
+            }
+            else
+            {
+                Events["SetAsANewProcSRBModel"].guiActiveEditor = false;
+            }
+
+            if (hardReset)
+            {
+                if (maintenanceCost > 0)
+                {
+                    SymmetryMaintenance();
+                }
+
+                if (topBaseRatedTime != -1)
+                {
+                    currentBaseRatedTime = ProbabilityLib.ATangentCumulativePercentArg(r, topBaseRatedTime);
+
+                    setBurnTime = currentBaseRatedTime * (1 + extraBurnTimePercent * (topMaxRatedTime / topBaseRatedTime - 1) / 100);
+                    usedBurnTime = 0;
+                }
+
+                if (baseIgnitions != -1)
+                {
+                    setIgnitions = (int)(baseIgnitions + extraIgnitionsPercent * (maxIgnitions - baseIgnitions) / 100);
+                    ignitionsLeft = setIgnitions;
+                }
+
+                UpdateIndicators();
+
+                maintenanceCost = 0;
+                Events["MaintenanceEvent"].guiActiveEditor = false;
+
+                failAtBurnTime = -1;
+            }
+        }
+
         #endregion
     }
 }
