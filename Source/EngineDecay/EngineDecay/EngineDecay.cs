@@ -295,8 +295,6 @@ namespace EngineDecay
                 else
                 {
                     maintenanceCost = (int)(knownPartCost * maintenanceAtRatedTimeCoeff);
-
-                    usageExperienceCoeff = 0.1f;
                 }
             }
 
@@ -642,6 +640,10 @@ namespace EngineDecay
                                 Disable();
                                 ticksTillDisabling = -1;
                             }
+                        }
+                        else
+                        {
+                            usageExperienceCoeff = 0.1f;
                         }
 
                         if (Time.time >= ignoreIgnitionTill && baseIgnitions != -1 && nominal)
