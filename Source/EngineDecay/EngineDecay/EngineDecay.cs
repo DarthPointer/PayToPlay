@@ -143,6 +143,12 @@ namespace EngineDecay
         int symmetryMaintenanceCost = 0;
 
         [KSPField(isPersistant = true, guiActive = false)]
+        int replaceCost = 0;
+
+        [KSPField(isPersistant = true, guiActive = false)]
+        int symmetryReplaceCost = 0;
+
+        [KSPField(isPersistant = true, guiActive = false)]
         public float procSRBDiameter = 0;
 
         [KSPField(isPersistant = true, guiActive = false)]
@@ -164,7 +170,7 @@ namespace EngineDecay
 
         #endregion
 
-        #region maintenance
+        #region Maintenance
 
         [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "Maintenance")]
         void MaintenanceEvent()
@@ -313,6 +319,140 @@ namespace EngineDecay
             }
 
             return maintenanceCost;
+        }
+
+        #endregion
+
+        #region Replacement
+
+        [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "Replace")]
+        void ReplaceEvent()
+        {
+            foreach (Part i in part.symmetryCounterparts)
+            {
+                EngineDecay engineDecay = i.FindModuleImplementing<EngineDecay>();
+                if (i != null)
+                {
+                    engineDecay.CounterpartReplace(replaceCost);
+                }
+                else
+                {
+                    UnityEngine.Debug.Log("EngineDecay found a counterpart without EngineDecay, it is really WEIRD!");
+                }
+            }
+
+            CounterpartReplace(replaceCost);                            // the counterpart is the same part for this case, we call it to update symmetry replace button
+
+            Replace();
+
+            GameEvents.onEditorShipModified.Fire(EditorLogic.fetch.ship);
+        }
+
+        void Replace()
+        {
+            usedBurnTime = 0;
+            usageExperienceCoeff = 0;
+
+            if (!procPart)
+            {
+                r = ReliabilityProgress.fetch.GetExponent(part.name);
+            }
+            else
+            {
+                r = ReliabilityProgress.fetch.CheckProcSRBProgress(part.name, ref procSRBDiameter, ref procSRBThrust, ref procSRBBellName);
+
+                if (r == -1)
+                {
+                    r = PayToPlaySettings.StartingReliability;
+                    Events["SetAsANewProcSRBModel"].guiActiveEditor = true;
+                }
+                else
+                {
+                    Events["SetAsANewProcSRBModel"].guiActiveEditor = false;
+                }
+            }
+
+            if (topBaseRatedTime != -1)
+            {
+                currentBaseRatedTime = ProbabilityLib.ATangentCumulativePercentArg(r, topBaseRatedTime);
+                setBurnTime = currentBaseRatedTime * (1 + extraBurnTimePercent * (topMaxRatedTime / topBaseRatedTime - 1) / 100);
+            }
+
+            if (baseIgnitions != -1)
+            {
+                ignitionsLeft = setIgnitions;
+            }
+
+            UpdateIndicators();
+
+            reliabilityStatus = "nominal";
+            nominal = true;
+
+            Enable();
+
+            failAtBurnTime = -1;
+
+            targetPartCost += replaceCost;
+
+            replaceCost = 0;
+            Events["ReplaceEvent"].guiActiveEditor = false;
+        }
+
+        [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "Symmetry Replace")]
+        void SymmetryReplace()
+        {
+            foreach (Part i in part.symmetryCounterparts)
+            {
+                EngineDecay engineDecay = i.FindModuleImplementing<EngineDecay>();
+                if (i != null)
+                {
+                    engineDecay.ReplaceFromCounterpart();
+                }
+                else
+                {
+                    UnityEngine.Debug.Log("EngineDecay found a counterpart without EngineDecay, it is really WEIRD!");
+                }
+            }
+
+            ReplaceFromCounterpart();
+        }
+
+        void ReplaceFromCounterpart()
+        {
+            Replace();
+
+            symmetryReplaceCost = 0;
+            Events["SymmetryReplace"].guiActiveEditor = false;
+        }
+
+        void CounterpartReplace(int cost)
+        {
+            if (symmetryReplaceCost != 0)
+            {
+                symmetryReplaceCost -= cost;
+
+                if (symmetryReplaceCost != 0)
+                {
+                    Events["SymmetryReplace"].guiName = string.Format("Symmetry Replace: {0}", symmetryReplaceCost);
+                }
+                else
+                {
+                    Events["SymmetryReplace"].guiActiveEditor = false;
+                }
+            }
+        }
+
+        int UpdateReplaceCost()
+        {
+            replaceCost = (int)(fullPartCost - targetPartCost);
+
+            if (replaceCost > 0 || !nominal)
+            {
+                Events["ReplaceEvent"].guiActiveEditor = true;
+                Events["ReplaceEvent"].guiName = String.Format("Replace: {0}", replaceCost);
+            }
+
+            return replaceCost;
         }
 
         #endregion
@@ -514,6 +654,7 @@ namespace EngineDecay
                 if (inEditor)
                 {
                     UpdateMaintenanceCost();
+                    UpdateReplaceCost();
 
                     List<Part> counterparts = part.symmetryCounterparts;
                     if(counterparts.Count() != 0)
@@ -526,6 +667,7 @@ namespace EngineDecay
                                 if (engineDecay != null)
                                 {
                                     symmetryMaintenanceCost += engineDecay.UpdateMaintenanceCost();
+                                    symmetryReplaceCost += engineDecay.UpdateReplaceCost();
                                 }
                                 else
                                 {
