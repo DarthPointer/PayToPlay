@@ -37,6 +37,9 @@ namespace EngineDecay
         [GameParameters.CustomFloatParameterUI("Non-standard long time display", newGameOnly = false, toolTip = "Stanrdad format is xx:xx:xx (hh:mm:ss), turn this option on for xh:m:s")]
         public bool useNonstandardLongTimeFormat = false;
 
+        [GameParameters.CustomFloatParameterUI("Degradation on use multiplier", newGameOnly = false, displayFormat = "F1", minValue = 0.1f, maxValue = 5, toolTip = "The more it is the faster engines wear out and should be replaced with new ones")]
+        public float usageExperienceToDegradationMul = 1;
+
         #endregion
 
         #region logics

@@ -67,17 +67,17 @@ namespace EngineDecay
 
         [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Extra Burn Time Percent", guiFormat = "D"),
             UI_FloatEdit(scene = UI_Scene.Editor, minValue = 0, maxValue = 100, incrementLarge = 20, incrementSmall = 5, incrementSlide = 1)]
-        float extraBurnTimePercent = 0;
+        public float extraBurnTimePercent = 0;
 
         [KSPField(isPersistant = true, guiActive = false)]
-        float prevEBTP = -1;
+        public float prevEBTP = -1;
 
         [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Extra Ignitions Percent", guiFormat = "D"),
             UI_FloatEdit(scene = UI_Scene.Editor, minValue = 0, maxValue = 100, incrementLarge = 20, incrementSmall = 5, incrementSlide = 1)]
-        float extraIgnitionsPercent = 0;
+        public float extraIgnitionsPercent = 0;
 
         [KSPField(isPersistant = true, guiActive = false)]
-        float prevEIP = -1;
+        public float prevEIP = -1;
 
         [KSPField(isPersistant = true, guiActive = false)]
         float setBurnTime = 1;
@@ -113,7 +113,13 @@ namespace EngineDecay
         bool wasRailWarpingPrevTick = false;
 
         [KSPField(isPersistant = true, guiActive = false)]
-        float knownPartCost = -1;
+        public float knownPartCost = -1;
+
+        [KSPField(isPersistant = true, guiActive = false)]
+        public float fullPartCost = -1;
+
+        [KSPField(isPersistant = true, guiActive = false)]
+        public float targetPartCost = -1;
 
         [KSPField(isPersistant = true, guiActive = false)]
         public bool subtractResourcesCost = false;
@@ -227,6 +233,8 @@ namespace EngineDecay
 
             failAtBurnTime = -1;
 
+            targetPartCost = maintenanceCost;
+
             maintenanceCost = 0;
             Events["MaintenanceEvent"].guiActiveEditor = false;
         }
@@ -333,7 +341,7 @@ namespace EngineDecay
             {
                 usingTimeFormat = 1;
             }
-            else //if (usingTimeFormat == 2 || usingTimeFormat ==1)
+            else //if (usingTimeFormat == 2 || usingTimeFormat == 1)
             {
                 usingTimeFormat = 0;
             }
@@ -581,6 +589,9 @@ namespace EngineDecay
                         prevEIP = extraIgnitionsPercent;
 
                         failAtBurnTime = -1;
+
+                        fullPartCost = -1;
+                        targetPartCost = -1;
                     }
                 }
             }
@@ -603,9 +614,9 @@ namespace EngineDecay
                             ignoreIgnitionTill = Time.time + 0.5f;
                         }
 
-                        if (topBaseRatedTime != -1)
+                        if (runningMode != -1)
                         {
-                            if (runningMode != -1)
+                            if (topBaseRatedTime != -1)
                             {
                                 if (!usingMultiModeLogic)
                                 {
@@ -621,7 +632,15 @@ namespace EngineDecay
                                     usageExperienceCoeff = 0.1f * usedBurnTime / setBurnTime;
                                 }
                             }
+                            else
+                            {
+                                usageExperienceCoeff = 0.1f;
+                            }
+                            targetPartCost = 0;
+                        }
 
+                        if (topBaseRatedTime != -1)
+                        {
                             if (usedBurnTime > failAtBurnTime && nominal)
                             {
                                 Failure();
@@ -640,10 +659,6 @@ namespace EngineDecay
                                 Disable();
                                 ticksTillDisabling = -1;
                             }
-                        }
-                        else
-                        {
-                            usageExperienceCoeff = 0.1f;
                         }
 
                         if (Time.time >= ignoreIgnitionTill && baseIgnitions != -1 && nominal)
@@ -698,7 +713,7 @@ namespace EngineDecay
 
             if (defaultCost != 0)
             {
-                if (knownPartCost == -1 || procPart)            //It is assumed not to change only for procedural parts. Probably this check will have to be removed
+                if (knownPartCost == -1)
                 {
                     if (subtractResourcesCost)
                     {
@@ -709,6 +724,8 @@ namespace EngineDecay
                     }
 
                     knownPartCost = defaultCost;
+                    fullPartCost = knownPartCost * (1 + maxCostRatedTimeCoeff * extraBurnTimePercent / 100 + maxCostIgnitionsCoeff * extraIgnitionsPercent / 100);
+                    targetPartCost = fullPartCost;
                 }
             }
 
@@ -718,30 +735,7 @@ namespace EngineDecay
             }
             else
             {
-                if (!useSRBCost)
-                {
-                    if (setBurnTime / usedBurnTime > maintenanceAtRatedTimeCoeff)
-                    {
-                        return (extraBurnTimePercent * maxCostRatedTimeCoeff * knownPartCost / 100) + (extraIgnitionsPercent * maxCostIgnitionsCoeff * knownPartCost / 100) -
-                        (knownPartCost + extraBurnTimePercent * maxCostRatedTimeCoeff * knownPartCost / 100) * maintenanceAtRatedTimeCoeff * usedBurnTime / setBurnTime;
-                    }
-                    else
-                    {
-                        return (extraBurnTimePercent * maxCostRatedTimeCoeff * knownPartCost / 100) + (extraIgnitionsPercent * maxCostIgnitionsCoeff * knownPartCost / 100) -
-                        (knownPartCost + extraBurnTimePercent * maxCostRatedTimeCoeff * knownPartCost / 100);
-                    }
-                }
-                else
-                {
-                    if (ignitionsLeft == setIgnitions)
-                    {
-                        return 0;
-                    }
-                    else
-                    {
-                        return -knownPartCost * maintenanceAtRatedTimeCoeff;
-                    }
-                }
+                return targetPartCost - fullPartCost;
             }
         }
 
@@ -1032,6 +1026,9 @@ namespace EngineDecay
 
                 maintenanceCost = 0;
                 Events["MaintenanceEvent"].guiActiveEditor = false;
+
+                fullPartCost = -1;
+                targetPartCost = -1;
 
                 failAtBurnTime = -1;
             }
