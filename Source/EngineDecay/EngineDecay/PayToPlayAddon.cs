@@ -24,7 +24,7 @@ namespace EngineDecay
         {
             if (PayToPlaySettings.ReliabilityProgress)
             {
-                UnityEngine.Debug.Log("P2P: onVesselRacovered has successfully called Read");
+                UnityEngine.Debug.Log("P2P: onVesselRecovered has successfully called Read");
 
                 List<ProtoPartSnapshot> parts = v.protoPartSnapshots;
 

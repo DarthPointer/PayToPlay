@@ -202,26 +202,7 @@ namespace EngineDecay
             usedBurnTime = 0;
             usageExperienceCoeff = 0;
 
-            if (!procPart)
-            {
-                r = ReliabilityProgress.fetch.GetExponent(part.name);
-            }
-            else
-            {
-                r = ReliabilityProgress.fetch.CheckProcSRBProgress(part.name, ref procSRBDiameter, ref procSRBThrust, ref procSRBBellName);
-
-                if (r == -1)
-                {
-                    r = PayToPlaySettings.StartingReliability;
-                    Events["SetAsANewProcSRBModel"].guiActiveEditor = true;
-                }
-                else
-                {
-                    Events["SetAsANewProcSRBModel"].guiActiveEditor = false;
-                }
-            }
-
-            if (topBaseRatedTime != -1)
+            if (topBaseRatedTime != -1)                                                 // The r parameter is changed with the P2PAddon while reading usage experience
             {
                 currentBaseRatedTime = ProbabilityLib.ATangentCumulativePercentArg(r, topBaseRatedTime);
                 setBurnTime = currentBaseRatedTime * (1 + extraBurnTimePercent * (topMaxRatedTime / topBaseRatedTime - 1) / 100);
