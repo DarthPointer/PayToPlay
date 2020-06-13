@@ -446,6 +446,11 @@ namespace EngineDecay
         {
             replaceCost = (int)(fullPartCost - targetPartCost);
 
+            print("===");
+            print(fullPartCost);
+            print(targetPartCost);
+            print("===");
+
             if (replaceCost > 0 || !nominal)
             {
                 Events["ReplaceEvent"].guiActiveEditor = true;
@@ -613,6 +618,7 @@ namespace EngineDecay
                     }
 
                     symmetryMaintenanceCost = -1;
+                    symmetryReplaceCost = -1;
                 }
             }
             else
@@ -654,13 +660,15 @@ namespace EngineDecay
                 if (inEditor)
                 {
                     UpdateMaintenanceCost();
-                    UpdateReplaceCost();
 
                     List<Part> counterparts = part.symmetryCounterparts;
                     if(counterparts.Count() != 0)
                     {
                         if(symmetryMaintenanceCost == -1)
                         {
+                            symmetryMaintenanceCost = 0;
+                            symmetryReplaceCost = 0;
+
                             foreach (Part i in counterparts)
                             {
                                 EngineDecay engineDecay = i.FindModuleImplementing<EngineDecay>();
@@ -671,9 +679,11 @@ namespace EngineDecay
                                 }
                                 else
                                 {
-                                    UnityEngine.Debug.Log("EngineDecay found a counterpart without EngineDecay, it is really WEIRD!");
+                                    Debug.LogError("EngineDecay found a counterpart without EngineDecay, it is really WEIRD!");
                                 }
                             }
+
+                            print(symmetryReplaceCost);
 
                             foreach (Part i in counterparts)
                             {
@@ -689,7 +699,7 @@ namespace EngineDecay
                                 }
                                 else
                                 {
-                                    UnityEngine.Debug.Log("EngineDecay found a counterpart without EngineDecay, it is really WEIRD!");
+                                    Debug.LogError("EngineDecay found a counterpart without EngineDecay, it is really WEIRD!");
                                 }
                             }
                         }
@@ -732,8 +742,7 @@ namespace EngineDecay
 
                         failAtBurnTime = -1;
 
-                        fullPartCost = -1;
-                        targetPartCost = -1;
+                        knownPartCost = -1;
                     }
                 }
             }
@@ -868,6 +877,7 @@ namespace EngineDecay
                     knownPartCost = defaultCost;
                     fullPartCost = knownPartCost * (1 + maxCostRatedTimeCoeff * extraBurnTimePercent / 100 + maxCostIgnitionsCoeff * extraIgnitionsPercent / 100);
                     targetPartCost = fullPartCost;
+                    replaceCost = 0;
                 }
             }
 
@@ -1169,10 +1179,9 @@ namespace EngineDecay
                 maintenanceCost = 0;
                 Events["MaintenanceEvent"].guiActiveEditor = false;
 
-                fullPartCost = -1;
-                targetPartCost = -1;
-
                 failAtBurnTime = -1;
+
+                knownPartCost = -1;
             }
         }
 
