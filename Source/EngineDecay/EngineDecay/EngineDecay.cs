@@ -241,7 +241,10 @@ namespace EngineDecay
 
             failAtBurnTime = -1;
 
-            targetPartCost = maintenanceCost;
+            if (maintenanceCost != 0)
+            {
+                targetPartCost = maintenanceCost;
+            }
 
             UpdateReplaceCost();
 
@@ -343,6 +346,7 @@ namespace EngineDecay
                 if (i != null)
                 {
                     engineDecay.CounterpartReplace(replaceCost);
+                    engineDecay.CounterpartMaintenance(maintenanceCost);
                 }
                 else
                 {
@@ -351,6 +355,10 @@ namespace EngineDecay
             }
 
             CounterpartReplace(replaceCost);                            // the counterpart is the same part for this case, we call it to update symmetry replace button
+            CounterpartMaintenance(maintenanceCost);
+
+            maintenanceCost = 0;
+            Events["MaintenanceEvent"].guiActiveEditor = false;
 
             Replace();
 
@@ -430,6 +438,11 @@ namespace EngineDecay
 
         void ReplaceFromCounterpart()
         {
+            maintenanceCost = 0;
+            symmetryMaintenanceCost = 0;
+            Events["MaintenanceEvent"].guiActiveEditor = false;
+            Events["SymmetryMaintenance"].guiActiveEditor = false;
+
             Replace();
 
             symmetryReplaceCost = 0;
