@@ -594,30 +594,33 @@ namespace EngineDecay
 
                     r -= usageExperienceCoeff * PayToPlaySettings.UsageExperienceToDegradationMul;
 
-                    if (!procPart)
+                    if (newBorn)
                     {
-                        r = ReliabilityProgress.fetch.GetExponent(part.name);
-                    }
-                    else
-                    {
-                        procSRBCylinder = part.Modules["ProceduralShapeCylinder"];
-                        procSRB = part.Modules["ProceduralSRB"];
-
-                        if ((procSRBCylinder == null) || (procSRB == null))
+                        if (!procPart)
                         {
-                            print("An EngineDecay module marked as a one for ProceduralParts SRB could not find relevant modules. Switched to non-procedural logic");
-                            Debug.LogError("An EngineDecay module marked as a one for ProceduralParts SRB could not find relevant modules. Switched to non-procedural logic");
-                            procPart = false;
+                            r = ReliabilityProgress.fetch.GetExponent(part.name);
                         }
                         else
                         {
-                            procSRBCylinder.Fields["diameter"].uiControlEditor.onFieldChanged += ProcUpdateDiameter;
-                            procSRB.Fields["thrust"].uiControlEditor.onFieldChanged += ProcUpdateThrust;
-                            procSRB.Fields["selectedBellName"].uiControlEditor.onFieldChanged += ProcUpdateBellName;
+                            procSRBCylinder = part.Modules["ProceduralShapeCylinder"];
+                            procSRB = part.Modules["ProceduralSRB"];
 
-                            ProcUpdateDiameter(procSRBCylinder.Fields["diameter"], null);
-                            ProcUpdateBellName(procSRB.Fields["selectedBellName"], null);
-                            ProcUpdateThrust(procSRB.Fields["thrust"], null);
+                            if ((procSRBCylinder == null) || (procSRB == null))
+                            {
+                                print("An EngineDecay module marked as a one for ProceduralParts SRB could not find relevant modules. Switched to non-procedural logic");
+                                Debug.LogError("An EngineDecay module marked as a one for ProceduralParts SRB could not find relevant modules. Switched to non-procedural logic");
+                                procPart = false;
+                            }
+                            else
+                            {
+                                procSRBCylinder.Fields["diameter"].uiControlEditor.onFieldChanged += ProcUpdateDiameter;
+                                procSRB.Fields["thrust"].uiControlEditor.onFieldChanged += ProcUpdateThrust;
+                                procSRB.Fields["selectedBellName"].uiControlEditor.onFieldChanged += ProcUpdateBellName;
+
+                                ProcUpdateDiameter(procSRBCylinder.Fields["diameter"], null);
+                                ProcUpdateBellName(procSRB.Fields["selectedBellName"], null);
+                                ProcUpdateThrust(procSRB.Fields["thrust"], null);
+                            }
                         }
                     }
                 }
