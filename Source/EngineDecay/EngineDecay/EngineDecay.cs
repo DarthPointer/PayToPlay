@@ -181,6 +181,7 @@ namespace EngineDecay
                 if (i != null)
                 {
                     engineDecay.CounterpartMaintenance(maintenanceCost);
+                    engineDecay.CounterpartReplace(maintenanceCost);
                 }
                 else
                 {
@@ -189,6 +190,7 @@ namespace EngineDecay
             }
 
             CounterpartMaintenance(maintenanceCost);                            // the counterpart is the same part for this case, we call it to update symmetry maintenance button
+            CounterpartReplace(maintenanceCost);
 
             Maintenance();
 
@@ -264,9 +266,6 @@ namespace EngineDecay
             }
 
             MaintenanceFromCounterpart();
-
-            symmetryReplaceCost -= symmetryReplaceCost;
-            UpdateSymmetryReplaceButton();
 
             GameEvents.onEditorShipModified.Fire(EditorLogic.fetch.ship);
         }
@@ -420,11 +419,13 @@ namespace EngineDecay
                 }
                 else
                 {
-                    UnityEngine.Debug.Log("EngineDecay found a counterpart without EngineDecay, it is really WEIRD!");
+                    Debug.LogError("EngineDecay found a counterpart without EngineDecay, it is really WEIRD!");
                 }
             }
 
             ReplaceFromCounterpart();
+
+            GameEvents.onEditorShipModified.Fire(EditorLogic.fetch.ship);
         }
 
         void ReplaceFromCounterpart()
@@ -454,18 +455,16 @@ namespace EngineDecay
 
         int UpdateReplaceCost()
         {
-            print(fullPartCost);
-            print(targetPartCost);
             replaceCost = (int)(fullPartCost - targetPartCost);
 
             if (replaceCost > 0 || !nominal)
             {
-                Events["SymmetryReplace"].guiActiveEditor = true;
-                Events["SymmetryReplace"].guiName = string.Format("Replace: {0}", symmetryReplaceCost);
+                Events["ReplaceEvent"].guiActiveEditor = true;
+                Events["ReplaceEvent"].guiName = string.Format("Replace: {0}", replaceCost);
             }
             else
             {
-                Events["SymmetryReplace"].guiActiveEditor = false;
+                Events["ReplaceEvent"].guiActiveEditor = false;
             }
 
             return replaceCost;
@@ -475,8 +474,12 @@ namespace EngineDecay
         {
             if (symmetryReplaceCost > 0 || !nominal)
             {
-                Events["ReplaceEvent"].guiActiveEditor = true;
-                Events["ReplaceEvent"].guiName = string.Format("Replace: {0}", replaceCost);
+                Events["SymmetryReplace"].guiActiveEditor = true;
+                Events["SymmetryReplace"].guiName = string.Format("Replace: {0}", symmetryReplaceCost);
+            }
+            else
+            {
+                Events["SymmetryReplace"].guiActiveEditor = false;
             }
         }
 
@@ -707,6 +710,7 @@ namespace EngineDecay
                                 if (engineDecay != null)
                                 {
                                     engineDecay.symmetryMaintenanceCost = symmetryMaintenanceCost;
+                                    engineDecay.symmetryReplaceCost = symmetryReplaceCost;
                                     if (symmetryMaintenanceCost > 0)
                                     {
                                         engineDecay.Events["SymmetryMaintenance"].guiName = string.Format("Symmetry Maintenance: {0}", symmetryMaintenanceCost);
