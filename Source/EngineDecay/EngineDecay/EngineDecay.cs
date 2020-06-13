@@ -753,6 +753,11 @@ namespace EngineDecay
                             Events["SymmetryReplace"].guiActiveEditor = true;
                         }
                     }
+                    else
+                    {
+                        UpdateMaintenanceCost();
+                        UpdateReplaceCost();
+                    }
 
                     if (prevEBTP != extraBurnTimePercent || prevEIP != extraIgnitionsPercent)
                     {
@@ -1217,14 +1222,16 @@ namespace EngineDecay
                     ignitionsLeft = setIgnitions;
                 }
 
-                UpdateIndicators();
+                ReplaceEvent();
 
-                maintenanceCost = 0;
+                //UpdateIndicators();
+
+                /*maintenanceCost = 0;
                 Events["MaintenanceEvent"].guiActiveEditor = false;
 
                 failAtBurnTime = -1;
 
-                knownPartCost = -1;
+                knownPartCost = -1;*/
             }
         }
 
