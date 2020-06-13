@@ -780,9 +780,11 @@ namespace EngineDecay
                             ignitionsLeft = setIgnitions;
                         }
 
-                        UpdateIndicators();
+                        ReplaceEvent();
 
-                        maintenanceCost = 0;
+                        //UpdateIndicators();
+
+                        /*maintenanceCost = 0;
                         Events["MaintenanceEvent"].guiActiveEditor = false;
 
                         prevEBTP = extraBurnTimePercent;
@@ -790,7 +792,7 @@ namespace EngineDecay
 
                         failAtBurnTime = -1;
 
-                        knownPartCost = -1;
+                        knownPartCost = -1;*/
                     }
                 }
             }
