@@ -24,7 +24,7 @@ namespace EngineDecay
         {
             if (PayToPlaySettings.ReliabilityProgress)
             {
-                UnityEngine.Debug.Log("P2P: onVesselRecovered has successfully called Read");
+                Debug.Log("P2P: onVesselRecovered has successfully called Read");
 
                 List<ProtoPartSnapshot> parts = v.protoPartSnapshots;
 
@@ -56,7 +56,7 @@ namespace EngineDecay
                 }
                 else
                 {
-                    UnityEngine.Debug.Log("given ProtoVessel.protoPartSnapshots was null, cannot retrieve usage experience of the recovered vessel");
+                    Debug.LogError("given ProtoVessel.protoPartSnapshots was null, cannot retrieve usage experience of the recovered vessel");
                 }
             }
         }
