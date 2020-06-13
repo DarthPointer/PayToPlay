@@ -241,6 +241,8 @@ namespace EngineDecay
 
             targetPartCost = maintenanceCost;
 
+            UpdateReplaceCost();
+
             maintenanceCost = 0;
             Events["MaintenanceEvent"].guiActiveEditor = false;
         }
@@ -262,11 +264,19 @@ namespace EngineDecay
             }
 
             MaintenanceFromCounterpart();
+
+            symmetryReplaceCost -= symmetryReplaceCost;
+            UpdateSymmetryReplaceButton();
+
+            GameEvents.onEditorShipModified.Fire(EditorLogic.fetch.ship);
         }
 
         void MaintenanceFromCounterpart()
         {
             Maintenance();
+
+            symmetryReplaceCost -= symmetryMaintenanceCost;
+            UpdateSymmetryReplaceButton();
 
             symmetryMaintenanceCost = 0;
             Events["SymmetryMaintenance"].guiActiveEditor = false;
@@ -315,7 +325,7 @@ namespace EngineDecay
             if (maintenanceCost > 0 || !nominal)
             {
                 Events["MaintenanceEvent"].guiActiveEditor = true;
-                Events["MaintenanceEvent"].guiName = String.Format("Maintenance: {0}", maintenanceCost);
+                Events["MaintenanceEvent"].guiName = string.Format("Maintenance: {0}", maintenanceCost);
             }
 
             return maintenanceCost;
@@ -392,7 +402,7 @@ namespace EngineDecay
 
             failAtBurnTime = -1;
 
-            targetPartCost += replaceCost;
+            targetPartCost = fullPartCost;
 
             replaceCost = 0;
             Events["ReplaceEvent"].guiActiveEditor = false;
@@ -444,20 +454,30 @@ namespace EngineDecay
 
         int UpdateReplaceCost()
         {
-            replaceCost = (int)(fullPartCost - targetPartCost);
-
-            print("===");
             print(fullPartCost);
             print(targetPartCost);
-            print("===");
+            replaceCost = (int)(fullPartCost - targetPartCost);
 
             if (replaceCost > 0 || !nominal)
             {
-                Events["ReplaceEvent"].guiActiveEditor = true;
-                Events["ReplaceEvent"].guiName = String.Format("Replace: {0}", replaceCost);
+                Events["SymmetryReplace"].guiActiveEditor = true;
+                Events["SymmetryReplace"].guiName = string.Format("Replace: {0}", symmetryReplaceCost);
+            }
+            else
+            {
+                Events["SymmetryReplace"].guiActiveEditor = false;
             }
 
             return replaceCost;
+        }
+
+        void UpdateSymmetryReplaceButton()
+        {
+            if (symmetryReplaceCost > 0 || !nominal)
+            {
+                Events["ReplaceEvent"].guiActiveEditor = true;
+                Events["ReplaceEvent"].guiName = string.Format("Replace: {0}", replaceCost);
+            }
         }
 
         #endregion
@@ -659,15 +679,13 @@ namespace EngineDecay
 
                 if (inEditor)
                 {
-                    UpdateMaintenanceCost();
-
                     List<Part> counterparts = part.symmetryCounterparts;
                     if(counterparts.Count() != 0)
                     {
                         if(symmetryMaintenanceCost == -1)
                         {
-                            symmetryMaintenanceCost = 0;
-                            symmetryReplaceCost = 0;
+                            symmetryMaintenanceCost = UpdateMaintenanceCost();
+                            symmetryReplaceCost = UpdateReplaceCost();
 
                             foreach (Part i in counterparts)
                             {
@@ -683,18 +701,21 @@ namespace EngineDecay
                                 }
                             }
 
-                            print(symmetryReplaceCost);
-
                             foreach (Part i in counterparts)
                             {
                                 EngineDecay engineDecay = i.FindModuleImplementing<EngineDecay>();
                                 if (engineDecay != null)
                                 {
                                     engineDecay.symmetryMaintenanceCost = symmetryMaintenanceCost;
-                                    if(symmetryMaintenanceCost > 0)
+                                    if (symmetryMaintenanceCost > 0)
                                     {
                                         engineDecay.Events["SymmetryMaintenance"].guiName = string.Format("Symmetry Maintenance: {0}", symmetryMaintenanceCost);
                                         engineDecay.Events["SymmetryMaintenance"].guiActiveEditor = true;
+                                    }
+                                    if (symmetryReplaceCost > 0)
+                                    {
+                                        engineDecay.Events["SymmetryReplace"].guiName = string.Format("Symmetry Replace: {0}", symmetryReplaceCost);
+                                        engineDecay.Events["SymmetryReplace"].guiActiveEditor = true;
                                     }
                                 }
                                 else
@@ -708,6 +729,11 @@ namespace EngineDecay
                         {
                             Events["SymmetryMaintenance"].guiName = string.Format("Symmetry Maintenance: {0}", symmetryMaintenanceCost);
                             Events["SymmetryMaintenance"].guiActiveEditor = true;
+                        }
+                        if (symmetryReplaceCost > 0)
+                        {
+                            Events["SymmetryReplace"].guiName = string.Format("Symmetry Replace: {0}", symmetryReplaceCost);
+                            Events["SymmetryReplace"].guiActiveEditor = true;
                         }
                     }
 
