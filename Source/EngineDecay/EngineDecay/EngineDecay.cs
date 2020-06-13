@@ -202,7 +202,7 @@ namespace EngineDecay
             usedBurnTime = 0;
             usageExperienceCoeff = 0;
 
-            if (topBaseRatedTime != -1)                                                 // The r parameter is changed with the P2PAddon while reading usage experience
+            if (topBaseRatedTime != -1)                                                 // The r parameter is changed by OnLoad when getting back to editor
             {
                 currentBaseRatedTime = ProbabilityLib.ATangentCumulativePercentArg(r, topBaseRatedTime);
                 setBurnTime = currentBaseRatedTime * (1 + extraBurnTimePercent * (topMaxRatedTime / topBaseRatedTime - 1) / 100);
@@ -591,6 +591,8 @@ namespace EngineDecay
                 if (state == StartState.Editor)
                 {
                     inEditor = true;
+
+                    r -= usageExperienceCoeff * PayToPlaySettings.UsageExperienceToDegradationMul;
 
                     if (!procPart)
                     {

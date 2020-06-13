@@ -160,6 +160,19 @@ namespace EngineDecay
             }
         }
 
+        public static float UsageExperienceToDegradationMul
+        {
+            get
+            {
+                return HighLogic.CurrentGame.Parameters.CustomParams<PayToPlaySettings>().usageExperienceToDegradationMul;
+            }
+
+            set
+            {
+                HighLogic.CurrentGame.Parameters.CustomParams<PayToPlaySettings>().usageExperienceToDegradationMul = value;
+            }
+        }
+
         #endregion
 
         #region CustomParameterNode
