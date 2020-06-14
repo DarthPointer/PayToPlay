@@ -641,7 +641,6 @@ namespace EngineDecay
                         if (r < 5)
                         {
                             reliabilityStatus = PayToPlayAddon.RandomStatus("LowReliabilityModel");
-                            GameEvents.onEditorShipModified.Fire(EditorLogic.fetch.ship);
                         }
                     }
                 }
@@ -665,6 +664,7 @@ namespace EngineDecay
                 }
 
                 UpdateIndicators();
+                GameEvents.onEditorShipModified.Fire(EditorLogic.fetch.ship);
             }
             else
             {
