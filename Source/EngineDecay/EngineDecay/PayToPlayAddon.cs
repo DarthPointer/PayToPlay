@@ -18,7 +18,7 @@ namespace EngineDecay
         public static string RandomStatus(string statusType)
         {
             return fetch.reliabilityStatuses[statusType]
-                [UnityEngine.Random.Range(0, fetch.reliabilityStatuses[statusType].Count) - 1];     // Random string from corresponding list
+                [UnityEngine.Random.Range(0, fetch.reliabilityStatuses[statusType].Count - 1)];     // Random string from corresponding list
         }
 
         public void Start()
@@ -63,6 +63,38 @@ namespace EngineDecay
 
                 reliabilityStatuses["PoorEngineCondition"] = new List<string>();
                 reliabilityStatuses["PoorEngineCondition"].Add("It is recommended to perform maintenance ASAP");
+            }
+
+            List<string> dummy = new List<string>();
+
+            if (!reliabilityStatuses.TryGetValue("HeavilyReused", out dummy))
+            {
+                reliabilityStatuses["HeavilyReused"] = new List<string>();
+                reliabilityStatuses["HeavilyReused"].Add("Further reuse is considered to be unsafe");
+            }
+            else if (reliabilityStatuses["HeavilyReused"].Count == 0)
+            {
+                reliabilityStatuses["HeavilyReused"].Add("Further reuse is considered to be unsafe");
+            }
+
+            if (!reliabilityStatuses.TryGetValue("LowReliabilityModel", out dummy))
+            {
+                reliabilityStatuses["LowReliabilityModel"] = new List<string>();
+                reliabilityStatuses["LowReliabilityModel"].Add("Further reuse is considered to be unsafe");
+            }
+            else if (reliabilityStatuses["LowReliabilityModel"].Count == 0)
+            {
+                reliabilityStatuses["LowReliabilityModel"].Add("Further reuse is considered to be unsafe");
+            }
+
+            if (!reliabilityStatuses.TryGetValue("PoorEngineCondition", out dummy))
+            {
+                reliabilityStatuses["PoorEngineCondition"] = new List<string>();
+                reliabilityStatuses["PoorEngineCondition"].Add("Further reuse is considered to be unsafe");
+            }
+            else if (reliabilityStatuses["PoorEngineCondition"].Count == 0)
+            {
+                reliabilityStatuses["PoorEngineCondition"].Add("Further reuse is considered to be unsafe");
             }
         }
 
