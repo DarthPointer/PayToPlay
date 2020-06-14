@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using System.IO;
 
 
 namespace EngineDecay
@@ -10,17 +11,53 @@ namespace EngineDecay
     [KSPAddon(KSPAddon.Startup.AllGameScenes, false)]
     public class PayToPlayAddon : MonoBehaviour
     {
+        public static PayToPlayAddon fetch;
+
+        Dictionary<string, List<string>> reliabilityStatuses;
+
         public void Start()
         {
-            GameEvents.onVesselRecovered.Add(Read);
+            GameEvents.onVesselRecovered.Add(ReadRecoveredVessel);
+            fetch = this;
+
+            reliabilityStatuses = new Dictionary<string, List<string>>();
+
+            try
+            {
+                string []fileNames = Directory.GetFiles("GameData/PayToPlay/Data/ReliabilityStatuses/");
+                
+                foreach (string i in fileNames)
+                {
+                    FileStream fileStream = new FileStream(i, FileMode.Open);
+                    StreamReader reader = new StreamReader(fileStream);
+
+                    string setName = i.Split('/')[i.Split('/').Length - 1].Split('.')[0];           // Last part of the name without .txt appendix
+                    List<string> stringList = new List<string>();
+
+                    while (!reader.EndOfStream)
+                    {
+                        stringList.Add(reader.ReadLine());
+                    }
+
+                    reliabilityStatuses[setName] = stringList;
+
+                    reader.Close();
+                    // fileStream.Close();              Do we need it?
+                }
+            }
+            catch (Exception)
+            {
+                Debug.LogError("PayToPlayAddon could not read reliability status strings from files PayToPlay/Data/ReliabilityStatuses/*.txt");
+            }
         }
 
         public void OnDestroy()
         {
-            GameEvents.onVesselRecovered.Remove(Read);
+            GameEvents.onVesselRecovered.Remove(ReadRecoveredVessel);
+            fetch = null;
         }
 
-        public void Read(ProtoVessel v, bool wtf)
+        public void ReadRecoveredVessel(ProtoVessel v, bool wtf)
         {
             if (PayToPlaySettings.ReliabilityProgress)
             {
