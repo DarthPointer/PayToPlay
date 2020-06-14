@@ -638,6 +638,10 @@ namespace EngineDecay
                             }
                         }
 
+                        currentBaseRatedTime = ProbabilityLib.ATangentCumulativePercentArg(r, topBaseRatedTime);
+
+                        setBurnTime = currentBaseRatedTime * (1 + extraBurnTimePercent * (topMaxRatedTime / topBaseRatedTime - 1) / 100);
+
                         if (r < 5)
                         {
                             reliabilityStatus = PayToPlayAddon.RandomStatus("LowReliabilityModel");
