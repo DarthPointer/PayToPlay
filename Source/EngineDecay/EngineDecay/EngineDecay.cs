@@ -663,6 +663,8 @@ namespace EngineDecay
                     symmetryMaintenanceCost = -1;
                     symmetryReplaceCost = -1;
                 }
+
+                UpdateIndicators();
             }
             else
             {
