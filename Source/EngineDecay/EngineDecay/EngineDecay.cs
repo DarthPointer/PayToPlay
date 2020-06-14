@@ -1022,7 +1022,7 @@ namespace EngineDecay
                     }
                     else if(luck < (PayToPlaySettings.FailureOnIgnitionPercent + PayToPlaySettings.IgnitionFailurePercent) * (8.01 - r))
                     {
-                        FlightLogger.fetch?.LogEvent(String.Format("Bad ignition of {0}, shutdown performed to prevent consequences", part.name));
+                        FlightLogger.fetch?.LogEvent(string.Format("Bad ignition of {0}, shutdown performed to prevent consequences", part.name));
                         CutoffOnFailure();
                     }
                 }
