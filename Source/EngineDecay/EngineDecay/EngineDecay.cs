@@ -1045,7 +1045,7 @@ namespace EngineDecay
                         }
                         else if (luck < 0.001f)
                         {
-                            FlightLogger.fetch?.LogEvent(String.Format("Bad ignition of {0}, shutdown performed to prevent consequences", part.name));
+                            FlightLogger.fetch?.LogEvent(string.Format("Bad ignition of {0}, shutdown performed to prevent consequences", part.name));
                             CutoffOnFailure();
                         }
                     }
