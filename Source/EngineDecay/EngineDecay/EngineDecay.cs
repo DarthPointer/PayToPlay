@@ -70,14 +70,14 @@ namespace EngineDecay
         public float extraBurnTimePercent = 0;
 
         [KSPField(isPersistant = true, guiActive = false)]
-        public float prevEBTP = -1;
+        public float prevEBTP = 0;
 
         [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Extra Ignitions Percent", guiFormat = "D"),
             UI_FloatEdit(scene = UI_Scene.Editor, minValue = 0, maxValue = 100, incrementLarge = 20, incrementSmall = 5, incrementSlide = 1)]
         public float extraIgnitionsPercent = 0;
 
         [KSPField(isPersistant = true, guiActive = false)]
-        public float prevEIP = -1;
+        public float prevEIP = 0;
 
         [KSPField(isPersistant = true, guiActive = false)]
         float setBurnTime = 1;
@@ -787,15 +787,15 @@ namespace EngineDecay
                             ignitionsLeft = setIgnitions;
                         }
 
+                        prevEBTP = extraBurnTimePercent;
+                        prevEIP = extraIgnitionsPercent;
+
                         ReplaceEvent();
 
                         //UpdateIndicators();
 
                         /*maintenanceCost = 0;
                         Events["MaintenanceEvent"].guiActiveEditor = false;
-
-                        prevEBTP = extraBurnTimePercent;
-                        prevEIP = extraIgnitionsPercent;
 
                         failAtBurnTime = -1;
 
@@ -837,7 +837,10 @@ namespace EngineDecay
 
                                 if (usedBurnTime > setBurnTime)
                                 {
-                                    reliabilityStatus = PayToPlayAddon.RandomStatus("PoorEngineCondition");
+                                    if (reliabilityStatus == "nominal")
+                                    {
+                                        reliabilityStatus = PayToPlayAddon.RandomStatus("PoorEngineCondition");
+                                    }
                                 }
 
                                 if (usedBurnTime <= setBurnTime)
