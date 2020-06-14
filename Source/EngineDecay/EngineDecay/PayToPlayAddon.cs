@@ -18,7 +18,7 @@ namespace EngineDecay
         public static string RandomStatus(string statusType)
         {
             return fetch.reliabilityStatuses[statusType]
-                [UnityEngine.Random.Range(0, fetch.reliabilityStatuses[statusType].Count - 1)];     // Random string from corresponding list
+                [UnityEngine.Random.Range(0, fetch.reliabilityStatuses[statusType].Count)];     // Random string from corresponding list
         }
 
         public void Start()
