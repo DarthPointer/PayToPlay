@@ -56,13 +56,13 @@ namespace EngineDecay
                 Debug.LogError("PayToPlayAddon could not read reliability status strings from files PayToPlay/Data/ReliabilityStatuses/*.txt");
 
                 reliabilityStatuses["HeavilyReused"] = new List<string>();
-                reliabilityStatuses["HeavilyReused"].Add("Further reuse is considered to be unsafe");
+                reliabilityStatuses["HeavilyReused"].Add("To be replaced");
 
                 reliabilityStatuses["LowReliabilityModel"] = new List<string>();
-                reliabilityStatuses["LowReliabilityModel"].Add("Needs some testing before safe use");
+                reliabilityStatuses["LowReliabilityModel"].Add("Needs testing");
 
                 reliabilityStatuses["PoorEngineCondition"] = new List<string>();
-                reliabilityStatuses["PoorEngineCondition"].Add("It is recommended to perform maintenance ASAP");
+                reliabilityStatuses["PoorEngineCondition"].Add("Needs maintenance");
             }
 
             List<string> dummy = new List<string>();
@@ -70,31 +70,31 @@ namespace EngineDecay
             if (!reliabilityStatuses.TryGetValue("HeavilyReused", out dummy))
             {
                 reliabilityStatuses["HeavilyReused"] = new List<string>();
-                reliabilityStatuses["HeavilyReused"].Add("Further reuse is considered to be unsafe");
+                reliabilityStatuses["HeavilyReused"].Add("To be replaced");
             }
             else if (reliabilityStatuses["HeavilyReused"].Count == 0)
             {
-                reliabilityStatuses["HeavilyReused"].Add("Needs some testing before safe use");
+                reliabilityStatuses["HeavilyReused"].Add("To be replaced");
             }
 
             if (!reliabilityStatuses.TryGetValue("LowReliabilityModel", out dummy))
             {
                 reliabilityStatuses["LowReliabilityModel"] = new List<string>();
-                reliabilityStatuses["LowReliabilityModel"].Add("It is recommended to perform maintenance ASAP");
+                reliabilityStatuses["LowReliabilityModel"].Add("Needs testing");
             }
             else if (reliabilityStatuses["LowReliabilityModel"].Count == 0)
             {
-                reliabilityStatuses["LowReliabilityModel"].Add("Further reuse is considered to be unsafe");
+                reliabilityStatuses["LowReliabilityModel"].Add("Needs testing");
             }
 
             if (!reliabilityStatuses.TryGetValue("PoorEngineCondition", out dummy))
             {
                 reliabilityStatuses["PoorEngineCondition"] = new List<string>();
-                reliabilityStatuses["PoorEngineCondition"].Add("Further reuse is considered to be unsafe");
+                reliabilityStatuses["PoorEngineCondition"].Add("Needs maintenance");
             }
             else if (reliabilityStatuses["PoorEngineCondition"].Count == 0)
             {
-                reliabilityStatuses["PoorEngineCondition"].Add("Further reuse is considered to be unsafe");
+                reliabilityStatuses["PoorEngineCondition"].Add("Needs maintenance");
             }
         }
 
