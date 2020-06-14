@@ -1,6 +1,6 @@
 # Welcome to PayToPlay repo!
 
-This is a brand-new KSP reliability mod designed to  ~~cause some explosions~~ make you pay for engine maintenance. The idea is to have an easy-to-use mod that decreases parts' cost as they are being used and make them fail if you don't repair them. As for now it is an early WIP stage, the mod doesn't do much at the moment. Forum thread is here https://forum.kerbalspaceprogram.com/index.php?/topic/193467-181-190-paytoplay-maintenance-costs-money/&tab=comments#comment-3777542
+This is a brand-new KSP reliability mod designed to  ~~cause some explosions~~ make you pay for engine maintenance. The idea is that you have to perform maintenance for money and time and replace engines if their accumulated degradation is too much. Forum thread is here https://forum.kerbalspaceprogram.com/index.php?/topic/193467-181-190-paytoplay-maintenance-costs-money/&tab=comments#comment-3777542
 
 ## What is present
 
