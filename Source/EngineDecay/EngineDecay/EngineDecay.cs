@@ -381,6 +381,10 @@ namespace EngineDecay
             {
                 reliabilityStatus = PayToPlayAddon.RandomStatus("LowReliabilityModel");
             }
+            else
+            {
+                reliabilityStatus = "nominal";
+            }
 
             if (topBaseRatedTime != -1)
             {
@@ -395,7 +399,6 @@ namespace EngineDecay
 
             UpdateIndicators();
 
-            reliabilityStatus = "nominal";
             nominal = true;
 
             Enable();
@@ -638,6 +641,7 @@ namespace EngineDecay
                         if (r < 5)
                         {
                             reliabilityStatus = PayToPlayAddon.RandomStatus("LowReliabilityModel");
+                            GameEvents.onEditorShipModified.Fire(EditorLogic.fetch.ship);
                         }
                     }
                 }
@@ -912,7 +916,9 @@ namespace EngineDecay
 
                 foreach (IPartCostModifier i in part.FindModulesImplementing<IPartCostModifier>())
                 {
+#pragma warning disable CS0252 // Yes, I compare references
                     if (i != this)
+#pragma warning restore CS0252
                     {
                         defaultCost += i.GetModuleCost(0, sit);                                     //We assume there are no other cost modifiers besides procedural-related and EngineDecay
                     }

@@ -74,13 +74,13 @@ namespace EngineDecay
             }
             else if (reliabilityStatuses["HeavilyReused"].Count == 0)
             {
-                reliabilityStatuses["HeavilyReused"].Add("Further reuse is considered to be unsafe");
+                reliabilityStatuses["HeavilyReused"].Add("Needs some testing before safe use");
             }
 
             if (!reliabilityStatuses.TryGetValue("LowReliabilityModel", out dummy))
             {
                 reliabilityStatuses["LowReliabilityModel"] = new List<string>();
-                reliabilityStatuses["LowReliabilityModel"].Add("Further reuse is considered to be unsafe");
+                reliabilityStatuses["LowReliabilityModel"].Add("It is recommended to perform maintenance ASAP");
             }
             else if (reliabilityStatuses["LowReliabilityModel"].Count == 0)
             {
