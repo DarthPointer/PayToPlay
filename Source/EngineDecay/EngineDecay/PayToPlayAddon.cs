@@ -30,8 +30,8 @@ namespace EngineDecay
 
             try
             {
-                string []fileNames = Directory.GetFiles("GameData/PayToPlay/Data/ReliabilityStatuses/");
-                
+                string[] fileNames = Directory.GetFiles("GameData/PayToPlay/Data/ReliabilityStatuses/");
+
                 foreach (string i in fileNames)
                 {
                     FileStream fileStream = new FileStream(i, FileMode.Open);
@@ -54,6 +54,15 @@ namespace EngineDecay
             catch (Exception)
             {
                 Debug.LogError("PayToPlayAddon could not read reliability status strings from files PayToPlay/Data/ReliabilityStatuses/*.txt");
+
+                reliabilityStatuses["HeavilyReused"] = new List<string>();
+                reliabilityStatuses["HeavilyReused"].Add("Further reuse is considered to be unsafe");
+
+                reliabilityStatuses["LowReliabilityModel"] = new List<string>();
+                reliabilityStatuses["LowReliabilityModel"].Add("Needs some testing before safe use");
+
+                reliabilityStatuses["PoorEngineCondition"] = new List<string>();
+                reliabilityStatuses["PoorEngineCondition"].Add("It is recommended to perform maintenance ASAP");
             }
         }
 
