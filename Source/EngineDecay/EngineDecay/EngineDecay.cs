@@ -638,9 +638,19 @@ namespace EngineDecay
                             }
                         }
 
-                        currentBaseRatedTime = ProbabilityLib.ATangentCumulativePercentArg(r, topBaseRatedTime);
+                        if (topBaseRatedTime != -1)
+                        {
+                            currentBaseRatedTime = ProbabilityLib.ATangentCumulativePercentArg(r, topBaseRatedTime);
 
-                        setBurnTime = currentBaseRatedTime * (1 + extraBurnTimePercent * (topMaxRatedTime / topBaseRatedTime - 1) / 100);
+                            setBurnTime = currentBaseRatedTime * (1 + extraBurnTimePercent * (topMaxRatedTime / topBaseRatedTime - 1) / 100);
+                            usedBurnTime = 0;
+                        }
+
+                        if (baseIgnitions != -1)
+                        {
+                            setIgnitions = (int)(baseIgnitions + extraIgnitionsPercent * (maxIgnitions - baseIgnitions) / 100);
+                            ignitionsLeft = setIgnitions;
+                        }
 
                         if (r < 5)
                         {
