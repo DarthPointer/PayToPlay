@@ -215,7 +215,14 @@ namespace EngineDecay
 
             UpdateIndicators();
 
-            reliabilityStatus = "nominal";
+            if (r < 5)
+            {
+                reliabilityStatus = PayToPlayAddon.RandomStatus("HeavilyReused");
+            }
+            else
+            {
+                reliabilityStatus = "nominal";
+            }
             nominal = true;
 
             Enable();
@@ -368,6 +375,11 @@ namespace EngineDecay
                 {
                     Events["SetAsANewProcSRBModel"].guiActiveEditor = false;
                 }
+            }
+
+            if (r < 5)
+            {
+                reliabilityStatus = PayToPlayAddon.RandomStatus("LowReliabilityModel");
             }
 
             if (topBaseRatedTime != -1)
@@ -622,6 +634,11 @@ namespace EngineDecay
                                 ProcUpdateThrust(procSRB.Fields["thrust"], null);
                             }
                         }
+
+                        if (r < 5)
+                        {
+                            reliabilityStatus = PayToPlayAddon.RandomStatus("LowReliabilityModel");
+                        }
                     }
                 }
                 else
@@ -812,6 +829,11 @@ namespace EngineDecay
                                 else
                                 {
                                     usedBurnTime += TimeWarp.fixedDeltaTime * decayRatesList[runningMode];
+                                }
+
+                                if (usedBurnTime > setBurnTime)
+                                {
+                                    reliabilityStatus = PayToPlayAddon.RandomStatus("PoorEngineCondition");
                                 }
 
                                 if (usedBurnTime <= setBurnTime)
@@ -1177,18 +1199,6 @@ namespace EngineDecay
 
         void UpdateModelState(bool hardReset)
         {
-            r = ReliabilityProgress.fetch.CheckProcSRBProgress(part.name, ref procSRBDiameter, ref procSRBThrust, ref procSRBBellName);
-
-            if (r == -1)
-            {
-                r = PayToPlaySettings.StartingReliability;
-                Events["SetAsANewProcSRBModel"].guiActiveEditor = true;
-            }
-            else
-            {
-                Events["SetAsANewProcSRBModel"].guiActiveEditor = false;
-            }
-
             if (hardReset)
             {
                 if (maintenanceCost > 0)

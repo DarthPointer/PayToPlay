@@ -15,6 +15,12 @@ namespace EngineDecay
 
         Dictionary<string, List<string>> reliabilityStatuses;
 
+        public static string RandomStatus(string statusType)
+        {
+            return fetch.reliabilityStatuses[statusType]
+                [UnityEngine.Random.Range(0, fetch.reliabilityStatuses[statusType].Count) - 1];     // Random string from corresponding list
+        }
+
         public void Start()
         {
             GameEvents.onVesselRecovered.Add(ReadRecoveredVessel);
