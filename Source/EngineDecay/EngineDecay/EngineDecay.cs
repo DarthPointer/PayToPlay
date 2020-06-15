@@ -863,7 +863,6 @@ namespace EngineDecay
                 }
             }
 
-
             if (defaultCost != 0)
             {
                 if (knownPartCost == -1)
@@ -889,7 +888,7 @@ namespace EngineDecay
             }
             else
             {
-                return targetPartCost - fullPartCost;
+                return targetPartCost - knownPartCost;
             }
         }
 
