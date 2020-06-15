@@ -809,16 +809,9 @@ namespace EngineDecay
                         prevEBTP = extraBurnTimePercent;
                         prevEIP = extraIgnitionsPercent;
 
+                        knownPartCost = -1;
+
                         ReplaceEvent();
-
-                        //UpdateIndicators();
-
-                        /*maintenanceCost = 0;
-                        Events["MaintenanceEvent"].guiActiveEditor = false;
-
-                        failAtBurnTime = -1;
-
-                        knownPartCost = -1;*/
                     }
                 }
             }
@@ -1248,16 +1241,9 @@ namespace EngineDecay
                     ignitionsLeft = setIgnitions;
                 }
 
+                knownPartCost = -1;
+
                 ReplaceEvent();
-
-                //UpdateIndicators();
-
-                /*maintenanceCost = 0;
-                Events["MaintenanceEvent"].guiActiveEditor = false;
-
-                failAtBurnTime = -1;
-
-                knownPartCost = -1;*/
             }
         }
 
