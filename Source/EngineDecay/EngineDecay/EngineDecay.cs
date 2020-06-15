@@ -230,8 +230,6 @@ namespace EngineDecay
 
             Enable();
 
-            failAtBurnTime = -1;
-
             if (maintenanceCost != 0)
             {
                 targetPartCost = maintenanceCost;
@@ -368,8 +366,6 @@ namespace EngineDecay
             nominal = true;
 
             Enable();
-
-            failAtBurnTime = -1;
 
             targetPartCost = fullPartCost;
 
@@ -602,6 +598,8 @@ namespace EngineDecay
                     {
                         UpdateReliabilityData();
                     }
+
+                    failAtBurnTime = -1;
                 }
                 else
                 {
