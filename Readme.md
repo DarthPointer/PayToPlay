@@ -1,6 +1,6 @@
 # Welcome to PayToPlay repo!
 
-This is a brand-new KSP reliability mod designed to  ~~cause some explosions~~ make you pay for engine maintenance. The idea is to have an easy-to-use mod that decreases parts' cost as they are being used and make them fail if you don't repair them. As for now it is an early WIP stage, the mod doesn't do much at the moment. Forum thread is here https://forum.kerbalspaceprogram.com/index.php?/topic/193467-181-190-paytoplay-maintenance-costs-money/&tab=comments#comment-3777542
+This is a brand-new KSP reliability mod designed to  ~~cause some explosions~~ make you pay for engine maintenance. The idea is that you have to perform maintenance for money and time and replace engines if their accumulated degradation is too much. Forum thread is here https://forum.kerbalspaceprogram.com/index.php?/topic/193467-181-190-paytoplay-maintenance-costs-money/&tab=comments#comment-3777542
 
 ## What is present
 
@@ -21,7 +21,7 @@ Grab the latest release and make sure you have module manager (in order to patch
 - KCT: PayToPaly is designed to be used with KCT, it makes restoring recovered craft take time.
 
 #### Supported
-- Kerbalism: PayToPlay is provided a patch to disable engine reliability of kerbalism. Kerbalism has a lot of interesting features and it is unacceptable to be incompatible with it. Kerbalism has its own patch to do this but it is not released yet.
+- Kerbalism: K 3.8+ has a compatibillity patch removing own reliability from engines. For use with K 3.7- rename the .txt in PayToPlay/Support/Kerbalism into a .cfg. Kerbalism has a lot of interesting features and it is unacceptable to be incompatible with it. Kerbalism has its own patch to do this but it is not released yet.
 
 ## Some regards
 
