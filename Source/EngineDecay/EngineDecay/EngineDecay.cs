@@ -1150,7 +1150,7 @@ namespace EngineDecay
                 currentBaseRatedTime = ProbabilityLib.ATangentCumulativePercentArg(r, topBaseRatedTime);
                 setBurnTime = currentBaseRatedTime * (1 + extraBurnTimePercent * (topMaxRatedTime / topBaseRatedTime - 1) / 100);
 
-                usedBurnTime = -1;
+                usedBurnTime = 0;
             }
 
             if (baseIgnitions != -1)
