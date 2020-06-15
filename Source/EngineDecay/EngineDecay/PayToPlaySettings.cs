@@ -40,6 +40,9 @@ namespace EngineDecay
         [GameParameters.CustomFloatParameterUI("Degradation on use multiplier", newGameOnly = false, displayFormat = "F1", minValue = 0.1f, maxValue = 5, toolTip = "The more it is the faster engines wear out and should be replaced with new ones")]
         public float usageExperienceToDegradationMul = 1;
 
+        [GameParameters.CustomFloatParameterUI("Enable random warnings before failures", newGameOnly = false, toolTip = "There is a chance that you will get a warning before failure. This chance and failure porximity depend on reliability progress")]
+        public bool randomWarningEnable = false;
+
         #endregion
 
         #region logics
@@ -170,6 +173,18 @@ namespace EngineDecay
             set
             {
                 HighLogic.CurrentGame.Parameters.CustomParams<PayToPlaySettings>().usageExperienceToDegradationMul = value;
+            }
+        }
+
+        public static bool RandomWarningEnable
+        {
+            get
+            {
+                return HighLogic.CurrentGame.Parameters.CustomParams<PayToPlaySettings>().randomWarningEnable;
+            }
+            set
+            {
+                HighLogic.CurrentGame.Parameters.CustomParams<PayToPlaySettings>().randomWarningEnable = value;
             }
         }
 
