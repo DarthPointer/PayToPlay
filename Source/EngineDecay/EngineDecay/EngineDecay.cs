@@ -615,7 +615,7 @@ namespace EngineDecay
                     }
                     else if (failAtBurnTime == -1)
                     {
-                        SetFailTime();
+                        SetReliabilityData();
                     }
 
                     symmetryMaintenanceCost = -1;
@@ -1103,11 +1103,6 @@ namespace EngineDecay
             }
         }
 
-        void SetFailTime()
-        {
-            failAtBurnTime = ProbabilityLib.ATangentRandom(r, topBaseRatedTime);
-        }
-
         bool SwitchNeedsIgnition(int fromMode, int toMode)
         {
             if (fromMode == -1)
@@ -1155,19 +1150,25 @@ namespace EngineDecay
                 currentBaseRatedTime = ProbabilityLib.ATangentCumulativePercentArg(r, topBaseRatedTime);
                 setBurnTime = currentBaseRatedTime * (1 + extraBurnTimePercent * (topMaxRatedTime / topBaseRatedTime - 1) / 100);
 
-                float failureWarningDevationRatioPercent = PayToPlaySettings.TopFailureWarningDeviationRatioPercent * (float)Math.Pow(9 - r, 2);
-                if (failureWarningDevationRatioPercent <= 50)
-                {
-                    if (UnityEngine.Random.value < PayToPlaySettings.TopFailureWarningChancePercent / (float)Math.Pow(9 - r, 2))
-                    {
-                        warnAtBurnTime = setBurnTime * (1 - UnityEngine.Random.value * failureWarningDevationRatioPercent / 100);
-                    }
-                }
+                usedBurnTime = -1;
             }
 
             if (baseIgnitions != -1)
             {
+                setIgnitions = (int)(baseIgnitions + (maxIgnitions - baseIgnitions) * (extraIgnitionsPercent / 100));
                 ignitionsLeft = setIgnitions;
+            }
+        }
+
+        void SetReliabilityData()
+        {
+            float failureWarningDevationRatioPercent = PayToPlaySettings.TopFailureWarningDeviationRatioPercent * (float)Math.Pow(9 - r, 2);
+            if (failureWarningDevationRatioPercent <= 50)
+            {
+                if (UnityEngine.Random.value < PayToPlaySettings.TopFailureWarningChancePercent / (float)Math.Pow(9 - r, 2))
+                {
+                    warnAtBurnTime = setBurnTime * (1 - UnityEngine.Random.value * failureWarningDevationRatioPercent / 100);
+                }
             }
         }
         #endregion
