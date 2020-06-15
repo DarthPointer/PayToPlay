@@ -770,14 +770,6 @@ namespace EngineDecay
                                     usedBurnTime += TimeWarp.fixedDeltaTime * decayRatesList[runningMode];
                                 }
 
-                                if (usedBurnTime > setBurnTime)
-                                {
-                                    if (reliabilityStatus == "nominal")
-                                    {
-                                        reliabilityStatus = PayToPlayAddon.RandomStatus("PoorEngineCondition");
-                                    }
-                                }
-
                                 if (usedBurnTime <= setBurnTime)
                                 {
                                     usageExperienceCoeff = 0.1f * usedBurnTime / setBurnTime;
@@ -797,6 +789,25 @@ namespace EngineDecay
                                 Failure();
 
                                 usageExperienceCoeff = 0.3f;
+                            }
+
+                            if (PayToPlaySettings.RandomFailureWarningEnable)
+                            {
+                                if (usedBurnTime > warnAtBurnTime)
+                                {
+                                    if (reliabilityStatus == "nominal")
+                                    {
+                                        reliabilityStatus = PayToPlayAddon.RandomStatus("PoorEngineCondition");
+                                        part.highlightColor = new Color(1, 1, 0);
+                                    }
+                                }
+                            }
+                            else if (usedBurnTime > setBurnTime)
+                            {
+                                if (reliabilityStatus == "nominal")
+                                {
+                                    reliabilityStatus = PayToPlayAddon.RandomStatus("PoorEngineCondition");
+                                }
                             }
 
                             if (ticksTillDisabling > 0)
