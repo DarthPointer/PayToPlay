@@ -598,7 +598,10 @@ namespace EngineDecay
                         }
                     }
 
-                    UpdateReliabilityData();
+                    if (newBorn)
+                    {
+                        UpdateReliabilityData();
+                    }
                 }
                 else
                 {
