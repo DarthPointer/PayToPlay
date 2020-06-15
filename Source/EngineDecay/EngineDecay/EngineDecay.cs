@@ -1166,6 +1166,8 @@ namespace EngineDecay
                     warnAtBurnTime = setBurnTime * (1 - UnityEngine.Random.value * failureWarningDevationRatioPercent / 100);
                 }
             }
+
+            failAtBurnTime = ProbabilityLib.ATangentRandom(r, setBurnTime);
         }
         #endregion
 
