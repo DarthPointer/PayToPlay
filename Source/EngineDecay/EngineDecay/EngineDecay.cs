@@ -137,6 +137,9 @@ namespace EngineDecay
         float failAtBurnTime = -1;
 
         [KSPField(isPersistant = true, guiActive = false)]
+        float warnAtBurnTime = -1;
+
+        [KSPField(isPersistant = true, guiActive = false)]
         int maintenanceCost = 0;
 
         [KSPField(isPersistant = true, guiActive = false)]

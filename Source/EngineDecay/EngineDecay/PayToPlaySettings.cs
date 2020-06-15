@@ -41,7 +41,13 @@ namespace EngineDecay
         public float usageExperienceToDegradationMul = 1;
 
         [GameParameters.CustomFloatParameterUI("Enable random warnings before failures", newGameOnly = false, toolTip = "There is a chance that you will get a warning before failure. This chance and failure porximity depend on reliability progress")]
-        public bool randomWarningEnable = false;
+        public bool randomFailureWarningEnable = false;
+
+        [GameParameters.CustomFloatParameterUI("Failure warning chance percent at max reliability", newGameOnly = false, displayFormat = "F1", minValue = 0, maxValue = 100, toolTip = "Failure warning chance multiplier, equals to warn chance precent at max reliability")]
+        public float topFailureWarningChancePercent = 90;
+
+        [GameParameters.CustomFloatParameterUI("Failure warning deviation ratio percent at max reliability", newGameOnly = false, displayFormat = "F1", minValue = 1, maxValue = 50, toolTip = "Failure warning deviation multiplier, equals to deviation ratio percent at max reliability. Warnings are disabled for engines with this percent > 50.")]
+        public float topFailureWarningDeviationRatioPercent = 5;
 
         #endregion
 
@@ -176,15 +182,41 @@ namespace EngineDecay
             }
         }
 
-        public static bool RandomWarningEnable
+        public static bool RandomFailureWarningEnable
         {
             get
             {
-                return HighLogic.CurrentGame.Parameters.CustomParams<PayToPlaySettings>().randomWarningEnable;
+                return HighLogic.CurrentGame.Parameters.CustomParams<PayToPlaySettings>().randomFailureWarningEnable;
             }
             set
             {
-                HighLogic.CurrentGame.Parameters.CustomParams<PayToPlaySettings>().randomWarningEnable = value;
+                HighLogic.CurrentGame.Parameters.CustomParams<PayToPlaySettings>().randomFailureWarningEnable = value;
+            }
+        }
+
+        public static float TopFailureWarningChancePercent
+        {
+            get
+            {
+                return HighLogic.CurrentGame.Parameters.CustomParams<PayToPlaySettings>().topFailureWarningChancePercent;
+            }
+
+            set
+            {
+                HighLogic.CurrentGame.Parameters.CustomParams<PayToPlaySettings>().topFailureWarningChancePercent = value;
+            }
+        }
+
+        public static float TopFailureWarningDeviationRatioPercent
+        {
+            get
+            {
+                return HighLogic.CurrentGame.Parameters.CustomParams<PayToPlaySettings>().topFailureWarningDeviationRatioPercent;
+            }
+
+            set
+            {
+                HighLogic.CurrentGame.Parameters.CustomParams<PayToPlaySettings>().topFailureWarningDeviationRatioPercent = value;
             }
         }
 
