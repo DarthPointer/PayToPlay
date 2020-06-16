@@ -34,21 +34,8 @@ namespace EngineDecay
 
                 foreach (string i in fileNames)
                 {
-                    FileStream fileStream = new FileStream(i, FileMode.Open);
-                    StreamReader reader = new StreamReader(fileStream);
-
-                    string setName = i.Split('/')[i.Split('/').Length - 1].Split('.')[0];           // Last part of the name without .txt appendix
-                    List<string> stringList = new List<string>();
-
-                    while (!reader.EndOfStream)
-                    {
-                        stringList.Add(reader.ReadLine());
-                    }
-
-                    reliabilityStatuses[setName] = stringList;
-
-                    reader.Close();
-                    // fileStream.Close();              Do we need it?
+                    string setName = Path.GetFileNameWithoutExtension(i);           // Last part of the name without .txt appendix
+                    reliabilityStatuses[setName] = new List<string>(File.ReadAllLines(i));
                 }
             }
             catch (Exception)

@@ -137,6 +137,12 @@ namespace EngineDecay
         float failAtBurnTime = -1;
 
         [KSPField(isPersistant = true, guiActive = false)]
+        float warnAtBurnTime = -1;
+
+        [KSPField(isPersistant = true, guiActive = false)]
+        bool autoShutdownOnWarning = false;
+
+        [KSPField(isPersistant = true, guiActive = false)]
         int maintenanceCost = 0;
 
         [KSPField(isPersistant = true, guiActive = false)]
@@ -226,8 +232,6 @@ namespace EngineDecay
             nominal = true;
 
             Enable();
-
-            failAtBurnTime = -1;
 
             if (maintenanceCost != 0)
             {
@@ -358,52 +362,13 @@ namespace EngineDecay
             usedBurnTime = 0;
             usageExperienceCoeff = 0;
 
-            if (!procPart)
-            {
-                r = ReliabilityProgress.fetch.GetExponent(part.name);
-            }
-            else
-            {
-                r = ReliabilityProgress.fetch.CheckProcSRBProgress(part.name, ref procSRBDiameter, ref procSRBThrust, ref procSRBBellName);
-
-                if (r == -1)
-                {
-                    r = PayToPlaySettings.StartingReliability;
-                    Events["SetAsANewProcSRBModel"].guiActiveEditor = true;
-                }
-                else
-                {
-                    Events["SetAsANewProcSRBModel"].guiActiveEditor = false;
-                }
-            }
-
-            if (r < 5)
-            {
-                reliabilityStatus = PayToPlayAddon.RandomStatus("LowReliabilityModel");
-            }
-            else
-            {
-                reliabilityStatus = "nominal";
-            }
-
-            if (topBaseRatedTime != -1)
-            {
-                currentBaseRatedTime = ProbabilityLib.ATangentCumulativePercentArg(r, topBaseRatedTime);
-                setBurnTime = currentBaseRatedTime * (1 + extraBurnTimePercent * (topMaxRatedTime / topBaseRatedTime - 1) / 100);
-            }
-
-            if (baseIgnitions != -1)
-            {
-                ignitionsLeft = setIgnitions;
-            }
+            UpdateReliabilityData();
 
             UpdateIndicators();
 
             nominal = true;
 
             Enable();
-
-            failAtBurnTime = -1;
 
             targetPartCost = fullPartCost;
 
@@ -536,6 +501,17 @@ namespace EngineDecay
 
         #endregion
 
+        #region Autoshutdown Button
+
+        [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "Autoshutdown on Warning")]
+        void ToggleAutoShutdownOnWarning()
+        {
+            autoShutdownOnWarning = !autoShutdownOnWarning;
+            Events["ToggleAutoShutdownOnWarning"].guiName = "Autoshutdown on Warning: " + autoShutdownOnWarning;
+        }
+
+        #endregion
+
         #region Game-called Methods
 
         public override void OnStart(StartState state)
@@ -603,60 +579,55 @@ namespace EngineDecay
                     Fields["ignitionsIndicator"].guiActive = false;
                 }
 
+                if (PayToPlaySettings.RandomFailureWarningEnable)
+                {
+                    Events["ToggleAutoShutdownOnWarning"].guiActiveEditor = true;
+                    Events["ToggleAutoShutdownOnWarning"].guiActive = true;
+                    Events["ToggleAutoShutdownOnWarning"].guiName = "Autoshutdown on Warning: " + autoShutdownOnWarning;
+                }
+                else
+                {
+                    Events["ToggleAutoShutdownOnWarning"].guiActiveEditor = false;
+                    Events["ToggleAutoShutdownOnWarning"].guiActive = false;
+
+                    autoShutdownOnWarning = false;
+                }
+
                 if (state == StartState.Editor)
                 {
                     inEditor = true;
 
                     r -= usageExperienceCoeff * PayToPlaySettings.UsageExperienceToDegradationMul;
 
-                    if (newBorn)
+                    if (procPart)
                     {
-                        if (!procPart)
+                        procSRBCylinder = part.Modules["ProceduralShapeCylinder"];
+                        procSRB = part.Modules["ProceduralSRB"];
+
+                        if ((procSRBCylinder == null) || (procSRB == null))
                         {
-                            r = ReliabilityProgress.fetch.GetExponent(part.name);
+                            print("An EngineDecay module marked as a one for ProceduralParts SRB could not find relevant modules. Switched to non-procedural logic");
+                            Debug.LogError("An EngineDecay module marked as a one for ProceduralParts SRB could not find relevant modules. Switched to non-procedural logic");
+                            procPart = false;
                         }
                         else
                         {
-                            procSRBCylinder = part.Modules["ProceduralShapeCylinder"];
-                            procSRB = part.Modules["ProceduralSRB"];
+                            procSRBCylinder.Fields["diameter"].uiControlEditor.onFieldChanged += ProcUpdateDiameter;
+                            procSRB.Fields["thrust"].uiControlEditor.onFieldChanged += ProcUpdateThrust;
+                            procSRB.Fields["selectedBellName"].uiControlEditor.onFieldChanged += ProcUpdateBellName;
 
-                            if ((procSRBCylinder == null) || (procSRB == null))
-                            {
-                                print("An EngineDecay module marked as a one for ProceduralParts SRB could not find relevant modules. Switched to non-procedural logic");
-                                Debug.LogError("An EngineDecay module marked as a one for ProceduralParts SRB could not find relevant modules. Switched to non-procedural logic");
-                                procPart = false;
-                            }
-                            else
-                            {
-                                procSRBCylinder.Fields["diameter"].uiControlEditor.onFieldChanged += ProcUpdateDiameter;
-                                procSRB.Fields["thrust"].uiControlEditor.onFieldChanged += ProcUpdateThrust;
-                                procSRB.Fields["selectedBellName"].uiControlEditor.onFieldChanged += ProcUpdateBellName;
-
-                                ProcUpdateDiameter(procSRBCylinder.Fields["diameter"], null);
-                                ProcUpdateBellName(procSRB.Fields["selectedBellName"], null);
-                                ProcUpdateThrust(procSRB.Fields["thrust"], null);
-                            }
-                        }
-
-                        if (topBaseRatedTime != -1)
-                        {
-                            currentBaseRatedTime = ProbabilityLib.ATangentCumulativePercentArg(r, topBaseRatedTime);
-
-                            setBurnTime = currentBaseRatedTime * (1 + extraBurnTimePercent * (topMaxRatedTime / topBaseRatedTime - 1) / 100);
-                            usedBurnTime = 0;
-                        }
-
-                        if (baseIgnitions != -1)
-                        {
-                            setIgnitions = (int)(baseIgnitions + extraIgnitionsPercent * (maxIgnitions - baseIgnitions) / 100);
-                            ignitionsLeft = setIgnitions;
-                        }
-
-                        if (r < 5)
-                        {
-                            reliabilityStatus = PayToPlayAddon.RandomStatus("LowReliabilityModel");
+                            ProcUpdateDiameter(procSRBCylinder.Fields["diameter"], null);
+                            ProcUpdateBellName(procSRB.Fields["selectedBellName"], null);
+                            ProcUpdateThrust(procSRB.Fields["thrust"], null);
                         }
                     }
+
+                    if (newBorn)
+                    {
+                        UpdateReliabilityData();
+                    }
+
+                    failAtBurnTime = -1;
                 }
                 else
                 {
@@ -670,7 +641,7 @@ namespace EngineDecay
                     }
                     else if (failAtBurnTime == -1)
                     {
-                        SetFailTime();
+                        SetReliabilityData();
                     }
 
                     symmetryMaintenanceCost = -1;
@@ -784,38 +755,12 @@ namespace EngineDecay
 
                     if (prevEBTP != extraBurnTimePercent || prevEIP != extraIgnitionsPercent)
                     {
-                        if (maintenanceCost > 0)
-                        {
-                            SymmetryMaintenance();
-                        }
-
-                        if (topBaseRatedTime != -1)
-                        {
-                            currentBaseRatedTime = ProbabilityLib.ATangentCumulativePercentArg(r, topBaseRatedTime);
-
-                            setBurnTime = currentBaseRatedTime * (1 + extraBurnTimePercent * (topMaxRatedTime / topBaseRatedTime - 1) / 100);
-                            usedBurnTime = 0;
-                        }
-
-                        if (baseIgnitions != -1)
-                        {
-                            setIgnitions = (int)(baseIgnitions + extraIgnitionsPercent * (maxIgnitions - baseIgnitions) / 100);
-                            ignitionsLeft = setIgnitions;
-                        }
-
                         prevEBTP = extraBurnTimePercent;
                         prevEIP = extraIgnitionsPercent;
 
+                        knownPartCost = -1;
+
                         ReplaceEvent();
-
-                        //UpdateIndicators();
-
-                        /*maintenanceCost = 0;
-                        Events["MaintenanceEvent"].guiActiveEditor = false;
-
-                        failAtBurnTime = -1;
-
-                        knownPartCost = -1;*/
                     }
                 }
             }
@@ -851,14 +796,6 @@ namespace EngineDecay
                                     usedBurnTime += TimeWarp.fixedDeltaTime * decayRatesList[runningMode];
                                 }
 
-                                if (usedBurnTime > setBurnTime)
-                                {
-                                    if (reliabilityStatus == "nominal")
-                                    {
-                                        reliabilityStatus = PayToPlayAddon.RandomStatus("PoorEngineCondition");
-                                    }
-                                }
-
                                 if (usedBurnTime <= setBurnTime)
                                 {
                                     usageExperienceCoeff = 0.1f * usedBurnTime / setBurnTime;
@@ -878,6 +815,34 @@ namespace EngineDecay
                                 Failure();
 
                                 usageExperienceCoeff = 0.3f;
+                            }
+
+                            if (PayToPlaySettings.RandomFailureWarningEnable)
+                            {
+                                if (usedBurnTime > warnAtBurnTime)
+                                {
+                                    if (reliabilityStatus == "nominal")
+                                    {
+                                        reliabilityStatus = PayToPlayAddon.RandomStatus("PoorEngineCondition");
+                                        part.SetHighlightType(Part.HighlightType.AlwaysOn);
+                                        part.SetHighlightColor(new Color(1, 1, 0));
+                                        part.SetHighlight(true, false);
+
+                                        ScreenMessages.PostScreenMessage("Bad engine telemetry, get ready for a failure!");
+
+                                        if (autoShutdownOnWarning)
+                                        {
+                                            CutoffOnFailure();
+                                        }
+                                    }
+                                }
+                            }
+                            else if (usedBurnTime > setBurnTime)
+                            {
+                                if (reliabilityStatus == "nominal")
+                                {
+                                    reliabilityStatus = PayToPlayAddon.RandomStatus("PoorEngineCondition");
+                                }
                             }
 
                             if (ticksTillDisabling > 0)
@@ -944,7 +909,6 @@ namespace EngineDecay
                 }
             }
 
-
             if (defaultCost != 0)
             {
                 if (knownPartCost == -1)
@@ -970,7 +934,7 @@ namespace EngineDecay
             }
             else
             {
-                return targetPartCost - fullPartCost;
+                return targetPartCost - knownPartCost;
             }
         }
 
@@ -1184,11 +1148,6 @@ namespace EngineDecay
             }
         }
 
-        void SetFailTime()
-        {
-            failAtBurnTime = ProbabilityLib.ATangentRandom(r, topBaseRatedTime);
-        }
-
         bool SwitchNeedsIgnition(int fromMode, int toMode)
         {
             if (fromMode == -1)
@@ -1198,6 +1157,73 @@ namespace EngineDecay
             else
             {
                 return ignitionsOnSwitchList[fromMode * modesNumber + toMode];
+            }
+        }
+
+        void UpdateReliabilityData()
+        {
+            if (!procPart)
+            {
+                r = ReliabilityProgress.fetch.GetExponent(part.name);
+            }
+            else
+            {
+                r = ReliabilityProgress.fetch.CheckProcSRBProgress(part.name, ref procSRBDiameter, ref procSRBThrust, ref procSRBBellName);
+
+                if (r == -1)
+                {
+                    r = PayToPlaySettings.StartingReliability;
+                    Events["SetAsANewProcSRBModel"].guiActiveEditor = true;
+                }
+                else
+                {
+                    Events["SetAsANewProcSRBModel"].guiActiveEditor = false;
+                }
+            }
+
+            if (r < 5)
+            {
+                reliabilityStatus = PayToPlayAddon.RandomStatus("LowReliabilityModel");
+            }
+            else
+            {
+                reliabilityStatus = "nominal";
+            }
+
+            if (topBaseRatedTime != -1)
+            {
+                currentBaseRatedTime = ProbabilityLib.ATangentCumulativePercentArg(r, topBaseRatedTime);
+                setBurnTime = currentBaseRatedTime * (1 + extraBurnTimePercent * (topMaxRatedTime / topBaseRatedTime - 1) / 100);
+
+                usedBurnTime = 0;
+            }
+
+            if (baseIgnitions != -1)
+            {
+                setIgnitions = (int)(baseIgnitions + (maxIgnitions - baseIgnitions) * (extraIgnitionsPercent / 100));
+                ignitionsLeft = setIgnitions;
+            }
+        }
+
+        void SetReliabilityData()
+        {
+            failAtBurnTime = ProbabilityLib.ATangentRandom(r, setBurnTime);
+
+            float failureWarningDevationRatioPercent = PayToPlaySettings.TopFailureWarningDeviationRatioPercent * (float)Math.Pow(9 - r, 2);
+            if (failureWarningDevationRatioPercent <= 50)
+            {
+                if (UnityEngine.Random.value < PayToPlaySettings.TopFailureWarningChancePercent / (float)Math.Pow(9 - r, 2))
+                {
+                    warnAtBurnTime = failAtBurnTime * (1 - UnityEngine.Random.value * failureWarningDevationRatioPercent / 100);
+                }
+                else
+                {
+                    warnAtBurnTime = float.PositiveInfinity;
+                }
+            }
+            else
+            {
+                warnAtBurnTime = float.PositiveInfinity;
             }
         }
         #endregion
@@ -1226,35 +1252,9 @@ namespace EngineDecay
         {
             if (hardReset)
             {
-                if (maintenanceCost > 0)
-                {
-                    SymmetryMaintenance();
-                }
-
-                if (topBaseRatedTime != -1)
-                {
-                    currentBaseRatedTime = ProbabilityLib.ATangentCumulativePercentArg(r, topBaseRatedTime);
-
-                    setBurnTime = currentBaseRatedTime * (1 + extraBurnTimePercent * (topMaxRatedTime / topBaseRatedTime - 1) / 100);
-                    usedBurnTime = 0;
-                }
-
-                if (baseIgnitions != -1)
-                {
-                    setIgnitions = (int)(baseIgnitions + extraIgnitionsPercent * (maxIgnitions - baseIgnitions) / 100);
-                    ignitionsLeft = setIgnitions;
-                }
+                knownPartCost = -1;
 
                 ReplaceEvent();
-
-                //UpdateIndicators();
-
-                /*maintenanceCost = 0;
-                Events["MaintenanceEvent"].guiActiveEditor = false;
-
-                failAtBurnTime = -1;
-
-                knownPartCost = -1;*/
             }
         }
 
