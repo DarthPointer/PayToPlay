@@ -796,7 +796,11 @@ namespace EngineDecay
                                     if (reliabilityStatus == "nominal")
                                     {
                                         reliabilityStatus = PayToPlayAddon.RandomStatus("PoorEngineCondition");
-                                        part.highlightColor = new Color(1, 1, 0);
+                                        part.SetHighlightType(Part.HighlightType.AlwaysOn);
+                                        part.SetHighlightColor(new Color(1, 1, 0));
+                                        part.SetHighlight(true, false);
+
+                                        ScreenMessages.PostScreenMessage("Bad engine telemetry, get ready for a failure!");
                                     }
                                 }
                             }
