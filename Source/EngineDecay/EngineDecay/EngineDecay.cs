@@ -140,6 +140,9 @@ namespace EngineDecay
         float warnAtBurnTime = -1;
 
         [KSPField(isPersistant = true, guiActive = false)]
+        bool autoShutdownOnWarning = false;
+
+        [KSPField(isPersistant = true, guiActive = false)]
         int maintenanceCost = 0;
 
         [KSPField(isPersistant = true, guiActive = false)]
@@ -498,6 +501,17 @@ namespace EngineDecay
 
         #endregion
 
+        #region Autoshutdown Button
+
+        [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "Autoshutdown on Warning")]
+        void ToggleAutoShutdownOnWarning()
+        {
+            autoShutdownOnWarning = !autoShutdownOnWarning;
+            Events["ToggleAutoShutdownOnWarning"].guiName = "Autoshutdown on Warning: " + autoShutdownOnWarning;
+        }
+
+        #endregion
+
         #region Game-called Methods
 
         public override void OnStart(StartState state)
@@ -563,6 +577,20 @@ namespace EngineDecay
 
                     Fields["ignitionsIndicator"].guiActiveEditor = false;
                     Fields["ignitionsIndicator"].guiActive = false;
+                }
+
+                if (PayToPlaySettings.RandomFailureWarningEnable)
+                {
+                    Events["ToggleAutoShutdownOnWarning"].guiActiveEditor = true;
+                    Events["ToggleAutoShutdownOnWarning"].guiActive = true;
+                    Events["ToggleAutoShutdownOnWarning"].guiName = "Autoshutdown on Warning: " + autoShutdownOnWarning;
+                }
+                else
+                {
+                    Events["ToggleAutoShutdownOnWarning"].guiActiveEditor = false;
+                    Events["ToggleAutoShutdownOnWarning"].guiActive = false;
+
+                    autoShutdownOnWarning = false;
                 }
 
                 if (state == StartState.Editor)
@@ -801,6 +829,11 @@ namespace EngineDecay
                                         part.SetHighlight(true, false);
 
                                         ScreenMessages.PostScreenMessage("Bad engine telemetry, get ready for a failure!");
+
+                                        if (autoShutdownOnWarning)
+                                        {
+                                            CutoffOnFailure();
+                                        }
                                     }
                                 }
                             }
