@@ -21,7 +21,7 @@ Grab the latest release and make sure you have module manager (in order to patch
 - KCT: PayToPaly is designed to be used with KCT, it makes restoring recovered craft take time.
 
 #### Supported
-- Kerbalism: K 3.8+ has a compatibillity patch removing own reliability from engines. For use with K 3.7- rename the .txt in PayToPlay/Support/Kerbalism into a .cfg. Kerbalism has a lot of interesting features and it is unacceptable to be incompatible with it. Kerbalism has its own patch to do this but it is not released yet.
+- Kerbalism: K 3.8+ has a compatibillity patch removing own reliability from engines. For use with K 3.7- rename the .txt in PayToPlay/Support/Kerbalism into a .cfg. Kerbalism has a lot of interesting features and it is unacceptable to be incompatible with it.
 
 ## Some regards
 
