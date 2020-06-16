@@ -1174,12 +1174,14 @@ namespace EngineDecay
 
         void SetReliabilityData()
         {
+            failAtBurnTime = ProbabilityLib.ATangentRandom(r, setBurnTime);
+
             float failureWarningDevationRatioPercent = PayToPlaySettings.TopFailureWarningDeviationRatioPercent * (float)Math.Pow(9 - r, 2);
             if (failureWarningDevationRatioPercent <= 50)
             {
                 if (UnityEngine.Random.value < PayToPlaySettings.TopFailureWarningChancePercent / (float)Math.Pow(9 - r, 2))
                 {
-                    warnAtBurnTime = setBurnTime * (1 - UnityEngine.Random.value * failureWarningDevationRatioPercent / 100);
+                    warnAtBurnTime = failAtBurnTime * (1 - UnityEngine.Random.value * failureWarningDevationRatioPercent / 100);
                 }
                 else
                 {
@@ -1190,8 +1192,6 @@ namespace EngineDecay
             {
                 warnAtBurnTime = float.PositiveInfinity;
             }
-
-            failAtBurnTime = ProbabilityLib.ATangentRandom(r, setBurnTime);
         }
         #endregion
 
