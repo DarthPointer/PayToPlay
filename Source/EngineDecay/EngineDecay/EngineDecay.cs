@@ -1207,7 +1207,7 @@ namespace EngineDecay
 
         void SetReliabilityData()
         {
-            failAtBurnTime = ProbabilityLib.ATangentRandom(r, setBurnTime);
+            failAtBurnTime = ProbabilityLib.ATangentRandom(r, topBaseRatedTime) * (1 + extraBurnTimePercent * (topMaxRatedTime / topBaseRatedTime - 1) / 100);
 
             float failureWarningDevationRatioPercent = PayToPlaySettings.TopFailureWarningDeviationRatioPercent * (float)Math.Pow(9 - r, 2);
             if (failureWarningDevationRatioPercent <= 50)
