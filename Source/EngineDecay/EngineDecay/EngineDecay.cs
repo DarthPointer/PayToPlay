@@ -639,7 +639,7 @@ namespace EngineDecay
                     {
                         Disable();
                     }
-                    else if (failAtBurnTime == -1)
+                    else if (failAtBurnTime == -1 && topBaseRatedTime != -1)
                     {
                         SetReliabilityData();
                     }
@@ -1218,12 +1218,19 @@ namespace EngineDecay
                 }
                 else
                 {
-                    warnAtBurnTime = float.PositiveInfinity;
+                    warnAtBurnTime = float.PositiveInfinity;                // bad luck
                 }
+
+                Events["ToggleAutoShutdownOnWarning"].guiActiveEditor = true;
+                Events["ToggleAutoShutdownOnWarning"].guiActive = true;
+                Events["ToggleAutoShutdownOnWarning"].guiName = "Autoshutdown on Warning: " + autoShutdownOnWarning;
             }
             else
             {
-                warnAtBurnTime = float.PositiveInfinity;
+                warnAtBurnTime = float.PositiveInfinity;                    // warnings are not available for this engine
+
+                Events["ToggleAutoShutdownOnWarning"].guiActiveEditor = false;
+                Events["ToggleAutoShutdownOnWarning"].guiActive = false;
             }
         }
         #endregion
