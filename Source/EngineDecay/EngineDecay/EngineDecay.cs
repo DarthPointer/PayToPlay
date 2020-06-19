@@ -1209,28 +1209,31 @@ namespace EngineDecay
         {
             failAtBurnTime = ProbabilityLib.ATangentRandom(r, topBaseRatedTime) * (1 + extraBurnTimePercent * (topMaxRatedTime / topBaseRatedTime - 1) / 100);
 
-            float failureWarningDevationRatioPercent = PayToPlaySettings.TopFailureWarningDeviationRatioPercent * (float)Math.Pow(9 - r, 2);
-            if (failureWarningDevationRatioPercent <= 50)
+            if (PayToPlaySettings.RandomFailureWarningEnable)
             {
-                if (UnityEngine.Random.value < PayToPlaySettings.TopFailureWarningChancePercent / (float)Math.Pow(9 - r, 2))
+                float failureWarningDevationRatioPercent = PayToPlaySettings.TopFailureWarningDeviationRatioPercent * (float)Math.Pow(9 - r, 2);
+                if (failureWarningDevationRatioPercent <= 50)
                 {
-                    warnAtBurnTime = failAtBurnTime * (1 - UnityEngine.Random.value * failureWarningDevationRatioPercent / 100);
+                    if (UnityEngine.Random.value < PayToPlaySettings.TopFailureWarningChancePercent / (float)Math.Pow(9 - r, 2))
+                    {
+                        warnAtBurnTime = failAtBurnTime * (1 - UnityEngine.Random.value * failureWarningDevationRatioPercent / 100);
+                    }
+                    else
+                    {
+                        warnAtBurnTime = float.PositiveInfinity;                // bad luck
+                    }
+
+                    Events["ToggleAutoShutdownOnWarning"].guiActiveEditor = true;
+                    Events["ToggleAutoShutdownOnWarning"].guiActive = true;
+                    Events["ToggleAutoShutdownOnWarning"].guiName = "Autoshutdown on Warning: " + autoShutdownOnWarning;
                 }
                 else
                 {
-                    warnAtBurnTime = float.PositiveInfinity;                // bad luck
+                    warnAtBurnTime = float.PositiveInfinity;                    // warnings are not available for this engine
+
+                    Events["ToggleAutoShutdownOnWarning"].guiActiveEditor = false;
+                    Events["ToggleAutoShutdownOnWarning"].guiActive = false;
                 }
-
-                Events["ToggleAutoShutdownOnWarning"].guiActiveEditor = true;
-                Events["ToggleAutoShutdownOnWarning"].guiActive = true;
-                Events["ToggleAutoShutdownOnWarning"].guiName = "Autoshutdown on Warning: " + autoShutdownOnWarning;
-            }
-            else
-            {
-                warnAtBurnTime = float.PositiveInfinity;                    // warnings are not available for this engine
-
-                Events["ToggleAutoShutdownOnWarning"].guiActiveEditor = false;
-                Events["ToggleAutoShutdownOnWarning"].guiActive = false;
             }
         }
         #endregion
