@@ -178,7 +178,7 @@ namespace EngineDecay
 
         #region Maintenance
 
-        [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "Maintenance", groupName = "PayToPlay Reliability")]
+        [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "Maintenance", groupName = "PayToPlayReliability", groupDisplayName = "PayToPlay Reliability")]
         void MaintenanceEvent()
         {
             foreach (Part i in part.symmetryCounterparts)
@@ -244,7 +244,7 @@ namespace EngineDecay
             Events["MaintenanceEvent"].guiActiveEditor = false;
         }
 
-        [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "Symmetry Maintenance", groupName = "PayToPlay Reliability")]
+        [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "Symmetry Maintenance", groupName = "PayToPlayReliability", groupDisplayName = "PayToPlay Reliability")]
         void SymmetryMaintenance()
         {
             foreach (Part i in part.symmetryCounterparts)
@@ -329,7 +329,7 @@ namespace EngineDecay
 
         #region Replacement
 
-        [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "Replace", groupName = "PayToPlay Reliability")]
+        [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "Replace", groupName = "PayToPlayReliability", groupDisplayName = "PayToPlay Reliability")]
         void ReplaceEvent()
         {
             foreach (Part i in part.symmetryCounterparts)
@@ -376,7 +376,7 @@ namespace EngineDecay
             Events["ReplaceEvent"].guiActiveEditor = false;
         }
 
-        [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "Symmetry Replace", groupName = "PayToPlay Reliability")]
+        [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "Symmetry Replace", groupName = "PayToPlayReliability", groupDisplayName = "PayToPlay Reliability")]
         void SymmetryReplace()
         {
             foreach (Part i in part.symmetryCounterparts)
@@ -461,7 +461,7 @@ namespace EngineDecay
 
         #region proc SRB events
 
-        [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "Set as a New Model", groupName = "PayToPlay Reliability")]
+        [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "Set as a New Model", groupName = "PayToPlayReliability", groupDisplayName = "PayToPlay Reliability")]
         void SetAsANewProcSRBModel()
         {
             ReliabilityProgress.fetch.CreateModel(part.name, procSRBDiameter, procSRBThrust, procSRBBellName);
@@ -472,7 +472,7 @@ namespace EngineDecay
 
         #region Indicators
 
-        [KSPEvent(guiActive = true, guiActiveEditor = true, guiName = "Switch Time Format", groupName = "PayToPlay Reliability")]
+        [KSPEvent(guiActive = true, guiActiveEditor = true, guiName = "Switch Time Format", groupName = "PayToPlayReliability", groupDisplayName = "PayToPlay Reliability")]
         void SwitchTimeFormat()
         {
             if (usingTimeFormat == 0 && PayToPlaySettings.UseNonstandardLongTimeFormat)
@@ -503,7 +503,7 @@ namespace EngineDecay
 
         #region Autoshutdown Button
 
-        [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "Autoshutdown on Warning", groupName = "PayToPlay Reliability")]
+        [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "Autoshutdown on Warning", groupName = "PayToPlayReliability", groupDisplayName = "PayToPlay Reliability")]
         void ToggleAutoShutdownOnWarning()
         {
             autoShutdownOnWarning = !autoShutdownOnWarning;
