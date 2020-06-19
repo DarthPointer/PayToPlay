@@ -109,28 +109,35 @@ namespace EngineDecay
 
         public float CheckProcSRBProgress(string partName, ref float diameter, ref float thrust, ref string bellName)           // -1 if no registered model fits specified stats
         {                                                                                                                       // It CHANGES procedural data of EngineDecay in order to specify which model it is to prevent possible reliability progress issues
-            ProcSRBProgress partProgress;
-            if (procSRBs.TryGetValue(partName, out partProgress))
+            if (PayToPlaySettings.ReliabilityProgress)
             {
-                Dictionary<ProcSRBData, float>.Enumerator i = partProgress.models.GetEnumerator();
-
-                while (i.MoveNext())
+                ProcSRBProgress partProgress;
+                if (procSRBs.TryGetValue(partName, out partProgress))
                 {
-                    if (i.Current.Key.Fits(diameter, thrust, bellName))
+                    Dictionary<ProcSRBData, float>.Enumerator i = partProgress.models.GetEnumerator();
+
+                    while (i.MoveNext())
                     {
-                        diameter = i.Current.Key.diameter;
-                        thrust = i.Current.Key.thrust;
-                        bellName = i.Current.Key.bellName;
+                        if (i.Current.Key.Fits(diameter, thrust, bellName))
+                        {
+                            diameter = i.Current.Key.diameter;
+                            thrust = i.Current.Key.thrust;
+                            bellName = i.Current.Key.bellName;
 
-                        return i.Current.Value;
+                            return i.Current.Value;
+                        }
                     }
-                }
 
-                return -1;
+                    return -1;
+                }
+                else
+                {
+                    return -1;
+                }
             }
             else
             {
-                return -1;
+                return 8;
             }
         }
 
@@ -147,29 +154,32 @@ namespace EngineDecay
 
         public void ImproveProcedural(string partName, float diameter, float thrust, string bellName, float coeff, float generationExp)
         {
-            float newExp = generationExp + (9 - generationExp) * coeff;
-            if (newExp > 8)
+            if (PayToPlaySettings.ReliabilityProgress)
             {
-                newExp = 8;
-            }
+                float newExp = generationExp + (9 - generationExp) * coeff;
+                if (newExp > 8)
+                {
+                    newExp = 8;
+                }
 
-            ProcSRBProgress partProgress;
-            if (!procSRBs.TryGetValue(partName, out partProgress))
-            {
-                partProgress = procSRBs[partName] = new ProcSRBProgress();
-            }
+                ProcSRBProgress partProgress;
+                if (!procSRBs.TryGetValue(partName, out partProgress))
+                {
+                    partProgress = procSRBs[partName] = new ProcSRBProgress();
+                }
 
-            ProcSRBData key = new ProcSRBData(diameter, thrust, bellName);
-            if (partProgress.models.TryGetValue(key , out float oldExp))
-            {
-                if (newExp > oldExp)
+                ProcSRBData key = new ProcSRBData(diameter, thrust, bellName);
+                if (partProgress.models.TryGetValue(key, out float oldExp))
+                {
+                    if (newExp > oldExp)
+                    {
+                        partProgress.models[key] = newExp;
+                    }
+                }
+                else
                 {
                     partProgress.models[key] = newExp;
                 }
-            }
-            else
-            {
-                partProgress.models[key] = newExp;
             }
         }
 
