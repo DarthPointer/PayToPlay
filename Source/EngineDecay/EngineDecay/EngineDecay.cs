@@ -134,6 +134,9 @@ namespace EngineDecay
         bool newBorn = true;
 
         [KSPField(isPersistant = true, guiActive = false)]
+        public bool isKCTRecovered = false;
+
+        [KSPField(isPersistant = true, guiActive = false)]
         float failAtBurnTime = -1;
 
         [KSPField(isPersistant = true, guiActive = false)]
@@ -622,7 +625,7 @@ namespace EngineDecay
                         }
                     }
 
-                    if (newBorn)
+                    if (!isKCTRecovered)
                     {
                         UpdateReliabilityProgress();
                     }
