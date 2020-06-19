@@ -362,7 +362,7 @@ namespace EngineDecay
             usedBurnTime = 0;
             usageExperienceCoeff = 0;
 
-            UpdateReliabilityData();
+            UpdateReliabilityProgress();
 
             UpdateIndicators();
 
@@ -624,7 +624,7 @@ namespace EngineDecay
 
                     if (newBorn)
                     {
-                        UpdateReliabilityData();
+                        UpdateReliabilityProgress();
                     }
 
                     failAtBurnTime = -1;
@@ -1160,7 +1160,7 @@ namespace EngineDecay
             }
         }
 
-        void UpdateReliabilityData()
+        void UpdateReliabilityProgress()
         {
             if (!procPart)
             {
