@@ -672,6 +672,18 @@ namespace EngineDecay
                     symmetryReplaceCost = -1;
                 }
 
+                if (topBaseRatedTime != -1 && PayToPlaySettings.TopFailureWarningDeviationRatioPercent * (float)Math.Pow(9 - r, 2) <= 50)
+                {
+                    Events["ToggleAutoShutdownOnWarning"].guiActiveEditor = true;
+                    Events["ToggleAutoShutdownOnWarning"].guiActive = true;
+                    Events["ToggleAutoShutdownOnWarning"].guiName = "Autoshutdown on Warning: " + autoShutdownOnWarning;
+                }
+                else
+                {
+                    Events["ToggleAutoShutdownOnWarning"].guiActiveEditor = false;
+                    Events["ToggleAutoShutdownOnWarning"].guiActive = false;
+                }
+
                 UpdateIndicators();
             }
             else
@@ -1245,17 +1257,10 @@ namespace EngineDecay
                     {
                         warnAtBurnTime = float.PositiveInfinity;                // bad luck
                     }
-
-                    Events["ToggleAutoShutdownOnWarning"].guiActiveEditor = true;
-                    Events["ToggleAutoShutdownOnWarning"].guiActive = true;
-                    Events["ToggleAutoShutdownOnWarning"].guiName = "Autoshutdown on Warning: " + autoShutdownOnWarning;
                 }
                 else
                 {
                     warnAtBurnTime = float.PositiveInfinity;                    // warnings are not available for this engine
-
-                    Events["ToggleAutoShutdownOnWarning"].guiActiveEditor = false;
-                    Events["ToggleAutoShutdownOnWarning"].guiActive = false;
                 }
             }
         }
