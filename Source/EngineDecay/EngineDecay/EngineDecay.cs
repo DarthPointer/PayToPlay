@@ -194,7 +194,7 @@ namespace EngineDecay
                 }
                 else
                 {
-                    UnityEngine.Debug.Log("EngineDecay found a counterpart without EngineDecay, it is really WEIRD!");
+                   Lib.LogError("EngineDecay found a counterpart without EngineDecay, it is really WEIRD!");
                 }
             }
 
@@ -1266,13 +1266,22 @@ namespace EngineDecay
         public void ProcUpdateDiameter(BaseField diameter, object obj)
         {
             procSRBDiameter = (float)diameter.GetValue(procSRBCylinder);
-            UpdateModelState(obj != null);
 
             if (obj != null)
             {
+                UpdateModelState();
+
                 foreach (Part i in part.symmetryCounterparts)
                 {
-                    i.FindModuleImplementing<EngineDecay>()?.ProcUpdateDiameter(diameter, obj);
+                    if (i.FindModuleImplementing<EngineDecay>() != null)
+                    {
+                        i.FindModuleImplementing<EngineDecay>().procSRBDiameter = procSRBDiameter;
+                        i.FindModuleImplementing<EngineDecay>().UpdateModelState();
+                    }
+                    else
+                    {
+                        Lib.LogError("EngineDecay found a counterpart without EngineDecay, it is really WEIRD!");
+                    }
                 }
             }
         }
@@ -1280,13 +1289,22 @@ namespace EngineDecay
         public void ProcUpdateThrust(BaseField thrust, object obj)
         {
             procSRBThrust = (float)thrust.GetValue(procSRB);
-            UpdateModelState(obj != null);
 
             if (obj != null)
             {
+                UpdateModelState();
+
                 foreach (Part i in part.symmetryCounterparts)
                 {
-                    i.FindModuleImplementing<EngineDecay>()?.ProcUpdateThrust(thrust, obj);
+                    if (i.FindModuleImplementing<EngineDecay>() != null)
+                    {
+                        i.FindModuleImplementing<EngineDecay>().procSRBThrust = procSRBThrust;
+                        i.FindModuleImplementing<EngineDecay>().UpdateModelState();
+                    }
+                    else
+                    {
+                        Lib.LogError("EngineDecay found a counterpart without EngineDecay, it is really WEIRD!");
+                    }
                 }
             }
         }
@@ -1294,25 +1312,30 @@ namespace EngineDecay
         public void ProcUpdateBellName(BaseField bellName, object obj)
         {
             procSRBBellName = (string)bellName.GetValue(procSRB);
-            UpdateModelState(obj != null);
 
             if (obj != null)
             {
+                UpdateModelState();
+
                 foreach (Part i in part.symmetryCounterparts)
                 {
-                    i.FindModuleImplementing<EngineDecay>()?.ProcUpdateBellName(bellName, obj);
+                    if (i.FindModuleImplementing<EngineDecay>() != null)
+                    {
+                        i.FindModuleImplementing<EngineDecay>().procSRBBellName = procSRBBellName;
+                        i.FindModuleImplementing<EngineDecay>().UpdateModelState();
+                    }
+                    else
+                    {
+                        Lib.LogError("EngineDecay found a counterpart without EngineDecay, it is really WEIRD!");
+                    }
                 }
             }
         }
 
-        void UpdateModelState(bool hardReset)
+        void UpdateModelState()
         {
-            if (hardReset)
-            {
-                knownPartCost = -1;
-
-                ReplaceEvent();
-            }
+            knownPartCost = -1;
+            ReplaceEvent();
         }
 
         #endregion
