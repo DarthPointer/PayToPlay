@@ -500,6 +500,18 @@ namespace EngineDecay
             ignitionsIndicator = string.Format("{0} / {1}", ignitionsLeft, setIgnitions);
 
             holdIndicatorsTill = Time.time + 0.5f;
+
+            if (topBaseRatedTime != -1 && PayToPlaySettings.TopFailureWarningDeviationRatioPercent * (float)Math.Pow(9 - r, 2) <= 50 && PayToPlaySettings.RandomFailureWarningEnable)
+            {
+                Events["ToggleAutoShutdownOnWarning"].guiActiveEditor = true;
+                Events["ToggleAutoShutdownOnWarning"].guiActive = true;
+                Events["ToggleAutoShutdownOnWarning"].guiName = "Autoshutdown on Warning: " + autoShutdownOnWarning;
+            }
+            else
+            {
+                Events["ToggleAutoShutdownOnWarning"].guiActiveEditor = false;
+                Events["ToggleAutoShutdownOnWarning"].guiActive = false;
+            }
         }
 
         #endregion
@@ -598,17 +610,8 @@ namespace EngineDecay
                     Fields["ignitionsIndicator"].guiActive = false;
                 }
 
-                if (PayToPlaySettings.RandomFailureWarningEnable)
+                if (!PayToPlaySettings.RandomFailureWarningEnable)
                 {
-                    Events["ToggleAutoShutdownOnWarning"].guiActiveEditor = true;
-                    Events["ToggleAutoShutdownOnWarning"].guiActive = true;
-                    Events["ToggleAutoShutdownOnWarning"].guiName = "Autoshutdown on Warning: " + autoShutdownOnWarning;
-                }
-                else
-                {
-                    Events["ToggleAutoShutdownOnWarning"].guiActiveEditor = false;
-                    Events["ToggleAutoShutdownOnWarning"].guiActive = false;
-
                     autoShutdownOnWarning = false;
                 }
 
@@ -670,18 +673,6 @@ namespace EngineDecay
 
                     symmetryMaintenanceCost = -1;
                     symmetryReplaceCost = -1;
-                }
-
-                if (topBaseRatedTime != -1 && PayToPlaySettings.TopFailureWarningDeviationRatioPercent * (float)Math.Pow(9 - r, 2) <= 50)
-                {
-                    Events["ToggleAutoShutdownOnWarning"].guiActiveEditor = true;
-                    Events["ToggleAutoShutdownOnWarning"].guiActive = true;
-                    Events["ToggleAutoShutdownOnWarning"].guiName = "Autoshutdown on Warning: " + autoShutdownOnWarning;
-                }
-                else
-                {
-                    Events["ToggleAutoShutdownOnWarning"].guiActiveEditor = false;
-                    Events["ToggleAutoShutdownOnWarning"].guiActive = false;
                 }
 
                 UpdateIndicators();
