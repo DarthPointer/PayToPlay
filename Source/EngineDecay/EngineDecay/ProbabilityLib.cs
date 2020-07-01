@@ -20,7 +20,7 @@ namespace EngineDecay
             return (float)(Math.Pow(Math.Tan(UnityEngine.Random.Range(0f, 1f) * Math.PI/2f), 1f/r) * Math.Pow(10f, 1f - 3f/r) / k);
         }
 
-        public static float ATangentCumulativePercentArg(float r, float t1)                                 //tells t(Fr = 0.01) if t(F8 = 0.01) = t1
+        public static float ATangentCumulativePercentArg(float r, float t1)                                 //tells t(Fr = 0.01) assuming t(F8 = 0.01) = t1
         {
             float k = (float)(Math.Pow(Math.Tan(0.005 * Math.PI), 1f / 8f) * Math.Pow(10f, 5f / 8f) / t1);
 

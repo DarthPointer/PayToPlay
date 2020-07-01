@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace EngineDecay
 {
@@ -29,6 +30,25 @@ namespace EngineDecay
             {
                 throw new Exception("EngineDecay.Lib.Format: bad time format code");
             }
+        }
+
+        public static void Log(string message)
+        {
+#if DEBUG
+            Debug.Log("[PayToPlay]: " + message);
+#endif
+        }
+
+        public static void LogWarning(string message)
+        {
+            KSPLog.print("[PayToPlay] has encountered an issue!!!");
+            Debug.LogWarning("[PayToPlay]: " + message);
+        }
+
+        public static void LogError(string message)
+        {
+            KSPLog.print("PayToPlay has encountered an error!!!");
+            Debug.LogError("[PayToPlay]: " + message);
         }
     }
 }

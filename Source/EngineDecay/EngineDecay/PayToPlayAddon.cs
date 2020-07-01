@@ -24,6 +24,7 @@ namespace EngineDecay
         public void Start()
         {
             GameEvents.onVesselRecovered.Add(ReadRecoveredVessel);
+
             fetch = this;
 
             reliabilityStatuses = new Dictionary<string, List<string>>();
@@ -88,6 +89,7 @@ namespace EngineDecay
         public void OnDestroy()
         {
             GameEvents.onVesselRecovered.Remove(ReadRecoveredVessel);
+
             fetch = null;
         }
 

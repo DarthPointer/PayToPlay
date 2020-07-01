@@ -134,7 +134,7 @@ namespace EngineDecay
         bool newBorn = true;
 
         [KSPField(isPersistant = true, guiActive = false)]
-        public bool isKCTRecovered = false;
+        bool isKCTBuilt = false;
 
         [KSPField(isPersistant = true, guiActive = false)]
         float failAtBurnTime = -1;
@@ -526,6 +526,8 @@ namespace EngineDecay
 
                 modesNumber = decayingEngines.Count();
 
+                Lib.Log($"EngineDecay Module has found {modesNumber} engine modules");
+
                 if (decayRates.Length != 0)
                 {
                     foreach (string i in decayRates.Split(';'))
@@ -560,6 +562,20 @@ namespace EngineDecay
 
                 //if engine multimode data is consistent, we will access features for mulit-mode engines
                 usingMultiModeLogic = decayRatesList.Count() == modesNumber && ignitionsUsageList.Count() == modesNumber && ignitionsOnSwitchList.Count() == modesNumber * modesNumber;
+
+                if (modesNumber == 0)
+                {
+                    Lib.LogWarning($"EngineDecay could not find engine modules at part {part.name}");           // Need full stop flag
+                    return;
+                }
+                else if (modesNumber != 1 && !usingMultiModeLogic)
+                {
+                    Lib.LogWarning($"EngineDecay found multiple engine modules at {part.name} but is not properly configured for {modesNumber} modes, fallback to singlemode logic");
+                }
+                else
+                {
+                    Lib.Log($"EngineDecay found {modesNumber} modes at {part.name}");
+                }
 
                 if (topBaseRatedTime == -1)
                 {
@@ -610,7 +626,7 @@ namespace EngineDecay
                         if ((procSRBCylinder == null) || (procSRB == null))
                         {
                             print("An EngineDecay module marked as a one for ProceduralParts SRB could not find relevant modules. Switched to non-procedural logic");
-                            Debug.LogError("An EngineDecay module marked as a one for ProceduralParts SRB could not find relevant modules. Switched to non-procedural logic");
+                            Lib.Log("An EngineDecay module marked as a one for ProceduralParts SRB could not find relevant modules. Switched to non-procedural logic");
                             procPart = false;
                         }
                         else
@@ -625,12 +641,17 @@ namespace EngineDecay
                         }
                     }
 
-                    if (!isKCTRecovered)
+                    UpdateReplaceCost();
+
+                    if (!isKCTBuilt || replaceCost == 0 || newBorn)
                     {
                         UpdateReliabilityProgress();
                     }
 
+                    isKCTBuilt = false;                                                 // If we don't do this, this flag will be passed to saved the saved ship
                     failAtBurnTime = -1;
+
+                    GameEvents.onEditorShipModified.Fire(EditorLogic.fetch.ship);
                 }
                 else
                 {
@@ -652,7 +673,6 @@ namespace EngineDecay
                 }
 
                 UpdateIndicators();
-                GameEvents.onEditorShipModified.Fire(EditorLogic.fetch.ship);
             }
             else
             {
@@ -1247,18 +1267,42 @@ namespace EngineDecay
         {
             procSRBDiameter = (float)diameter.GetValue(procSRBCylinder);
             UpdateModelState(obj != null);
+
+            if (obj != null)
+            {
+                foreach (Part i in part.symmetryCounterparts)
+                {
+                    i.FindModuleImplementing<EngineDecay>()?.ProcUpdateDiameter(diameter, obj);
+                }
+            }
         }
 
         public void ProcUpdateThrust(BaseField thrust, object obj)
         {
             procSRBThrust = (float)thrust.GetValue(procSRB);
             UpdateModelState(obj != null);
+
+            if (obj != null)
+            {
+                foreach (Part i in part.symmetryCounterparts)
+                {
+                    i.FindModuleImplementing<EngineDecay>()?.ProcUpdateThrust(thrust, obj);
+                }
+            }
         }
 
         public void ProcUpdateBellName(BaseField bellName, object obj)
         {
             procSRBBellName = (string)bellName.GetValue(procSRB);
             UpdateModelState(obj != null);
+
+            if (obj != null)
+            {
+                foreach (Part i in part.symmetryCounterparts)
+                {
+                    i.FindModuleImplementing<EngineDecay>()?.ProcUpdateBellName(bellName, obj);
+                }
+            }
         }
 
         void UpdateModelState(bool hardReset)
