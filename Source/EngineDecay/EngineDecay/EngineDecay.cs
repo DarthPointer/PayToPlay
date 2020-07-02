@@ -628,12 +628,13 @@ namespace EngineDecay
 
                         if ((procSRBCylinder == null) || (procSRB == null))
                         {
-                            print("An EngineDecay module marked as a one for ProceduralParts SRB could not find relevant modules. Switched to non-procedural logic");
-                            Lib.Log("An EngineDecay module marked as a one for ProceduralParts SRB could not find relevant modules. Switched to non-procedural logic");
+                            Lib.LogWarning("An EngineDecay module marked as a one for ProceduralParts SRB could not find relevant modules. Switched to non-procedural logic");
                             procPart = false;
                         }
                         else
                         {
+                            Lib.Log($"EngineDecay started initialization for procedural SRB at part {part.name}");
+
                             procSRBCylinder.Fields["diameter"].uiControlEditor.onFieldChanged += ProcUpdateDiameter;
                             procSRB.Fields["thrust"].uiControlEditor.onFieldChanged += ProcUpdateThrust;
                             procSRB.Fields["selectedBellName"].uiControlEditor.onFieldChanged += ProcUpdateBellName;
@@ -641,6 +642,8 @@ namespace EngineDecay
                             ProcUpdateDiameter(procSRBCylinder.Fields["diameter"], null);
                             ProcUpdateBellName(procSRB.Fields["selectedBellName"], null);
                             ProcUpdateThrust(procSRB.Fields["thrust"], null);
+
+                            Lib.Log($"EngineDecay initialization success for procedural SRB at part {part.name}");
                         }
                     }
 
@@ -649,6 +652,8 @@ namespace EngineDecay
                     if (!isKCTBuilt || replaceCost == 0 || newBorn)
                     {
                         UpdateReliabilityProgress();
+
+                        Lib.Log($"EngineDecay has automatically updated to last reliability generation at part {part.name}");
                     }
 
                     isKCTBuilt = false;                                                 // If we don't do this, this flag will be passed to saved the saved ship
@@ -674,6 +679,8 @@ namespace EngineDecay
                     symmetryMaintenanceCost = -1;
                     symmetryReplaceCost = -1;
                 }
+
+                Lib.Log($"EngineDecay at {part.name} is finishing OnLoad, about to update indicators");
 
                 UpdateIndicators();
             }
