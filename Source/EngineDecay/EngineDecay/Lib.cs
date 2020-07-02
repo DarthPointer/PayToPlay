@@ -35,7 +35,6 @@ namespace EngineDecay
         public static void Log(string message)
         {
 #if DEBUG
-            KSPLog.print(message);
             Debug.Log("[P2P] " + message);
 #endif
         }
