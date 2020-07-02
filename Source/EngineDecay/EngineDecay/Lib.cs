@@ -34,9 +34,10 @@ namespace EngineDecay
 
         public static void Log(string message)
         {
-#if DEBUG
-            Debug.Log("[P2P] " + message);
-#endif
+            if (PayToPlaySettingsFeatures.ExtraDebugLogging)
+            {
+                Debug.Log("[P2P] " + message);
+            }
         }
 
         public static void LogWarning(string message)
