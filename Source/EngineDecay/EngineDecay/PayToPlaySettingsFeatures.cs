@@ -28,6 +28,9 @@ namespace EngineDecay
         [GameParameters.CustomFloatParameterUI("Enable random warnings before failures", newGameOnly = false, toolTip = "There is a chance that you will get a warning before failure. This chance and failure porximity depend on reliability progress")]
         public bool randomFailureWarningEnable = false;
 
+        [GameParameters.CustomFloatParameterUI("Use funny strings instead of \"failed\" status", newGameOnly = false)]
+        public bool jokesInsteadOfFailedStatus = false;
+
         [GameParameters.CustomFloatParameterUI("Extra debug logging", newGameOnly = false)]
         public bool extraDebugLogging = false;
 
@@ -108,6 +111,18 @@ namespace EngineDecay
             set
             {
                 HighLogic.CurrentGame.Parameters.CustomParams<PayToPlaySettingsFeatures>().randomFailureWarningEnable = value;
+            }
+        }
+
+        public static bool JokesInsteadOfFailedStatus
+        {
+            get
+            {
+                return HighLogic.CurrentGame.Parameters.CustomParams<PayToPlaySettingsFeatures>().jokesInsteadOfFailedStatus;
+            }
+            set
+            {
+                HighLogic.CurrentGame.Parameters.CustomParams<PayToPlaySettingsFeatures>().jokesInsteadOfFailedStatus = value;
             }
         }
 

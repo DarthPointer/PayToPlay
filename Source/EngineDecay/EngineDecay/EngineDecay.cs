@@ -1096,7 +1096,14 @@ namespace EngineDecay
 
             CutoffOnFailure();
 
-            reliabilityStatus = "failed";
+            if (PayToPlaySettingsFeatures.JokesInsteadOfFailedStatus)
+            {
+                reliabilityStatus = PayToPlayAddon.RandomStatus("failed");
+            }
+            else
+            {
+                reliabilityStatus = "failed";
+            }
 
             nominal = false;
         }
