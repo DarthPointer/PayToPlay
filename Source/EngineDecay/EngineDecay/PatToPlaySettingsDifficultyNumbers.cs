@@ -25,12 +25,6 @@ namespace EngineDecay
         [GameParameters.CustomFloatParameterUI("Part destruction on failure (%) at max reliability progress", newGameOnly = false, displayFormat = "F1", minValue = 1, maxValue = 10, toolTip = "Does NOT affect wasted ignitions")]
         public float destructionOnFailurePercent = 5;
 
-        [GameParameters.CustomFloatParameterUI("Procedural SRB diameter model margin (%)", newGameOnly = false, displayFormat = "F1", minValue = 0.1f, maxValue = 10)]
-        public float procSRBDiameterModelMarginPercent = 4;
-
-        [GameParameters.CustomFloatParameterUI("Procedural SRB thrust model margin (%)", newGameOnly = false, displayFormat = "F1", minValue = 0.1f, maxValue = 20)]
-        public float procSRBThrustModelMarginPercent = 10;
-
         [GameParameters.CustomFloatParameterUI("Degradation on use multiplier", newGameOnly = false, displayFormat = "F1", minValue = 0.1f, maxValue = 5, toolTip = "The more it is the faster engines wear out and should be replaced with new ones")]
         public float usageExperienceToDegradationMul = 1;
 
@@ -66,32 +60,6 @@ namespace EngineDecay
             set
             {
                 HighLogic.CurrentGame.Parameters.CustomParams<PatToPlaySettingsDifficultyNumbers>().randomStartingReliabilityBonusLimit = value;
-            }
-        }
-
-        public static float ProcSRBDiameterModelMarginPercent
-        {
-            get
-            {
-                return HighLogic.CurrentGame.Parameters.CustomParams<PatToPlaySettingsDifficultyNumbers>().procSRBDiameterModelMarginPercent;
-            }
-
-            set
-            {
-                HighLogic.CurrentGame.Parameters.CustomParams<PatToPlaySettingsDifficultyNumbers>().procSRBDiameterModelMarginPercent = value;
-            }
-        }
-
-        public static float ProcSRBThrustModelMarginPercent
-        {
-            get
-            {
-                return HighLogic.CurrentGame.Parameters.CustomParams<PatToPlaySettingsDifficultyNumbers>().procSRBThrustModelMarginPercent;
-            }
-
-            set
-            {
-                HighLogic.CurrentGame.Parameters.CustomParams<PatToPlaySettingsDifficultyNumbers>().procSRBThrustModelMarginPercent = value;
             }
         }
 
