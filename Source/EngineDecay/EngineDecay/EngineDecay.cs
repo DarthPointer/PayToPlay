@@ -525,7 +525,7 @@ namespace EngineDecay
 
             holdIndicatorsTill = Time.time + 0.5f;
 
-            if (topBaseRatedTime != -1 && PatToPlaySettingsDifficultyNumbers.TopFailureWarningDeviationRatioPercent * (float)Math.Pow(9 - r, 2) <= 50 && PayToPlaySettingsFeatures.RandomFailureWarningEnable)
+            if (topBaseRatedTime != -1 && PayToPlaySettingsDifficultyNumbers.TopFailureWarningDeviationRatioPercent * (float)Math.Pow(9 - r, 2) <= 50 && PayToPlaySettingsFeatures.RandomFailureWarningEnable)
             {
                 Events["ToggleAutoShutdownOnWarning"].guiActiveEditor = true;
                 Events["ToggleAutoShutdownOnWarning"].guiActive = true;
@@ -643,7 +643,7 @@ namespace EngineDecay
                 {
                     inEditor = true;
 
-                    r -= usageExperienceCoeff * PatToPlaySettingsDifficultyNumbers.UsageExperienceToDegradationMul;
+                    r -= usageExperienceCoeff * PayToPlaySettingsDifficultyNumbers.UsageExperienceToDegradationMul;
 
                     if (procPart)
                     {
@@ -1035,7 +1035,7 @@ namespace EngineDecay
                     ignitionsLeft--;
 
                     float luck = UnityEngine.Random.Range(0f, 1f);
-                    if (luck < PatToPlaySettingsDifficultyNumbers.FailureOnIgnitionPercent / 100 * Math.Pow(9 - r, 3.2))         // 8.01 stands for 8 is max r, 8.01 - 8 = 1/100 thus settings are relevant for max-reliability parts
+                    if (luck < PayToPlaySettingsDifficultyNumbers.FailureOnIgnitionPercent / 100 * Math.Pow(9 - r, 3.2))         // 8.01 stands for 8 is max r, 8.01 - 8 = 1/100 thus settings are relevant for max-reliability parts
                     {
                         Failure();
 
@@ -1048,7 +1048,7 @@ namespace EngineDecay
                             usageExperienceCoeff = 0.5f;
                         }
                     }
-                    else if(luck < (PatToPlaySettingsDifficultyNumbers.FailureOnIgnitionPercent + PatToPlaySettingsDifficultyNumbers.IgnitionFailurePercent) / 100 * Math.Pow(9 - r, 3.2))
+                    else if(luck < (PayToPlaySettingsDifficultyNumbers.FailureOnIgnitionPercent + PayToPlaySettingsDifficultyNumbers.IgnitionFailurePercent) / 100 * Math.Pow(9 - r, 3.2))
                     {
                         FlightLogger.fetch?.LogEvent(string.Format("Bad ignition of {0}, shutdown performed to prevent consequences", part.name));
                         CutoffOnFailure();
@@ -1083,7 +1083,7 @@ namespace EngineDecay
 
         void Failure()
         {
-            if(UnityEngine.Random.Range(0f, 1f) < PatToPlaySettingsDifficultyNumbers.DestructionOnFailurePercent/100 * (9 - r))
+            if(UnityEngine.Random.Range(0f, 1f) < PayToPlaySettingsDifficultyNumbers.DestructionOnFailurePercent/100 * (9 - r))
             {
                 BadaBoom();
             }
@@ -1240,10 +1240,10 @@ namespace EngineDecay
                 {
                     if (PayToPlaySettingsFeatures.ReliabilityProgress)
                     {
-                        r = PatToPlaySettingsDifficultyNumbers.StartingReliability;
+                        r = PayToPlaySettingsDifficultyNumbers.StartingReliability;
                         if (PayToPlaySettingsFeatures.RandomStartingReliability)
                         {
-                            r += UnityEngine.Random.Range(0f, 1f) * PatToPlaySettingsDifficultyNumbers.RandomStartingReliabilityBonusLimit;
+                            r += UnityEngine.Random.Range(0f, 1f) * PayToPlaySettingsDifficultyNumbers.RandomStartingReliabilityBonusLimit;
                         }
 
                         r = Math.Min(r, 8);
@@ -1293,10 +1293,10 @@ namespace EngineDecay
 
             if (PayToPlaySettingsFeatures.RandomFailureWarningEnable)
             {
-                float failureWarningDevationRatioPercent = PatToPlaySettingsDifficultyNumbers.TopFailureWarningDeviationRatioPercent * (float)Math.Pow(9 - r, 2);
+                float failureWarningDevationRatioPercent = PayToPlaySettingsDifficultyNumbers.TopFailureWarningDeviationRatioPercent * (float)Math.Pow(9 - r, 2);
                 if (failureWarningDevationRatioPercent <= 50)
                 {
-                    if (UnityEngine.Random.value < PatToPlaySettingsDifficultyNumbers.TopFailureWarningChancePercent / (float)Math.Pow(9 - r, 2))
+                    if (UnityEngine.Random.value < PayToPlaySettingsDifficultyNumbers.TopFailureWarningChancePercent / (float)Math.Pow(9 - r, 2))
                     {
                         warnAtBurnTime = failAtBurnTime * (1 - UnityEngine.Random.value * failureWarningDevationRatioPercent / 100);
                     }

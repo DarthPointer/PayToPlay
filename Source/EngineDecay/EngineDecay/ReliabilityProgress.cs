@@ -35,7 +35,7 @@ namespace EngineDecay
                 {
                     r = float.Parse(fields[0]);
 
-                    if (r != PatToPlaySettingsDifficultyNumbers.StartingReliability)
+                    if (r != PayToPlaySettingsDifficultyNumbers.StartingReliability)
                     {
                         reliabilityIsVisible = true;
                     }
@@ -153,11 +153,11 @@ namespace EngineDecay
                 {
                     Lib.Log($"Reliability progress record for {partName} not found, creating it");
 
-                    float r = PatToPlaySettingsDifficultyNumbers.StartingReliability;
+                    float r = PayToPlaySettingsDifficultyNumbers.StartingReliability;
                     if (PayToPlaySettingsFeatures.RandomStartingReliability)
                     {
                         Lib.Log($"Applying random starting reliability bonus for {partName}");
-                        r += UnityEngine.Random.Range(0f, 1f) * PatToPlaySettingsDifficultyNumbers.RandomStartingReliabilityBonusLimit;
+                        r += UnityEngine.Random.Range(0f, 1f) * PayToPlaySettingsDifficultyNumbers.RandomStartingReliabilityBonusLimit;
                     }
                     r = Math.Min(r, 8);
 
@@ -175,7 +175,7 @@ namespace EngineDecay
         {
             if(!records.ContainsKey(partName))
             {
-                records[partName] = new ReliabilityProgressData(PatToPlaySettingsDifficultyNumbers.StartingReliability, !PayToPlaySettingsFeatures.HideStartingReliability);
+                records[partName] = new ReliabilityProgressData(PayToPlaySettingsDifficultyNumbers.StartingReliability, !PayToPlaySettingsFeatures.HideStartingReliability);
             }
 
             float oldExp = records[partName].r;
@@ -341,11 +341,11 @@ namespace EngineDecay
 
             public bool Fits (float _diameter, float _thrust, string _bellName)
             {
-                float maxDiameter = diameter * (1 + PatToPlaySettingsDifficultyNumbers.ProcSRBDiameterModelMarginPercent/100);
-                float minDiameter = diameter * (1 - PatToPlaySettingsDifficultyNumbers.ProcSRBDiameterModelMarginPercent/100);
+                float maxDiameter = diameter * (1 + PayToPlaySettingsDifficultyNumbers.ProcSRBDiameterModelMarginPercent/100);
+                float minDiameter = diameter * (1 - PayToPlaySettingsDifficultyNumbers.ProcSRBDiameterModelMarginPercent/100);
 
-                float maxThrust = thrust * (1 + PatToPlaySettingsDifficultyNumbers.ProcSRBThrustModelMarginPercent / 100);
-                float minThrust = thrust * (1 - PatToPlaySettingsDifficultyNumbers.ProcSRBThrustModelMarginPercent / 100);
+                float maxThrust = thrust * (1 + PayToPlaySettingsDifficultyNumbers.ProcSRBThrustModelMarginPercent / 100);
+                float minThrust = thrust * (1 - PayToPlaySettingsDifficultyNumbers.ProcSRBThrustModelMarginPercent / 100);
 
                 return ((maxDiameter >= _diameter) && (minDiameter <= _diameter) && (maxThrust >= _thrust) && (minThrust <= _thrust) && (bellName == _bellName));
             }
