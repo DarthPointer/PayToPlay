@@ -197,7 +197,7 @@ namespace EngineDecay
                 }
                 else
                 {
-                   Lib.LogError("EngineDecay found a counterpart without EngineDecay, it is really WEIRD!");
+                   Lib.LogWarning("EngineDecay found a counterpart without EngineDecay, it is really WEIRD!");
                 }
             }
 
@@ -262,7 +262,7 @@ namespace EngineDecay
                 }
                 else
                 {
-                    UnityEngine.Debug.Log("EngineDecay found a counterpart without EngineDecay, it is really WEIRD!");
+                    Lib.LogWarning("EngineDecay found a counterpart without EngineDecay, it is really WEIRD!");
                 }
             }
 
@@ -348,7 +348,7 @@ namespace EngineDecay
                 }
                 else
                 {
-                    UnityEngine.Debug.Log("EngineDecay found a counterpart without EngineDecay, it is really WEIRD!");
+                    Lib.LogWarning("EngineDecay found a counterpart without EngineDecay, it is really WEIRD!");
                 }
             }
 
@@ -394,7 +394,7 @@ namespace EngineDecay
                 }
                 else
                 {
-                    Debug.LogError("EngineDecay found a counterpart without EngineDecay, it is really WEIRD!");
+                    Debug.LogWarning("EngineDecay found a counterpart without EngineDecay, it is really WEIRD!");
                 }
             }
 
@@ -472,6 +472,19 @@ namespace EngineDecay
         {
             ReliabilityProgress.fetch.CreateModel(part.name, r, procSRBDiameter, procSRBThrust, procSRBBellName);
             Events["SetAsANewProcSRBModel"].guiActiveEditor = false;
+
+            foreach (Part i in part.symmetryCounterparts)
+            {
+                if (i.FindModuleImplementing<EngineDecay>() != null)
+                {
+                    i.FindModuleImplementing<EngineDecay>().Events["SetAsANewProcSRBModel"].guiActiveEditor = false;
+                    i.FindModuleImplementing<EngineDecay>().r = r;
+                }
+                else
+                {
+                    Lib.LogWarning("EngineDecay found a counterpart without EngineDecay, it is really WEIRD!");
+                }
+            }
         }
 
         #endregion
@@ -751,7 +764,7 @@ namespace EngineDecay
                                 }
                                 else
                                 {
-                                    Debug.LogError("EngineDecay found a counterpart without EngineDecay, it is really WEIRD!");
+                                    Debug.LogWarning("EngineDecay found a counterpart without EngineDecay, it is really WEIRD!");
                                 }
                             }
 
@@ -775,7 +788,7 @@ namespace EngineDecay
                                 }
                                 else
                                 {
-                                    Debug.LogError("EngineDecay found a counterpart without EngineDecay, it is really WEIRD!");
+                                    Debug.LogWarning("EngineDecay found a counterpart without EngineDecay, it is really WEIRD!");
                                 }
                             }
                         }
@@ -1319,7 +1332,7 @@ namespace EngineDecay
                     }
                     else
                     {
-                        Lib.LogError("EngineDecay found a counterpart without EngineDecay, it is really WEIRD!");
+                        Lib.LogWarning("EngineDecay found a counterpart without EngineDecay, it is really WEIRD!");
                     }
                 }
             }
@@ -1342,7 +1355,7 @@ namespace EngineDecay
                     }
                     else
                     {
-                        Lib.LogError("EngineDecay found a counterpart without EngineDecay, it is really WEIRD!");
+                        Lib.LogWarning("EngineDecay found a counterpart without EngineDecay, it is really WEIRD!");
                     }
                 }
             }
@@ -1365,7 +1378,7 @@ namespace EngineDecay
                     }
                     else
                     {
-                        Lib.LogError("EngineDecay found a counterpart without EngineDecay, it is really WEIRD!");
+                        Lib.LogWarning("EngineDecay found a counterpart without EngineDecay, it is really WEIRD!");
                     }
                 }
             }
