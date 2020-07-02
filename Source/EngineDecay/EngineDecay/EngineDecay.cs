@@ -1098,7 +1098,7 @@ namespace EngineDecay
 
             if (PayToPlaySettingsFeatures.JokesInsteadOfFailedStatus)
             {
-                reliabilityStatus = PayToPlayAddon.RandomStatus("failed");
+                reliabilityStatus = PayToPlayAddon.RandomStatus("Failed");
             }
             else
             {
