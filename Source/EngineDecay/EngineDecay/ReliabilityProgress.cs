@@ -6,19 +6,86 @@ using System.Collections.Generic;
 
 namespace EngineDecay
 {
+    public class ReliabilityProgressData
+    {
+        public float r;
+        public bool reliabilityIsVisible;
+
+        public ReliabilityProgressData(float _r, bool _reliabilityIsVisible)
+        {
+            r = _r;
+            reliabilityIsVisible = _reliabilityIsVisible;
+        }
+
+        public ReliabilityProgressData(string s)
+        {
+            string[] fields = s.Split(';');
+            r = 2;
+            reliabilityIsVisible = false;
+
+            if (fields.Length == 0)
+            {
+                Lib.LogWarning("For some reason reliability progress record was empty");
+            }
+            else if (fields.Length == 1)
+            {
+                Lib.LogWarning("Reliability progress record was missing visibility flag, ignore this if you use a save from P2P 1.4.3 or below");
+
+                try
+                {
+                    r = float.Parse(fields[0]);
+                }
+                catch (FormatException)
+                {
+                    Lib.LogWarning("Reliability progress record contains misfomatted exponent (float)");
+                }
+            }
+            else
+            {
+                try
+                {
+                    r = float.Parse(fields[0]);
+                }
+                catch (FormatException)
+                {
+                    Lib.LogWarning("Reliability progress record contains misfomatted exponent (needs float)");
+                }
+
+                try
+                {
+                    reliabilityIsVisible = bool.Parse(fields[1]);
+                }
+                catch (FormatException)
+                {
+                    Lib.LogWarning("Reliability progress record contains misfomatted reliability visibility flag (needs bool)");
+                }
+
+                if (fields.Length > 2)
+                {
+                    Lib.LogWarning("Reliability progress record contains more than two fields splitted with ';'");
+                }
+            }
+        }
+
+        public override string ToString()
+        {
+            return $"{r}; {reliabilityIsVisible}";
+        }
+    }
+
     [KSPScenario(ScenarioCreationOptions.AddToAllGames, new[] { GameScenes.FLIGHT, GameScenes.EDITOR, GameScenes.TRACKSTATION, GameScenes.SPACECENTER, GameScenes.LOADING, GameScenes.LOADINGBUFFER })]
     public class ReliabilityProgress : ScenarioModule
     {
         public static ReliabilityProgress fetch;
 
-        Dictionary<string, float> exponents;
+        Dictionary<string, ReliabilityProgressData> records;
         Dictionary<string, ProcSRBProgress> procSRBs;
 
         #region Constructors
 
         public ReliabilityProgress()
         {
-            exponents = new Dictionary<string, float>();
+            records = new Dictionary<string, ReliabilityProgressData>();
             procSRBs = new Dictionary<string, ProcSRBProgress>();
 
             fetch = this;
@@ -32,7 +99,7 @@ namespace EngineDecay
         {
             foreach (ConfigNode.Value val in node.GetNodes("Engines")[0].values)
             {
-                exponents[val.name] = float.Parse(val.value);
+                records[val.name] = new ReliabilityProgressData(val.value);
             }
 
 
@@ -47,7 +114,7 @@ namespace EngineDecay
 
         public override void OnSave(ConfigNode node)
         {
-            Dictionary<string, float>.Enumerator i = exponents.GetEnumerator();
+            Dictionary<string, ReliabilityProgressData>.Enumerator i = records.GetEnumerator();
             ConfigNode engines = node.AddNode("Engines");
             while (i.MoveNext())
             {
@@ -71,50 +138,51 @@ namespace EngineDecay
 
         #region Logic
 
-        public float GetExponent(string partName)
+        public ReliabilityProgressData GetReliabilityData(string partName)
         {
             if (PayToPlaySettingsFeatures.ReliabilityProgress)
             {
-                if (!exponents.ContainsKey(partName))
+                if (!records.ContainsKey(partName))
                 {
-                    exponents[partName] = PatToPlaySettingsDifficultyNumbers.StartingReliability;
+                    records[partName] = new ReliabilityProgressData(PatToPlaySettingsDifficultyNumbers.StartingReliability, !PayToPlaySettingsFeatures.HideStartingReliability);
                 }
-                return exponents[partName];
+                return records[partName];
             }
             else
             {
-                return 8;
+                return new ReliabilityProgressData(8, true);
             }
         }
 
         public void Improve(string partName, float coeff, float generationExp)
         {
-            if(!exponents.ContainsKey(partName))
+            if(!records.ContainsKey(partName))
             {
-                exponents[partName] = PatToPlaySettingsDifficultyNumbers.StartingReliability;
+                records[partName] = new ReliabilityProgressData(PatToPlaySettingsDifficultyNumbers.StartingReliability, !PayToPlaySettingsFeatures.HideStartingReliability);
             }
 
-
+            float oldExp = records[partName].r;
             float newExp = generationExp + (9 - generationExp) * coeff;
             if (newExp > 8)
             {
                 newExp = 8;
             }
 
-            if (newExp > exponents[partName])
+            if (newExp > oldExp)
             {
-                exponents[partName] = newExp;
+                records[partName].r = newExp;
+                records[partName].reliabilityIsVisible = true;
             }
         }
 
-        public float CheckProcSRBProgress(string partName, ref float diameter, ref float thrust, ref string bellName)           // -1 if no registered model fits specified stats
+        public ReliabilityProgressData CheckProcSRBProgress(string partName, ref float diameter, ref float thrust, ref string bellName)           // -1 if no registered model fits specified stats
         {                                                                                                                       // It CHANGES procedural data of EngineDecay in order to specify which model it is to prevent possible reliability progress issues
             if (PayToPlaySettingsFeatures.ReliabilityProgress)
             {
                 ProcSRBProgress partProgress;
                 if (procSRBs.TryGetValue(partName, out partProgress))
                 {
-                    Dictionary<ProcSRBData, float>.Enumerator i = partProgress.models.GetEnumerator();
+                    Dictionary<ProcSRBData, ReliabilityProgressData>.Enumerator i = partProgress.models.GetEnumerator();
 
                     while (i.MoveNext())
                     {
@@ -128,16 +196,16 @@ namespace EngineDecay
                         }
                     }
 
-                    return -1;
+                    return new ReliabilityProgressData(-1, !PayToPlaySettingsFeatures.HideStartingReliability);
                 }
                 else
                 {
-                    return -1;
+                    return new ReliabilityProgressData(-1, !PayToPlaySettingsFeatures.HideStartingReliability);
                 }
             }
             else
             {
-                return 8;
+                return new ReliabilityProgressData(8, true);
             }
         }
 
@@ -149,7 +217,7 @@ namespace EngineDecay
                 partProgress = procSRBs[partName] = new ProcSRBProgress();
             }
 
-            partProgress.models[new ProcSRBData(diameter, thrust, bellName)] = PatToPlaySettingsDifficultyNumbers.StartingReliability;
+            partProgress.models[new ProcSRBData(diameter, thrust, bellName)] = new ReliabilityProgressData(PatToPlaySettingsDifficultyNumbers.StartingReliability, !PayToPlaySettingsFeatures.HideStartingReliability);
         }
 
         public void ImproveProcedural(string partName, float diameter, float thrust, string bellName, float coeff, float generationExp)
@@ -169,16 +237,17 @@ namespace EngineDecay
                 }
 
                 ProcSRBData key = new ProcSRBData(diameter, thrust, bellName);
-                if (partProgress.models.TryGetValue(key, out float oldExp))
+                if (partProgress.models.TryGetValue(key, out ReliabilityProgressData oldRecord))
                 {
-                    if (newExp > oldExp)
+                    if (newExp > oldRecord.r)
                     {
-                        partProgress.models[key] = newExp;
+                        partProgress.models[key].r = newExp;
+                        partProgress.models[key].reliabilityIsVisible = true;
                     }
                 }
                 else
                 {
-                    partProgress.models[key] = newExp;
+                    partProgress.models[key] = new ReliabilityProgressData(newExp, true);
                 }
             }
         }
@@ -187,24 +256,24 @@ namespace EngineDecay
 
         class ProcSRBProgress
         {
-            public Dictionary<ProcSRBData, float> models;
+            public Dictionary<ProcSRBData, ReliabilityProgressData> models;
 
             public ProcSRBProgress() 
             {
-                models = new Dictionary<ProcSRBData, float>();
+                models = new Dictionary<ProcSRBData, ReliabilityProgressData>();
             }
             public ProcSRBProgress(ConfigNode node)
             {
-                models = new Dictionary<ProcSRBData, float>();
+                models = new Dictionary<ProcSRBData, ReliabilityProgressData>();
                 foreach (ConfigNode.Value val in node.values)
                 {
-                    models[new ProcSRBData(val.name)] = float.Parse(val.value);
+                    models[new ProcSRBData(val.name)] = new ReliabilityProgressData(val.value);
                 }
             }
 
             public void ToConfigNode(ConfigNode node)
             {
-                Dictionary<ProcSRBData, float>.Enumerator i = models.GetEnumerator();
+                Dictionary<ProcSRBData, ReliabilityProgressData>.Enumerator i = models.GetEnumerator();
 
                 while (i.MoveNext())
                 {

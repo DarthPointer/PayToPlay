@@ -21,6 +21,9 @@ namespace EngineDecay
         float r = 0;
 
         [KSPField(isPersistant = true, guiActive = false)]
+        bool reliabilityIsVisible;
+
+        [KSPField(isPersistant = true, guiActive = false)]
         float currentBaseRatedTime;
 
         [KSPField(isPersistant = true, guiActive = false)]
@@ -496,7 +499,15 @@ namespace EngineDecay
 
         void UpdateIndicators()
         {
-            burnTimeIndicator = string.Format("{0} / {1}", Lib.Format(usedBurnTime, usingTimeFormat), Lib.Format(setBurnTime, usingTimeFormat));
+            if (reliabilityIsVisible)
+            {
+                burnTimeIndicator = string.Format("{0} / {1}", Lib.Format(usedBurnTime, usingTimeFormat), Lib.Format(setBurnTime, usingTimeFormat));
+            }
+            else
+            {
+                burnTimeIndicator = "Need to recover usage experience";
+            }
+
             ignitionsIndicator = string.Format("{0} / {1}", ignitionsLeft, setIgnitions);
 
             holdIndicatorsTill = Time.time + 0.5f;
@@ -1204,15 +1215,19 @@ namespace EngineDecay
         {
             if (!procPart)
             {
-                r = ReliabilityProgress.fetch.GetExponent(part.name);
+                r = ReliabilityProgress.fetch.GetReliabilityData(part.name).r;
+                reliabilityIsVisible = ReliabilityProgress.fetch.GetReliabilityData(part.name).reliabilityIsVisible;
             }
             else
             {
-                r = ReliabilityProgress.fetch.CheckProcSRBProgress(part.name, ref procSRBDiameter, ref procSRBThrust, ref procSRBBellName);
+                r = ReliabilityProgress.fetch.CheckProcSRBProgress(part.name, ref procSRBDiameter, ref procSRBThrust, ref procSRBBellName).r;
+                reliabilityIsVisible = ReliabilityProgress.fetch.CheckProcSRBProgress(part.name, ref procSRBDiameter, ref procSRBThrust, ref procSRBBellName).reliabilityIsVisible;
 
                 if (r == -1)
                 {
                     r = PatToPlaySettingsDifficultyNumbers.StartingReliability;
+                    reliabilityIsVisible = !PayToPlaySettingsFeatures.HideStartingReliability;
+
                     Events["SetAsANewProcSRBModel"].guiActiveEditor = true;
                 }
                 else
