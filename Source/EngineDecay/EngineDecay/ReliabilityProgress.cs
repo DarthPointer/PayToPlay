@@ -171,8 +171,8 @@ namespace EngineDecay
             if (newExp > oldExp)
             {
                 records[partName].r = newExp;
-                records[partName].reliabilityIsVisible = true;
             }
+            records[partName].reliabilityIsVisible = true;
         }
 
         public ReliabilityProgressData CheckProcSRBProgress(string partName, ref float diameter, ref float thrust, ref string bellName)           // -1 if no registered model fits specified stats
@@ -242,8 +242,8 @@ namespace EngineDecay
                     if (newExp > oldRecord.r)
                     {
                         partProgress.models[key].r = newExp;
-                        partProgress.models[key].reliabilityIsVisible = true;
                     }
+                    partProgress.models[key].reliabilityIsVisible = true;
                 }
                 else
                 {
