@@ -53,9 +53,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="PatToPlaySettingsDifficultyNumbers.cs" />
     <Compile Include="Lib.cs" />
     <Compile Include="PayToPlayAddon.cs" />
-    <Compile Include="PayToPlaySettings.cs" />
+    <Compile Include="PayToPlaySettingsFeatures.cs" />
     <Compile Include="ReliabilityProgress.cs" />
     <Compile Include="ProbabilityLib.cs" />
     <Compile Include="EngineDecay.cs" />

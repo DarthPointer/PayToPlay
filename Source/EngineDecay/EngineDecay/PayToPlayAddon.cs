@@ -95,7 +95,7 @@ namespace EngineDecay
 
         public void ReadRecoveredVessel(ProtoVessel v, bool wtf)
         {
-            if (PayToPlaySettings.ReliabilityProgress)
+            if (PayToPlaySettingsFeatures.ReliabilityProgress)
             {
                 Debug.Log("P2P: onVesselRecovered has successfully called Read");
 

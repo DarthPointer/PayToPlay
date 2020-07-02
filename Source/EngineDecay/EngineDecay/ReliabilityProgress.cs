@@ -73,11 +73,11 @@ namespace EngineDecay
 
         public float GetExponent(string partName)
         {
-            if (PayToPlaySettings.ReliabilityProgress)
+            if (PayToPlaySettingsFeatures.ReliabilityProgress)
             {
                 if (!exponents.ContainsKey(partName))
                 {
-                    exponents[partName] = PayToPlaySettings.StartingReliability;
+                    exponents[partName] = PatToPlaySettingsDifficultyNumbers.StartingReliability;
                 }
                 return exponents[partName];
             }
@@ -91,7 +91,7 @@ namespace EngineDecay
         {
             if(!exponents.ContainsKey(partName))
             {
-                exponents[partName] = PayToPlaySettings.StartingReliability;
+                exponents[partName] = PatToPlaySettingsDifficultyNumbers.StartingReliability;
             }
 
 
@@ -109,7 +109,7 @@ namespace EngineDecay
 
         public float CheckProcSRBProgress(string partName, ref float diameter, ref float thrust, ref string bellName)           // -1 if no registered model fits specified stats
         {                                                                                                                       // It CHANGES procedural data of EngineDecay in order to specify which model it is to prevent possible reliability progress issues
-            if (PayToPlaySettings.ReliabilityProgress)
+            if (PayToPlaySettingsFeatures.ReliabilityProgress)
             {
                 ProcSRBProgress partProgress;
                 if (procSRBs.TryGetValue(partName, out partProgress))
@@ -149,12 +149,12 @@ namespace EngineDecay
                 partProgress = procSRBs[partName] = new ProcSRBProgress();
             }
 
-            partProgress.models[new ProcSRBData(diameter, thrust, bellName)] = PayToPlaySettings.StartingReliability;
+            partProgress.models[new ProcSRBData(diameter, thrust, bellName)] = PatToPlaySettingsDifficultyNumbers.StartingReliability;
         }
 
         public void ImproveProcedural(string partName, float diameter, float thrust, string bellName, float coeff, float generationExp)
         {
-            if (PayToPlaySettings.ReliabilityProgress)
+            if (PayToPlaySettingsFeatures.ReliabilityProgress)
             {
                 float newExp = generationExp + (9 - generationExp) * coeff;
                 if (newExp > 8)
@@ -248,11 +248,11 @@ namespace EngineDecay
 
             public bool Fits (float _diameter, float _thrust, string _bellName)
             {
-                float maxDiameter = diameter * (1 + PayToPlaySettings.ProcSRBDiameterModelMarginPercent/100);
-                float minDiameter = diameter * (1 - PayToPlaySettings.ProcSRBDiameterModelMarginPercent/100);
+                float maxDiameter = diameter * (1 + PatToPlaySettingsDifficultyNumbers.ProcSRBDiameterModelMarginPercent/100);
+                float minDiameter = diameter * (1 - PatToPlaySettingsDifficultyNumbers.ProcSRBDiameterModelMarginPercent/100);
 
-                float maxThrust = thrust * (1 + PayToPlaySettings.ProcSRBThrustModelMarginPercent / 100);
-                float minThrust = thrust * (1 - PayToPlaySettings.ProcSRBThrustModelMarginPercent / 100);
+                float maxThrust = thrust * (1 + PatToPlaySettingsDifficultyNumbers.ProcSRBThrustModelMarginPercent / 100);
+                float minThrust = thrust * (1 - PatToPlaySettingsDifficultyNumbers.ProcSRBThrustModelMarginPercent / 100);
 
                 return ((maxDiameter >= _diameter) && (minDiameter <= _diameter) && (maxThrust >= _thrust) && (minThrust <= _thrust) && (bellName == _bellName));
             }
