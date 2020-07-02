@@ -145,14 +145,19 @@ namespace EngineDecay
 
         public ReliabilityProgressData GetReliabilityData(string partName)
         {
+            Lib.Log($"Getting reliability progress for {partName}");
+
             if (PayToPlaySettingsFeatures.ReliabilityProgress)
             {
                 if (!records.ContainsKey(partName))
                 {
+                    Lib.Log($"Reliability progress record for {partName} not found, creating it");
+
                     float r = PatToPlaySettingsDifficultyNumbers.StartingReliability;
                     if (PayToPlaySettingsFeatures.RandomStartingReliability)
                     {
-                        r += UnityEngine.Random.Range(0, 1) * PatToPlaySettingsDifficultyNumbers.RandomStartingReliabilityBonusLimit;
+                        Lib.Log($"Applying random starting reliability bonus for {partName}");
+                        r += UnityEngine.Random.Range(0f, 1f) * PatToPlaySettingsDifficultyNumbers.RandomStartingReliabilityBonusLimit;
                     }
                     r = Math.Min(r, 8);
 

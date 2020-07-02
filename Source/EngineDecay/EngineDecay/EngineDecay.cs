@@ -1230,7 +1230,7 @@ namespace EngineDecay
                         r = PatToPlaySettingsDifficultyNumbers.StartingReliability;
                         if (PayToPlaySettingsFeatures.RandomStartingReliability)
                         {
-                            r += UnityEngine.Random.Range(0, 1) * PatToPlaySettingsDifficultyNumbers.RandomStartingReliabilityBonusLimit;
+                            r += UnityEngine.Random.Range(0f, 1f) * PatToPlaySettingsDifficultyNumbers.RandomStartingReliabilityBonusLimit;
                         }
 
                         r = Math.Min(r, 8);

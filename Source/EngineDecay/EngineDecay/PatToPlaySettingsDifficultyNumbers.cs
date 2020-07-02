@@ -13,7 +13,7 @@ namespace EngineDecay
         [GameParameters.CustomFloatParameterUI("Starting reliability exponent", newGameOnly = false, displayFormat = "F1", minValue = 2, maxValue = 8, toolTip = "See the .docx or .pdf in the mod dir")]
         public float startingReliability = 2;
 
-        [GameParameters.CustomFloatParameterUI("Starting reliability exponent", newGameOnly = false, displayFormat = "F1", minValue = 0, maxValue = 6)]
+        [GameParameters.CustomFloatParameterUI("Random starting reliability exponent bonus limit", newGameOnly = false, displayFormat = "F1", minValue = 0, maxValue = 6)]
         public float randomStartingReliabilityBonusLimit = 2;
 
         [GameParameters.CustomFloatParameterUI("Failure on ignition chance (%) at max reliability progress", newGameOnly = false, displayFormat = "F1", minValue = 0.01f, maxValue = 1, toolTip = "Chance to cause a failure at max reliability")]
