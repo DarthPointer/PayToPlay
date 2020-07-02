@@ -341,11 +341,11 @@ namespace EngineDecay
 
             public bool Fits (float _diameter, float _thrust, string _bellName)
             {
-                float maxDiameter = diameter * (1 + PayToPlaySettingsDifficultyNumbers.ProcSRBDiameterModelMarginPercent/100);
-                float minDiameter = diameter * (1 - PayToPlaySettingsDifficultyNumbers.ProcSRBDiameterModelMarginPercent/100);
+                float maxDiameter = diameter * (1 + PayToPlaySettingProcSRBs.ProcSRBDiameterModelMarginPercent/100);
+                float minDiameter = diameter * (1 - PayToPlaySettingProcSRBs.ProcSRBDiameterModelMarginPercent/100);
 
-                float maxThrust = thrust * (1 + PayToPlaySettingsDifficultyNumbers.ProcSRBThrustModelMarginPercent / 100);
-                float minThrust = thrust * (1 - PayToPlaySettingsDifficultyNumbers.ProcSRBThrustModelMarginPercent / 100);
+                float maxThrust = thrust * (1 + PayToPlaySettingProcSRBs.ProcSRBThrustModelMarginPercent / 100);
+                float minThrust = thrust * (1 - PayToPlaySettingProcSRBs.ProcSRBThrustModelMarginPercent / 100);
 
                 return ((maxDiameter >= _diameter) && (minDiameter <= _diameter) && (maxThrust >= _thrust) && (minThrust <= _thrust) && (bellName == _bellName));
             }
