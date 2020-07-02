@@ -41,15 +41,11 @@ namespace EngineDecay
 
         public static void LogWarning(string message)
         {
-            KSPLog.print("PayToPlay has encountered an issue!!!");
-            KSPLog.print("[P2P] " + message);
             Debug.LogWarning("[P2P] " + message);
         }
 
         public static void LogError(string message)
         {
-            KSPLog.print("PayToPlay has encountered an error!!!");
-            KSPLog.print("[P2P] " + message);
             Debug.LogError("[P2P] " + message);
         }
     }
