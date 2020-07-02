@@ -836,7 +836,7 @@ namespace EngineDecay
                             }
                             else
                             {
-                                usageExperienceCoeff = 0.1f;
+                                usageExperienceCoeff = 0.3f;
                             }
                             targetPartCost = 0;
                         }
@@ -1015,7 +1015,14 @@ namespace EngineDecay
                     {
                         Failure();
 
-                        usageExperienceCoeff = 0.3f;
+                        if (topBaseRatedTime != -1)
+                        {
+                            usageExperienceCoeff = 0.3f;
+                        }
+                        else
+                        {
+                            usageExperienceCoeff = 0.5f;
+                        }
                     }
                     else if(luck < (PatToPlaySettingsDifficultyNumbers.FailureOnIgnitionPercent + PatToPlaySettingsDifficultyNumbers.IgnitionFailurePercent) / 100 * Math.Pow(9 - r, 3.2))
                     {
