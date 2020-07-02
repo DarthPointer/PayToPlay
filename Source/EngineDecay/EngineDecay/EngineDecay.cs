@@ -470,7 +470,7 @@ namespace EngineDecay
         [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "Set as a New Model", groupName = "PayToPlayReliability", groupDisplayName = "PayToPlay Reliability")]
         void SetAsANewProcSRBModel()
         {
-            ReliabilityProgress.fetch.CreateModel(part.name, procSRBDiameter, procSRBThrust, procSRBBellName);
+            ReliabilityProgress.fetch.CreateModel(part.name, r, procSRBDiameter, procSRBThrust, procSRBBellName);
             Events["SetAsANewProcSRBModel"].guiActiveEditor = false;
         }
 
@@ -1225,7 +1225,21 @@ namespace EngineDecay
 
                 if (r == -1)
                 {
-                    r = PatToPlaySettingsDifficultyNumbers.StartingReliability;
+                    if (PayToPlaySettingsFeatures.ReliabilityProgress)
+                    {
+                        r = PatToPlaySettingsDifficultyNumbers.StartingReliability;
+                        if (PayToPlaySettingsFeatures.RandomStartingReliability)
+                        {
+                            r += UnityEngine.Random.Range(0, 1) * PatToPlaySettingsDifficultyNumbers.RandomStartingReliabilityBonusLimit;
+                        }
+
+                        r = Math.Min(r, 8);
+                    }
+                    else
+                    {
+                        r = 8;
+                    }
+
                     reliabilityIsVisible = !PayToPlaySettingsFeatures.HideStartingReliability;
 
                     Events["SetAsANewProcSRBModel"].guiActiveEditor = true;

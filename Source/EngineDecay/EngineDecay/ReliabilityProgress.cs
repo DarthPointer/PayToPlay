@@ -149,7 +149,14 @@ namespace EngineDecay
             {
                 if (!records.ContainsKey(partName))
                 {
-                    records[partName] = new ReliabilityProgressData(PatToPlaySettingsDifficultyNumbers.StartingReliability, !PayToPlaySettingsFeatures.HideStartingReliability);
+                    float r = PatToPlaySettingsDifficultyNumbers.StartingReliability;
+                    if (PayToPlaySettingsFeatures.RandomStartingReliability)
+                    {
+                        r += UnityEngine.Random.Range(0, 1) * PatToPlaySettingsDifficultyNumbers.RandomStartingReliabilityBonusLimit;
+                    }
+                    r = Math.Min(r, 8);
+
+                    records[partName] = new ReliabilityProgressData(r, !PayToPlaySettingsFeatures.HideStartingReliability);
                 }
                 return records[partName];
             }
@@ -217,7 +224,7 @@ namespace EngineDecay
             }
         }
 
-        public void CreateModel(string partName, float diameter, float thrust, string bellName)
+        public void CreateModel(string partName, float startingReliability, float diameter, float thrust, string bellName)
         {
             ProcSRBProgress partProgress;
             if (!procSRBs.TryGetValue(partName, out partProgress))
@@ -225,7 +232,7 @@ namespace EngineDecay
                 partProgress = procSRBs[partName] = new ProcSRBProgress();
             }
 
-            partProgress.models[new ProcSRBData(diameter, thrust, bellName)] = new ReliabilityProgressData(PatToPlaySettingsDifficultyNumbers.StartingReliability, !PayToPlaySettingsFeatures.HideStartingReliability);
+            partProgress.models[new ProcSRBData(diameter, thrust, bellName)] = new ReliabilityProgressData(startingReliability, !PayToPlaySettingsFeatures.HideStartingReliability);
         }
 
         public void ImproveProcedural(string partName, float diameter, float thrust, string bellName, float coeff, float generationExp)
