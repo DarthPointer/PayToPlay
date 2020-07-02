@@ -16,6 +16,12 @@ namespace EngineDecay
         [GameParameters.CustomParameterUI("Reliability progress", newGameOnly = false, toolTip = "Parts have full reliability only after enough experience recovered")]
         public bool reliabilityProgress = true;
 
+        [GameParameters.CustomParameterUI("Random starting reliability", newGameOnly = false, toolTip = "New models start with random reliability boost")]
+        public bool randomStartingReliability = true;
+
+        [GameParameters.CustomParameterUI("Hide starting reliability", newGameOnly = false, toolTip = "Do not show reliability data before retrieving any usage experience")]
+        public bool hideStartingReliability = true;
+
         [GameParameters.CustomFloatParameterUI("Non-standard long time display", newGameOnly = false, toolTip = "Stanrdad format is xx:xx:xx (hh:mm:ss), turn this option on for xh:m:s")]
         public bool useNonstandardLongTimeFormat = false;
 
@@ -52,6 +58,32 @@ namespace EngineDecay
             set
             {
                 HighLogic.CurrentGame.Parameters.CustomParams<PayToPlaySettingsFeatures>().reliabilityProgress = value;
+            }
+        }
+
+        public static bool RandomStartingReliability
+        {
+            get
+            {
+                return HighLogic.CurrentGame.Parameters.CustomParams<PayToPlaySettingsFeatures>().randomStartingReliability;
+            }
+
+            set
+            {
+                HighLogic.CurrentGame.Parameters.CustomParams<PayToPlaySettingsFeatures>().randomStartingReliability = value;
+            }
+        }
+
+        public static bool HideStartingReliability
+        {
+            get
+            {
+                return HighLogic.CurrentGame.Parameters.CustomParams<PayToPlaySettingsFeatures>().hideStartingReliability;
+            }
+
+            set
+            {
+                HighLogic.CurrentGame.Parameters.CustomParams<PayToPlaySettingsFeatures>().hideStartingReliability = value;
             }
         }
 

@@ -10,8 +10,11 @@ namespace EngineDecay
     {
         #region params
 
-        [GameParameters.CustomFloatParameterUI("Starting reliability exponent", newGameOnly = false, displayFormat = "F1", minValue = 2, maxValue = 8, toolTip = "See the .docx in the mod dir")]
+        [GameParameters.CustomFloatParameterUI("Starting reliability exponent", newGameOnly = false, displayFormat = "F1", minValue = 2, maxValue = 8, toolTip = "See the .docx or .pdf in the mod dir")]
         public float startingReliability = 2;
+
+        [GameParameters.CustomFloatParameterUI("Starting reliability exponent", newGameOnly = false, displayFormat = "F1", minValue = 0, maxValue = 6)]
+        public float randomStartingReliabilityBonusLimit = 2;
 
         [GameParameters.CustomFloatParameterUI("Failure on ignition chance (%) at max reliability progress", newGameOnly = false, displayFormat = "F1", minValue = 0.01f, maxValue = 1, toolTip = "Chance to cause a failure at max reliability")]
         public float failureOnIgnitionPercent = 0.05f;
@@ -50,6 +53,19 @@ namespace EngineDecay
             set
             {
                 HighLogic.CurrentGame.Parameters.CustomParams<PatToPlaySettingsDifficultyNumbers>().startingReliability = value;
+            }
+        }
+
+        public static float RandomStartingReliabilityBonusLimit
+        {
+            get
+            {
+                return HighLogic.CurrentGame.Parameters.CustomParams<PatToPlaySettingsDifficultyNumbers>().randomStartingReliabilityBonusLimit;
+            }
+
+            set
+            {
+                HighLogic.CurrentGame.Parameters.CustomParams<PatToPlaySettingsDifficultyNumbers>().randomStartingReliabilityBonusLimit = value;
             }
         }
 
