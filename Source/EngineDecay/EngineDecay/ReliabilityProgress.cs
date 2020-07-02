@@ -34,6 +34,11 @@ namespace EngineDecay
                 try
                 {
                     r = float.Parse(fields[0]);
+
+                    if (r != PatToPlaySettingsDifficultyNumbers.StartingReliability)
+                    {
+                        reliabilityIsVisible = true;
+                    }
                 }
                 catch (FormatException)
                 {
@@ -172,7 +177,10 @@ namespace EngineDecay
             {
                 records[partName].r = newExp;
             }
-            records[partName].reliabilityIsVisible = true;
+            if (coeff > 0)
+            {
+                records[partName].reliabilityIsVisible = true;
+            }
         }
 
         public ReliabilityProgressData CheckProcSRBProgress(string partName, ref float diameter, ref float thrust, ref string bellName)           // -1 if no registered model fits specified stats
@@ -243,7 +251,11 @@ namespace EngineDecay
                     {
                         partProgress.models[key].r = newExp;
                     }
-                    partProgress.models[key].reliabilityIsVisible = true;
+
+                    if (coeff > 0)
+                    {
+                        partProgress.models[key].reliabilityIsVisible = true;
+                    }
                 }
                 else
                 {
