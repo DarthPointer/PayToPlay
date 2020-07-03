@@ -1083,7 +1083,7 @@ namespace EngineDecay
 
         void Failure()
         {
-            Lib.Log($"Failing {part.partName}, destruction chance is {PayToPlaySettingsDifficultyNumbers.DestructionOnFailurePercent / 100 * (9 - r)}");
+            Lib.Log($"Failing {part.name}, destruction chance is {PayToPlaySettingsDifficultyNumbers.DestructionOnFailurePercent / 100 * (9 - r)}");
 
             if(UnityEngine.Random.Range(0f, 1f) < PayToPlaySettingsDifficultyNumbers.DestructionOnFailurePercent/100 * (9 - r))
             {
