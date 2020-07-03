@@ -1065,13 +1065,13 @@ namespace EngineDecay
                         ignitionsLeft--;
 
                         float luck = UnityEngine.Random.Range(0f, 1f);
-                        if (luck < 0.0005f)
+                        if (luck < PayToPlaySettingsDifficultyNumbers.FailureOnIgnitionPercent / 100 * Math.Pow(9 - r, 3.2))
                         {
                             Failure();
 
                             usageExperienceCoeff = 0.3f;
                         }
-                        else if (luck < 0.001f)
+                        else if (luck < (PayToPlaySettingsDifficultyNumbers.FailureOnIgnitionPercent + PayToPlaySettingsDifficultyNumbers.IgnitionFailurePercent) / 100 * Math.Pow(9 - r, 3.2))
                         {
                             FlightLogger.fetch?.LogEvent(string.Format("Bad ignition of {0}, shutdown performed to prevent consequences", part.name));
                             CutoffOnFailure();
