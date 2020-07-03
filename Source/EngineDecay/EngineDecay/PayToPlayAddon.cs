@@ -17,13 +17,28 @@ namespace EngineDecay
 
         public static string RandomStatus(string statusType)
         {
-            return fetch.reliabilityStatuses[statusType]
-                [UnityEngine.Random.Range(0, fetch.reliabilityStatuses[statusType].Count)];     // Random string from corresponding list
+            List<string> a;
+            if (fetch.reliabilityStatuses.TryGetValue(statusType, out a))
+            {
+                if (a.Count > 0)
+                {
+                    return a[UnityEngine.Random.Range(0, fetch.reliabilityStatuses[statusType].Count)];     // Random string from the list
+                }
+                else
+                {
+                    return statusType;
+                }
+            }
+            else
+            {
+                return statusType;
+            }
         }
 
         public void Start()
         {
             GameEvents.onVesselRecovered.Add(ReadRecoveredVessel);
+
             fetch = this;
 
             reliabilityStatuses = new Dictionary<string, List<string>>();
@@ -41,59 +56,21 @@ namespace EngineDecay
             catch (Exception)
             {
                 Debug.LogError("PayToPlayAddon could not read reliability status strings from files PayToPlay/Data/ReliabilityStatuses/*.txt");
-
-                reliabilityStatuses["HeavilyReused"] = new List<string>();
-                reliabilityStatuses["HeavilyReused"].Add("To be replaced");
-
-                reliabilityStatuses["LowReliabilityModel"] = new List<string>();
-                reliabilityStatuses["LowReliabilityModel"].Add("Needs testing");
-
-                reliabilityStatuses["PoorEngineCondition"] = new List<string>();
-                reliabilityStatuses["PoorEngineCondition"].Add("Needs maintenance");
             }
 
             List<string> dummy = new List<string>();
-
-            if (!reliabilityStatuses.TryGetValue("HeavilyReused", out dummy))
-            {
-                reliabilityStatuses["HeavilyReused"] = new List<string>();
-                reliabilityStatuses["HeavilyReused"].Add("To be replaced");
-            }
-            else if (reliabilityStatuses["HeavilyReused"].Count == 0)
-            {
-                reliabilityStatuses["HeavilyReused"].Add("To be replaced");
-            }
-
-            if (!reliabilityStatuses.TryGetValue("LowReliabilityModel", out dummy))
-            {
-                reliabilityStatuses["LowReliabilityModel"] = new List<string>();
-                reliabilityStatuses["LowReliabilityModel"].Add("Needs testing");
-            }
-            else if (reliabilityStatuses["LowReliabilityModel"].Count == 0)
-            {
-                reliabilityStatuses["LowReliabilityModel"].Add("Needs testing");
-            }
-
-            if (!reliabilityStatuses.TryGetValue("PoorEngineCondition", out dummy))
-            {
-                reliabilityStatuses["PoorEngineCondition"] = new List<string>();
-                reliabilityStatuses["PoorEngineCondition"].Add("Needs maintenance");
-            }
-            else if (reliabilityStatuses["PoorEngineCondition"].Count == 0)
-            {
-                reliabilityStatuses["PoorEngineCondition"].Add("Needs maintenance");
-            }
         }
 
         public void OnDestroy()
         {
             GameEvents.onVesselRecovered.Remove(ReadRecoveredVessel);
+
             fetch = null;
         }
 
         public void ReadRecoveredVessel(ProtoVessel v, bool wtf)
         {
-            if (PayToPlaySettings.ReliabilityProgress)
+            if (PayToPlaySettingsFeatures.ReliabilityProgress)
             {
                 Debug.Log("P2P: onVesselRecovered has successfully called Read");
 

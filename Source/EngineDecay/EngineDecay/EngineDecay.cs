@@ -21,6 +21,9 @@ namespace EngineDecay
         float r = 0;
 
         [KSPField(isPersistant = true, guiActive = false)]
+        bool reliabilityIsVisible;
+
+        [KSPField(isPersistant = true, guiActive = false)]
         float currentBaseRatedTime;
 
         [KSPField(isPersistant = true, guiActive = false)]
@@ -134,6 +137,9 @@ namespace EngineDecay
         bool newBorn = true;
 
         [KSPField(isPersistant = true, guiActive = false)]
+        bool isKCTBuilt = false;
+
+        [KSPField(isPersistant = true, guiActive = false)]
         float failAtBurnTime = -1;
 
         [KSPField(isPersistant = true, guiActive = false)]
@@ -178,7 +184,7 @@ namespace EngineDecay
 
         #region Maintenance
 
-        [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "Maintenance")]
+        [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "Maintenance", groupName = "PayToPlayReliability", groupDisplayName = "PayToPlay Reliability")]
         void MaintenanceEvent()
         {
             foreach (Part i in part.symmetryCounterparts)
@@ -191,7 +197,7 @@ namespace EngineDecay
                 }
                 else
                 {
-                    UnityEngine.Debug.Log("EngineDecay found a counterpart without EngineDecay, it is really WEIRD!");
+                   Lib.LogWarning("EngineDecay found a counterpart without EngineDecay, it is really WEIRD!");
                 }
             }
 
@@ -244,7 +250,7 @@ namespace EngineDecay
             Events["MaintenanceEvent"].guiActiveEditor = false;
         }
 
-        [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "Symmetry Maintenance")]
+        [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "Symmetry Maintenance", groupName = "PayToPlayReliability", groupDisplayName = "PayToPlay Reliability")]
         void SymmetryMaintenance()
         {
             foreach (Part i in part.symmetryCounterparts)
@@ -256,7 +262,7 @@ namespace EngineDecay
                 }
                 else
                 {
-                    UnityEngine.Debug.Log("EngineDecay found a counterpart without EngineDecay, it is really WEIRD!");
+                    Lib.LogWarning("EngineDecay found a counterpart without EngineDecay, it is really WEIRD!");
                 }
             }
 
@@ -329,7 +335,7 @@ namespace EngineDecay
 
         #region Replacement
 
-        [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "Replace")]
+        [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "Replace", groupName = "PayToPlayReliability", groupDisplayName = "PayToPlay Reliability")]
         void ReplaceEvent()
         {
             foreach (Part i in part.symmetryCounterparts)
@@ -342,7 +348,7 @@ namespace EngineDecay
                 }
                 else
                 {
-                    UnityEngine.Debug.Log("EngineDecay found a counterpart without EngineDecay, it is really WEIRD!");
+                    Lib.LogWarning("EngineDecay found a counterpart without EngineDecay, it is really WEIRD!");
                 }
             }
 
@@ -362,7 +368,7 @@ namespace EngineDecay
             usedBurnTime = 0;
             usageExperienceCoeff = 0;
 
-            UpdateReliabilityData();
+            UpdateReliabilityProgress();
 
             UpdateIndicators();
 
@@ -376,7 +382,7 @@ namespace EngineDecay
             Events["ReplaceEvent"].guiActiveEditor = false;
         }
 
-        [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "Symmetry Replace")]
+        [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "Symmetry Replace", groupName = "PayToPlayReliability", groupDisplayName = "PayToPlay Reliability")]
         void SymmetryReplace()
         {
             foreach (Part i in part.symmetryCounterparts)
@@ -388,7 +394,7 @@ namespace EngineDecay
                 }
                 else
                 {
-                    Debug.LogError("EngineDecay found a counterpart without EngineDecay, it is really WEIRD!");
+                    Debug.LogWarning("EngineDecay found a counterpart without EngineDecay, it is really WEIRD!");
                 }
             }
 
@@ -461,25 +467,38 @@ namespace EngineDecay
 
         #region proc SRB events
 
-        [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "Set as a New Model")]
+        [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "Set as a New Model", groupName = "PayToPlayReliability", groupDisplayName = "PayToPlay Reliability")]
         void SetAsANewProcSRBModel()
         {
-            ReliabilityProgress.fetch.CreateModel(part.name, procSRBDiameter, procSRBThrust, procSRBBellName);
+            ReliabilityProgress.fetch.CreateModel(part.name, r, procSRBDiameter, procSRBThrust, procSRBBellName);
             Events["SetAsANewProcSRBModel"].guiActiveEditor = false;
+
+            foreach (Part i in part.symmetryCounterparts)
+            {
+                if (i.FindModuleImplementing<EngineDecay>() != null)
+                {
+                    i.FindModuleImplementing<EngineDecay>().Events["SetAsANewProcSRBModel"].guiActiveEditor = false;
+                    i.FindModuleImplementing<EngineDecay>().r = r;
+                }
+                else
+                {
+                    Lib.LogWarning("EngineDecay found a counterpart without EngineDecay, it is really WEIRD!");
+                }
+            }
         }
 
         #endregion
 
         #region Indicators
 
-        [KSPEvent(guiActive = true, guiActiveEditor = true, guiName = "Switch Time Format")]
+        [KSPEvent(guiActive = true, guiActiveEditor = true, guiName = "Switch Time Format", groupName = "PayToPlayReliability", groupDisplayName = "PayToPlay Reliability")]
         void SwitchTimeFormat()
         {
-            if (usingTimeFormat == 0 && PayToPlaySettings.UseNonstandardLongTimeFormat)
+            if (usingTimeFormat == 0 && PayToPlaySettingsFeatures.UseNonstandardLongTimeFormat)
             {
                 usingTimeFormat = 2;
             }
-            else if (usingTimeFormat == 0 && !PayToPlaySettings.UseNonstandardLongTimeFormat)
+            else if (usingTimeFormat == 0 && !PayToPlaySettingsFeatures.UseNonstandardLongTimeFormat)
             {
                 usingTimeFormat = 1;
             }
@@ -493,17 +512,37 @@ namespace EngineDecay
 
         void UpdateIndicators()
         {
-            burnTimeIndicator = string.Format("{0} / {1}", Lib.Format(usedBurnTime, usingTimeFormat), Lib.Format(setBurnTime, usingTimeFormat));
+            if (reliabilityIsVisible)
+            {
+                burnTimeIndicator = string.Format("{0} / {1}", Lib.Format(usedBurnTime, usingTimeFormat), Lib.Format(setBurnTime, usingTimeFormat));
+            }
+            else
+            {
+                burnTimeIndicator = "Need to recover usage experience";
+            }
+
             ignitionsIndicator = string.Format("{0} / {1}", ignitionsLeft, setIgnitions);
 
             holdIndicatorsTill = Time.time + 0.5f;
+
+            if (topBaseRatedTime != -1 && PayToPlaySettingsDifficultyNumbers.TopFailureWarningDeviationRatioPercent * (float)Math.Pow(9 - r, 2) <= 50 && PayToPlaySettingsFeatures.RandomFailureWarningEnable)
+            {
+                Events["ToggleAutoShutdownOnWarning"].guiActiveEditor = true;
+                Events["ToggleAutoShutdownOnWarning"].guiActive = true;
+                Events["ToggleAutoShutdownOnWarning"].guiName = "Autoshutdown on Warning: " + autoShutdownOnWarning;
+            }
+            else
+            {
+                Events["ToggleAutoShutdownOnWarning"].guiActiveEditor = false;
+                Events["ToggleAutoShutdownOnWarning"].guiActive = false;
+            }
         }
 
         #endregion
 
         #region Autoshutdown Button
 
-        [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "Autoshutdown on Warning")]
+        [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "Autoshutdown on Warning", groupName = "PayToPlayReliability", groupDisplayName = "PayToPlay Reliability")]
         void ToggleAutoShutdownOnWarning()
         {
             autoShutdownOnWarning = !autoShutdownOnWarning;
@@ -516,12 +555,14 @@ namespace EngineDecay
 
         public override void OnStart(StartState state)
         {
-            if (PayToPlaySettings.Enable)
+            if (PayToPlaySettingsFeatures.Enable)
             {
                 decayingEngines = part.FindModulesImplementing<ModuleEngines>();
                 modeSwitcher = part.FindModuleImplementing<MultiModeEngine>();
 
                 modesNumber = decayingEngines.Count();
+
+                Lib.Log($"EngineDecay Module has found {modesNumber} engine modules");
 
                 if (decayRates.Length != 0)
                 {
@@ -558,6 +599,20 @@ namespace EngineDecay
                 //if engine multimode data is consistent, we will access features for mulit-mode engines
                 usingMultiModeLogic = decayRatesList.Count() == modesNumber && ignitionsUsageList.Count() == modesNumber && ignitionsOnSwitchList.Count() == modesNumber * modesNumber;
 
+                if (modesNumber == 0)
+                {
+                    Lib.LogWarning($"EngineDecay could not find engine modules at part {part.name}");           // Need full stop flag
+                    return;
+                }
+                else if (modesNumber != 1 && !usingMultiModeLogic)
+                {
+                    Lib.LogWarning($"EngineDecay found multiple engine modules at {part.name} but is not properly configured for {modesNumber} modes, fallback to singlemode logic");
+                }
+                else
+                {
+                    Lib.Log($"EngineDecay found {modesNumber} modes at {part.name}");
+                }
+
                 if (topBaseRatedTime == -1)
                 {
                     Fields["extraBurnTimePercent"].guiActiveEditor = false;
@@ -579,17 +634,8 @@ namespace EngineDecay
                     Fields["ignitionsIndicator"].guiActive = false;
                 }
 
-                if (PayToPlaySettings.RandomFailureWarningEnable)
+                if (!PayToPlaySettingsFeatures.RandomFailureWarningEnable)
                 {
-                    Events["ToggleAutoShutdownOnWarning"].guiActiveEditor = true;
-                    Events["ToggleAutoShutdownOnWarning"].guiActive = true;
-                    Events["ToggleAutoShutdownOnWarning"].guiName = "Autoshutdown on Warning: " + autoShutdownOnWarning;
-                }
-                else
-                {
-                    Events["ToggleAutoShutdownOnWarning"].guiActiveEditor = false;
-                    Events["ToggleAutoShutdownOnWarning"].guiActive = false;
-
                     autoShutdownOnWarning = false;
                 }
 
@@ -597,7 +643,7 @@ namespace EngineDecay
                 {
                     inEditor = true;
 
-                    r -= usageExperienceCoeff * PayToPlaySettings.UsageExperienceToDegradationMul;
+                    r -= usageExperienceCoeff * PayToPlaySettingsDifficultyNumbers.UsageExperienceToDegradationMul;
 
                     if (procPart)
                     {
@@ -606,12 +652,13 @@ namespace EngineDecay
 
                         if ((procSRBCylinder == null) || (procSRB == null))
                         {
-                            print("An EngineDecay module marked as a one for ProceduralParts SRB could not find relevant modules. Switched to non-procedural logic");
-                            Debug.LogError("An EngineDecay module marked as a one for ProceduralParts SRB could not find relevant modules. Switched to non-procedural logic");
+                            Lib.LogWarning("An EngineDecay module marked as a one for ProceduralParts SRB could not find relevant modules. Switched to non-procedural logic");
                             procPart = false;
                         }
                         else
                         {
+                            Lib.Log($"EngineDecay started initialization for procedural SRB at part {part.name}");
+
                             procSRBCylinder.Fields["diameter"].uiControlEditor.onFieldChanged += ProcUpdateDiameter;
                             procSRB.Fields["thrust"].uiControlEditor.onFieldChanged += ProcUpdateThrust;
                             procSRB.Fields["selectedBellName"].uiControlEditor.onFieldChanged += ProcUpdateBellName;
@@ -619,15 +666,24 @@ namespace EngineDecay
                             ProcUpdateDiameter(procSRBCylinder.Fields["diameter"], null);
                             ProcUpdateBellName(procSRB.Fields["selectedBellName"], null);
                             ProcUpdateThrust(procSRB.Fields["thrust"], null);
+
+                            Lib.Log($"EngineDecay initialization success for procedural SRB at part {part.name}");
                         }
                     }
 
-                    if (newBorn)
+                    UpdateReplaceCost();
+
+                    if (!isKCTBuilt || replaceCost == 0 || newBorn)
                     {
-                        UpdateReliabilityData();
+                        UpdateReliabilityProgress();
+
+                        Lib.Log($"EngineDecay has automatically updated to last reliability generation at part {part.name}");
                     }
 
+                    isKCTBuilt = false;                                                 // If we don't do this, this flag will be passed to saved the saved ship
                     failAtBurnTime = -1;
+
+                    GameEvents.onEditorShipModified.Fire(EditorLogic.fetch.ship);
                 }
                 else
                 {
@@ -639,7 +695,7 @@ namespace EngineDecay
                     {
                         Disable();
                     }
-                    else if (failAtBurnTime == -1)
+                    else if (failAtBurnTime == -1 && topBaseRatedTime != -1)
                     {
                         SetReliabilityData();
                     }
@@ -648,8 +704,9 @@ namespace EngineDecay
                     symmetryReplaceCost = -1;
                 }
 
+                Lib.Log($"EngineDecay at {part.name} is finishing OnLoad, about to update indicators");
+
                 UpdateIndicators();
-                GameEvents.onEditorShipModified.Fire(EditorLogic.fetch.ship);
             }
             else
             {
@@ -678,7 +735,7 @@ namespace EngineDecay
 
         public void Update()
         {
-            if (PayToPlaySettings.Enable)
+            if (PayToPlaySettingsFeatures.Enable)
             {
                 if (!inEditor && newBorn)
                 {
@@ -707,7 +764,7 @@ namespace EngineDecay
                                 }
                                 else
                                 {
-                                    Debug.LogError("EngineDecay found a counterpart without EngineDecay, it is really WEIRD!");
+                                    Debug.LogWarning("EngineDecay found a counterpart without EngineDecay, it is really WEIRD!");
                                 }
                             }
 
@@ -731,7 +788,7 @@ namespace EngineDecay
                                 }
                                 else
                                 {
-                                    Debug.LogError("EngineDecay found a counterpart without EngineDecay, it is really WEIRD!");
+                                    Debug.LogWarning("EngineDecay found a counterpart without EngineDecay, it is really WEIRD!");
                                 }
                             }
                         }
@@ -768,7 +825,7 @@ namespace EngineDecay
 
         public void FixedUpdate()
         {
-            if (PayToPlaySettings.Enable)
+            if (PayToPlaySettingsFeatures.Enable)
             {
                 if (!inEditor)
                 {
@@ -803,7 +860,7 @@ namespace EngineDecay
                             }
                             else
                             {
-                                usageExperienceCoeff = 0.1f;
+                                usageExperienceCoeff = 0.3f;
                             }
                             targetPartCost = 0;
                         }
@@ -817,7 +874,7 @@ namespace EngineDecay
                                 usageExperienceCoeff = 0.3f;
                             }
 
-                            if (PayToPlaySettings.RandomFailureWarningEnable)
+                            if (PayToPlaySettingsFeatures.RandomFailureWarningEnable)
                             {
                                 if (usedBurnTime > warnAtBurnTime)
                                 {
@@ -978,13 +1035,20 @@ namespace EngineDecay
                     ignitionsLeft--;
 
                     float luck = UnityEngine.Random.Range(0f, 1f);
-                    if (luck < PayToPlaySettings.FailureOnIgnitionPercent / 100 * Math.Pow(9 - r, 3.2))         // 8.01 stands for 8 is max r, 8.01 - 8 = 1/100 thus settings are relevant for max-reliability parts
+                    if (luck < PayToPlaySettingsDifficultyNumbers.FailureOnIgnitionPercent / 100 * Math.Pow(9 - r, 3.2))
                     {
                         Failure();
 
-                        usageExperienceCoeff = 0.3f;
+                        if (topBaseRatedTime != -1)
+                        {
+                            usageExperienceCoeff = 0.3f;
+                        }
+                        else
+                        {
+                            usageExperienceCoeff = 0.5f;
+                        }
                     }
-                    else if(luck < (PayToPlaySettings.FailureOnIgnitionPercent + PayToPlaySettings.IgnitionFailurePercent) / 100 * Math.Pow(9 - r, 3.2))
+                    else if(luck < (PayToPlaySettingsDifficultyNumbers.FailureOnIgnitionPercent + PayToPlaySettingsDifficultyNumbers.IgnitionFailurePercent) / 100 * Math.Pow(9 - r, 3.2))
                     {
                         FlightLogger.fetch?.LogEvent(string.Format("Bad ignition of {0}, shutdown performed to prevent consequences", part.name));
                         CutoffOnFailure();
@@ -1001,13 +1065,13 @@ namespace EngineDecay
                         ignitionsLeft--;
 
                         float luck = UnityEngine.Random.Range(0f, 1f);
-                        if (luck < 0.0005f)
+                        if (luck < PayToPlaySettingsDifficultyNumbers.FailureOnIgnitionPercent / 100 * Math.Pow(9 - r, 3.2))
                         {
                             Failure();
 
                             usageExperienceCoeff = 0.3f;
                         }
-                        else if (luck < 0.001f)
+                        else if (luck < (PayToPlaySettingsDifficultyNumbers.FailureOnIgnitionPercent + PayToPlaySettingsDifficultyNumbers.IgnitionFailurePercent) / 100 * Math.Pow(9 - r, 3.2))
                         {
                             FlightLogger.fetch?.LogEvent(string.Format("Bad ignition of {0}, shutdown performed to prevent consequences", part.name));
                             CutoffOnFailure();
@@ -1019,7 +1083,9 @@ namespace EngineDecay
 
         void Failure()
         {
-            if(UnityEngine.Random.Range(0f, 1f) < PayToPlaySettings.DestructionOnFailurePercent/100 * (9 - r))
+            Lib.Log($"Failing {part.name}, destruction chance is {PayToPlaySettingsDifficultyNumbers.DestructionOnFailurePercent / 100 * (9 - r)}");
+
+            if(UnityEngine.Random.Range(0f, 1f) < PayToPlaySettingsDifficultyNumbers.DestructionOnFailurePercent/100 * (9 - r))
             {
                 BadaBoom();
             }
@@ -1032,7 +1098,14 @@ namespace EngineDecay
 
             CutoffOnFailure();
 
-            reliabilityStatus = "failed";
+            if (PayToPlaySettingsFeatures.JokesInsteadOfFailedStatus)
+            {
+                reliabilityStatus = PayToPlayAddon.RandomStatus("Failed");
+            }
+            else
+            {
+                reliabilityStatus = "failed";
+            }
 
             nominal = false;
         }
@@ -1160,19 +1233,37 @@ namespace EngineDecay
             }
         }
 
-        void UpdateReliabilityData()
+        void UpdateReliabilityProgress()
         {
             if (!procPart)
             {
-                r = ReliabilityProgress.fetch.GetExponent(part.name);
+                r = ReliabilityProgress.fetch.GetReliabilityData(part.name).r;
+                reliabilityIsVisible = ReliabilityProgress.fetch.GetReliabilityData(part.name).reliabilityIsVisible;
             }
             else
             {
-                r = ReliabilityProgress.fetch.CheckProcSRBProgress(part.name, ref procSRBDiameter, ref procSRBThrust, ref procSRBBellName);
+                r = ReliabilityProgress.fetch.CheckProcSRBProgress(part.name, ref procSRBDiameter, ref procSRBThrust, ref procSRBBellName).r;
+                reliabilityIsVisible = ReliabilityProgress.fetch.CheckProcSRBProgress(part.name, ref procSRBDiameter, ref procSRBThrust, ref procSRBBellName).reliabilityIsVisible;
 
                 if (r == -1)
                 {
-                    r = PayToPlaySettings.StartingReliability;
+                    if (PayToPlaySettingsFeatures.ReliabilityProgress)
+                    {
+                        r = PayToPlaySettingsDifficultyNumbers.StartingReliability;
+                        if (PayToPlaySettingsFeatures.RandomStartingReliability)
+                        {
+                            r += UnityEngine.Random.Range(0f, 1f) * PayToPlaySettingsDifficultyNumbers.RandomStartingReliabilityBonusLimit;
+                        }
+
+                        r = Math.Min(r, 8);
+                    }
+                    else
+                    {
+                        r = 8;
+                    }
+
+                    reliabilityIsVisible = !PayToPlaySettingsFeatures.HideStartingReliability;
+
                     Events["SetAsANewProcSRBModel"].guiActiveEditor = true;
                 }
                 else
@@ -1209,21 +1300,24 @@ namespace EngineDecay
         {
             failAtBurnTime = ProbabilityLib.ATangentRandom(r, topBaseRatedTime) * (1 + extraBurnTimePercent * (topMaxRatedTime / topBaseRatedTime - 1) / 100);
 
-            float failureWarningDevationRatioPercent = PayToPlaySettings.TopFailureWarningDeviationRatioPercent * (float)Math.Pow(9 - r, 2);
-            if (failureWarningDevationRatioPercent <= 50)
+            if (PayToPlaySettingsFeatures.RandomFailureWarningEnable)
             {
-                if (UnityEngine.Random.value < PayToPlaySettings.TopFailureWarningChancePercent / (float)Math.Pow(9 - r, 2))
+                float failureWarningDevationRatioPercent = PayToPlaySettingsDifficultyNumbers.TopFailureWarningDeviationRatioPercent * (float)Math.Pow(9 - r, 2);
+                if (failureWarningDevationRatioPercent <= 50)
                 {
-                    warnAtBurnTime = failAtBurnTime * (1 - UnityEngine.Random.value * failureWarningDevationRatioPercent / 100);
+                    if (UnityEngine.Random.value < PayToPlaySettingsDifficultyNumbers.TopFailureWarningChancePercent / (float)Math.Pow(9 - r, 2))
+                    {
+                        warnAtBurnTime = failAtBurnTime * (1 - UnityEngine.Random.value * failureWarningDevationRatioPercent / 100);
+                    }
+                    else
+                    {
+                        warnAtBurnTime = float.PositiveInfinity;                // bad luck
+                    }
                 }
                 else
                 {
-                    warnAtBurnTime = float.PositiveInfinity;
+                    warnAtBurnTime = float.PositiveInfinity;                    // warnings are not available for this engine
                 }
-            }
-            else
-            {
-                warnAtBurnTime = float.PositiveInfinity;
             }
         }
         #endregion
@@ -1233,29 +1327,76 @@ namespace EngineDecay
         public void ProcUpdateDiameter(BaseField diameter, object obj)
         {
             procSRBDiameter = (float)diameter.GetValue(procSRBCylinder);
-            UpdateModelState(obj != null);
+
+            if (obj != null)
+            {
+                UpdateModelState();
+
+                foreach (Part i in part.symmetryCounterparts)
+                {
+                    if (i.FindModuleImplementing<EngineDecay>() != null)
+                    {
+                        i.FindModuleImplementing<EngineDecay>().procSRBDiameter = procSRBDiameter;
+                        i.FindModuleImplementing<EngineDecay>().UpdateModelState();
+                    }
+                    else
+                    {
+                        Lib.LogWarning("EngineDecay found a counterpart without EngineDecay, it is really WEIRD!");
+                    }
+                }
+            }
         }
 
         public void ProcUpdateThrust(BaseField thrust, object obj)
         {
             procSRBThrust = (float)thrust.GetValue(procSRB);
-            UpdateModelState(obj != null);
+
+            if (obj != null)
+            {
+                UpdateModelState();
+
+                foreach (Part i in part.symmetryCounterparts)
+                {
+                    if (i.FindModuleImplementing<EngineDecay>() != null)
+                    {
+                        i.FindModuleImplementing<EngineDecay>().procSRBThrust = procSRBThrust;
+                        i.FindModuleImplementing<EngineDecay>().UpdateModelState();
+                    }
+                    else
+                    {
+                        Lib.LogWarning("EngineDecay found a counterpart without EngineDecay, it is really WEIRD!");
+                    }
+                }
+            }
         }
 
         public void ProcUpdateBellName(BaseField bellName, object obj)
         {
             procSRBBellName = (string)bellName.GetValue(procSRB);
-            UpdateModelState(obj != null);
+
+            if (obj != null)
+            {
+                UpdateModelState();
+
+                foreach (Part i in part.symmetryCounterparts)
+                {
+                    if (i.FindModuleImplementing<EngineDecay>() != null)
+                    {
+                        i.FindModuleImplementing<EngineDecay>().procSRBBellName = procSRBBellName;
+                        i.FindModuleImplementing<EngineDecay>().UpdateModelState();
+                    }
+                    else
+                    {
+                        Lib.LogWarning("EngineDecay found a counterpart without EngineDecay, it is really WEIRD!");
+                    }
+                }
+            }
         }
 
-        void UpdateModelState(bool hardReset)
+        void UpdateModelState()
         {
-            if (hardReset)
-            {
-                knownPartCost = -1;
-
-                ReplaceEvent();
-            }
+            knownPartCost = -1;
+            ReplaceEvent();
         }
 
         #endregion

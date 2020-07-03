@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace EngineDecay
 {
@@ -29,6 +30,24 @@ namespace EngineDecay
             {
                 throw new Exception("EngineDecay.Lib.Format: bad time format code");
             }
+        }
+
+        public static void Log(string message)
+        {
+            if (PayToPlaySettingsFeatures.ExtraDebugLogging)
+            {
+                Debug.Log("[P2P] " + message);
+            }
+        }
+
+        public static void LogWarning(string message)
+        {
+            Debug.LogWarning("[P2P] " + message);
+        }
+
+        public static void LogError(string message)
+        {
+            Debug.LogError("[P2P] " + message);
         }
     }
 }
