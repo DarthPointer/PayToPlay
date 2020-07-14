@@ -21,7 +21,7 @@ namespace EngineDecay
         float r = 0;
 
         [KSPField(isPersistant = true, guiActive = false)]
-        bool reliabilityIsVisible;
+        bool reliabilityIsVisible = true;
 
         [KSPField(isPersistant = true, guiActive = false)]
         float currentBaseRatedTime;
@@ -512,7 +512,7 @@ namespace EngineDecay
 
         void UpdateIndicators()
         {
-            if (reliabilityIsVisible)
+            if (reliabilityIsVisible || !PayToPlaySettingsFeatures.HideStartingReliability)
             {
                 burnTimeIndicator = string.Format("{0} / {1}", Lib.Format(usedBurnTime, usingTimeFormat), Lib.Format(setBurnTime, usingTimeFormat));
             }
