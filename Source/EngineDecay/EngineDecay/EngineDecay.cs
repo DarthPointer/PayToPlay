@@ -699,7 +699,6 @@ namespace EngineDecay
                         Lib.Log($"EngineDecay has automatically updated to last reliability generation at part {part.name}");
                     }
 
-                    isKCTBuilt = false;                                                 // If we don't do this, this flag will be passed to saved the saved ship
                     failAtBurnTime = -1;
 
                     if (part.PartActionWindow != null)
@@ -766,6 +765,8 @@ namespace EngineDecay
                 Events["MaintenanceEvent"].guiActiveEditor = false;
                 Events["MaintenanceEvent"].guiActive = false;
             }
+
+            isKCTBuilt = false;                                     // If we don't do this, this flag will be passed to saved the saved ship
         }
 
         public void Update()
