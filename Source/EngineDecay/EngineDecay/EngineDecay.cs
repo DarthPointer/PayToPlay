@@ -721,7 +721,7 @@ namespace EngineDecay
                     }
                     else
                     {
-                        if (replaceCost == 0)
+                        if (replaceCost == 0 && prevLoadWasInEditor)
                         {
                             UpdateReliabilityProgress();
 
