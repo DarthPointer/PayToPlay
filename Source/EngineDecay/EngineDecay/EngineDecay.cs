@@ -137,6 +137,9 @@ namespace EngineDecay
         bool newBorn = true;
 
         [KSPField(isPersistant = true, guiActive = false)]
+        bool prevLoadWasInEditor = false;
+
+        [KSPField(isPersistant = true, guiActive = false)]
         bool isKCTBuilt = false;
 
         [KSPField(isPersistant = true, guiActive = false)]
@@ -206,7 +209,11 @@ namespace EngineDecay
 
             Maintenance();
 
-            GameEvents.onEditorShipModified.Fire(EditorLogic.fetch.ship);
+            if (part.PartActionWindow != null)
+            {
+                part.PartActionWindow.displayDirty = true;
+            }
+            //GameEvents.onEditorShipModified.Fire(EditorLogic.fetch.ship);
         }
 
         void Maintenance()
@@ -268,7 +275,11 @@ namespace EngineDecay
 
             MaintenanceFromCounterpart();
 
-            GameEvents.onEditorShipModified.Fire(EditorLogic.fetch.ship);
+            if (part.PartActionWindow != null)
+            {
+                part.PartActionWindow.displayDirty = true;
+            }
+            //GameEvents.onEditorShipModified.Fire(EditorLogic.fetch.ship);
         }
 
         void MaintenanceFromCounterpart()
@@ -360,7 +371,11 @@ namespace EngineDecay
 
             Replace();
 
-            GameEvents.onEditorShipModified.Fire(EditorLogic.fetch.ship);
+            if (part.PartActionWindow != null)
+            {
+                part.PartActionWindow.displayDirty = true;
+            }
+            //GameEvents.onEditorShipModified.Fire(EditorLogic.fetch.ship);
         }
 
         void Replace()
@@ -400,7 +415,11 @@ namespace EngineDecay
 
             ReplaceFromCounterpart();
 
-            GameEvents.onEditorShipModified.Fire(EditorLogic.fetch.ship);
+            if (part.PartActionWindow != null)
+            {
+                part.PartActionWindow.displayDirty = true;
+            }
+            //GameEvents.onEditorShipModified.Fire(EditorLogic.fetch.ship);
         }
 
         void ReplaceFromCounterpart()
@@ -683,7 +702,12 @@ namespace EngineDecay
                     isKCTBuilt = false;                                                 // If we don't do this, this flag will be passed to saved the saved ship
                     failAtBurnTime = -1;
 
-                    GameEvents.onEditorShipModified.Fire(EditorLogic.fetch.ship);
+                    if (part.PartActionWindow != null)
+                    {
+                        part.PartActionWindow.displayDirty = true;
+                    }
+                    //GameEvents.onEditorShipModified.Fire(EditorLogic.fetch.ship);
+                    prevLoadWasInEditor = true;
                 }
                 else
                 {
@@ -695,13 +719,24 @@ namespace EngineDecay
                     {
                         Disable();
                     }
-                    else if (failAtBurnTime == -1 && topBaseRatedTime != -1)
+                    else
                     {
-                        SetReliabilityData();
+                        if (replaceCost == 0 && (prevLoadWasInEditor || isKCTBuilt))        // if pLWIE is false and iKCTB is true, then we have been recovered and rolled out without visiting editor
+                        {
+                            UpdateReliabilityProgress();
+
+                            Lib.Log($"EngineDecay has automatically updated to last reliability generation at part {part.name}");
+                        }
+                        if (failAtBurnTime == -1 && topBaseRatedTime != -1)
+                        {
+                            SetReliabilityData();
+                        }
                     }
 
                     symmetryMaintenanceCost = -1;
                     symmetryReplaceCost = -1;
+
+                    prevLoadWasInEditor = false;
                 }
 
                 Lib.Log($"EngineDecay at {part.name} is finishing OnLoad, about to update indicators");
