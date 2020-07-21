@@ -721,7 +721,7 @@ namespace EngineDecay
                     }
                     else
                     {
-                        if (replaceCost == 0 && prevLoadWasInEditor)
+                        if (replaceCost == 0 && (prevLoadWasInEditor || isKCTBuilt))        // if pLWIE is false and iKCTB is true, then we have been recovered and rolled out without visiting editor
                         {
                             UpdateReliabilityProgress();
 
