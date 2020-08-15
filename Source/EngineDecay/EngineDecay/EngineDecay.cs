@@ -1280,7 +1280,7 @@ namespace EngineDecay
             }
             else
             {
-                FlightLogger.fetch?.LogEvent(string.Format("{0} failed", part.name));
+                FlightLogger.fetch?.LogEvent(string.Format("{0} failed", part.partName));
             }
 
             ticksTillDisabling = 5;
