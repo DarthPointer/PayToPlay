@@ -298,6 +298,9 @@ namespace EngineDecay
             symmetryMaintenanceCost = 0;
             Events["SymmetryMaintenance"].guiActiveEditor = false;
 
+            symmetryIgnitionRestoreCost = 0;
+            Events["SymmetryIgnitionRestore"].guiActiveEditor = false;
+
             if (baseIgnitions != -1)
             {
                 symmetryIgnitionRestoreCost = 0;
@@ -551,7 +554,6 @@ namespace EngineDecay
                 EngineDecay engineDecay = i.FindModuleImplementing<EngineDecay>();
                 if (i != null)
                 {
-                    engineDecay.CounterpartMaintenance(symmetryIgnitionRestoreCost);
                     engineDecay.IgnitionRestoreFromCounterpart();
                 }
                 else
@@ -560,7 +562,7 @@ namespace EngineDecay
                 }
             }
 
-            CounterpartMaintenance(symmetryIgnitionRestoreCost);
+            
             IgnitionRestoreFromCounterpart();
 
             GameEvents.onEditorShipModified.Fire(EditorLogic.fetch.ship);           // the cost has changed!
@@ -568,6 +570,8 @@ namespace EngineDecay
 
         void IgnitionRestoreFromCounterpart()
         {
+            CounterpartMaintenance(symmetryIgnitionRestoreCost);
+
             IgnitionRestore();
 
             symmetryIgnitionRestoreCost = 0;
