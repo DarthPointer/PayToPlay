@@ -571,6 +571,7 @@ namespace EngineDecay
         void IgnitionRestoreFromCounterpart()
         {
             CounterpartMaintenance(symmetryIgnitionRestoreCost);
+            CounterpartReplace(symmetryIgnitionRestoreCost);
 
             IgnitionRestore();
 
@@ -582,6 +583,7 @@ namespace EngineDecay
         void CounterpartIgnitionRestore(int cost)
         {
             CounterpartMaintenance(cost);
+            CounterpartReplace(cost);
 
             if (symmetryIgnitionRestoreCost != 0)
             {
