@@ -392,6 +392,9 @@ namespace EngineDecay
             maintenanceCost = 0;
             Events["MaintenanceEvent"].guiActiveEditor = false;
 
+            ignitionRestoreCost = 0;
+            Events["IgnitionRestoreEvent"].guiActiveEditor = false;
+
             Replace();
 
             GameEvents.onEditorShipModified.Fire(EditorLogic.fetch.ship);           // the cost has changed!
@@ -443,6 +446,11 @@ namespace EngineDecay
             symmetryMaintenanceCost = 0;
             Events["MaintenanceEvent"].guiActiveEditor = false;
             Events["SymmetryMaintenance"].guiActiveEditor = false;
+
+            ignitionRestoreCost = 0;
+            symmetryIgnitionRestoreCost = 0;
+            Events["IgnitionRestoreEvent"].guiActive = false;
+            Events["SymmetryIgnitionRestore"].guiActiveEditor = false;
 
             Replace();
 
