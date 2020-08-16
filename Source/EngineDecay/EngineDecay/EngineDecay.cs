@@ -774,6 +774,19 @@ namespace EngineDecay
 
         #region Game-called Methods
 
+        public override void OnCopy(PartModule fromModule)
+        {
+            base.OnCopy(fromModule);
+            UpdateModelState();
+            /*UpdateReliabilityProgress();
+            usedBurnTime = -1;
+            knownPartCost = -1;
+            if (baseIgnitions != -1)
+            {
+                ignitionsLeft = setIgnitions;
+            }*/
+        }
+
         public override void OnLoad(ConfigNode node)
         {
             base.OnLoad(node);
