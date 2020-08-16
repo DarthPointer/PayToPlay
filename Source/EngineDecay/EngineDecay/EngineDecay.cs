@@ -774,6 +774,32 @@ namespace EngineDecay
 
         #region Game-called Methods
 
+        public override void OnLoad(ConfigNode node)
+        {
+            base.OnLoad(node);
+            if (node.HasValue("nominal"))
+            {
+                if (!bool.Parse(node.GetValue("nominal")))
+                {
+                    if (node.HasValue("reliabilityStatus"))
+                    {
+                        if (node.GetValue("reliabilityStatus") == "out of ignitions")
+                        {
+                            issueCode = 2;
+                        }
+                        else
+                        {
+                            issueCode = 1;
+                        }
+                    }
+                    else
+                    {
+                        issueCode = 1;
+                    }
+                }
+            }
+        }
+
         public override void OnStart(StartState state)
         {
             if (PayToPlaySettingsFeatures.Enable)
