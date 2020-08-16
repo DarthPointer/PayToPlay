@@ -347,7 +347,7 @@ namespace EngineDecay
                 }
             }
 
-            if (baseIgnitions != -1)
+            if (baseIgnitions != -1 && !useSRBCost)
             {
                 maintenanceCost += UpdateIgnitionRestoreCost();
             }
@@ -1085,19 +1085,29 @@ namespace EngineDecay
                     }
                     else
                     {
-                        if (partSymmetryCounterpartsCount != -1)            // If a part was started in a symmetry group
+                        if (partSymmetryCounterpartsCount > 0)            // If a part was started in a symmetry group
                         {
                             symmetryIgnitionRestoreCost = -1;
                             symmetryMaintenanceCost = -1;
                             symmetryReplaceCost = -1;
 
-                            Events["IgnitionRestoreEvent"].guiActiveEditor = false;
-                            Events["MaintenanceEvent"].guiActiveEditor = false;
-                            Events["ReplaceEvent"].guiActiveEditor = false;
+                            Lib.Log("Detected symmetry disconnection, disabling symmetry-related buttons");
+                            Events["SymmetryIgnitionRestore"].guiActiveEditor = false;
+                            Events["SymmetryMaintenance"].guiActiveEditor = false;
+                            Events["SymmetryReplace"].guiActiveEditor = false;
+
+                            part.PartActionWindow.displayDirty = true;
+
+                            partSymmetryCounterpartsCount = 0;
                         }
-                        //UpdateIgnitionRestoreCost();          called in UpdateMaintenanceCost
-                        UpdateMaintenanceCost();
-                        UpdateReplaceCost();
+                        if (partSymmetryCounterpartsCount == -1)        // -1 is initial value, then it is set to 0/positve
+                        {
+                            //UpdateIgnitionRestoreCost();          called in UpdateMaintenanceCost
+                            UpdateMaintenanceCost();
+                            UpdateReplaceCost();
+
+                            partSymmetryCounterpartsCount = 0;
+                        }
                     }
 
                     if (prevEBTP != extraBurnTimePercent || prevEIP != extraIgnitionsPercent)
