@@ -536,7 +536,7 @@ namespace EngineDecay
             if (symmetryReplaceCost > 0 || issueCode != 0)
             {
                 Events["SymmetryReplace"].guiActiveEditor = true;
-                Events["SymmetryReplace"].guiName = string.Format("Replace: {0}", symmetryReplaceCost);
+                Events["SymmetryReplace"].guiName = string.Format("Symmetry Replace: {0}", symmetryReplaceCost);
             }
             else
             {
