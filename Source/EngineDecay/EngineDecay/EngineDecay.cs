@@ -777,7 +777,7 @@ namespace EngineDecay
         public override void OnLoad(ConfigNode node)
         {
             base.OnLoad(node);
-            if (node.HasValue("nominal"))
+            if (node.HasValue("nominal"))                                               // Support for pre-1.5.4.0 saves (noncritical, to be removed at some point)
             {
                 if (!bool.Parse(node.GetValue("nominal")))
                 {
