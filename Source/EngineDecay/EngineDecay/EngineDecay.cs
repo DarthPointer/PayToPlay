@@ -234,7 +234,7 @@ namespace EngineDecay
             usedBurnTime = 0;
             usageExperienceCoeff = 0;
 
-            if (topBaseRatedTime != -1)                                                 // The r parameter is changed by OnLoad when getting back to editor
+            if (topBaseRatedTime != -1)                                                 // The r parameter is changed by OnStart when getting back to editor
             {
                 currentBaseRatedTime = ProbabilityLib.ATangentCumulativePercentArg(r, topBaseRatedTime);
                 setBurnTime = currentBaseRatedTime * (1 + extraBurnTimePercent * (topMaxRatedTime / topBaseRatedTime - 1) / 100);
@@ -833,6 +833,8 @@ namespace EngineDecay
                 {
                     inEditor = true;
 
+                    GameEvents.onEditorShipModified.Add(ForceReplaceMaintenanceUpdating);
+
                     r -= usageExperienceCoeff * PayToPlaySettingsDifficultyNumbers.UsageExperienceToDegradationMul;
 
                     if (procPart)
@@ -910,7 +912,7 @@ namespace EngineDecay
                     prevLoadWasInEditor = false;
                 }
 
-                Lib.Log($"EngineDecay at {part.name} is finishing OnLoad, about to update indicators");
+                Lib.Log($"EngineDecay at {part.name} is finishing OnStart, about to update indicators");
 
                 UpdateIndicators();
             }
@@ -1053,6 +1055,16 @@ namespace EngineDecay
                     }
                 }
             }
+        }
+
+        void ForceReplaceMaintenanceUpdating(ShipConstruct doesNaMatter)
+        {
+            if (baseIgnitions != -1)
+            {
+                symmetryIgnitionRestoreCost = -1;
+            }
+            symmetryMaintenanceCost = -1;
+            symmetryReplaceCost = -1;
         }
 
         public void FixedUpdate()
