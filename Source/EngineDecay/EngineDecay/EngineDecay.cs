@@ -48,6 +48,9 @@ namespace EngineDecay
         public float maxCostIgnitionsCoeff = 0.5f;
 
         [KSPField(isPersistant = true, guiActive = false)]
+        public float maxIgnitionRestoreCostCoeff = 0.1f;
+
+        [KSPField(isPersistant = true, guiActive = false)]
         bool usingMultiModeLogic = false;
 
         [KSPField(isPersistant = true, guiActive = false)]
@@ -110,7 +113,7 @@ namespace EngineDecay
         string reliabilityStatus = "nominal";
 
         [KSPField(isPersistant = true, guiActive = false)]
-        bool nominal = true;
+        int issueCode = 0;
 
         int modeRunningPrevTick = -1;
         bool wasRailWarpingPrevTick = false;
@@ -164,6 +167,12 @@ namespace EngineDecay
         int symmetryReplaceCost = 0;
 
         [KSPField(isPersistant = true, guiActive = false)]
+        int ignitionRestoreCost = 0;
+
+        [KSPField(isPersistant = true, guiActive = false)]
+        int symmetryIgnitionRestoreCost = 0;
+
+        [KSPField(isPersistant = true, guiActive = false)]
         public float procSRBDiameter = 0;
 
         [KSPField(isPersistant = true, guiActive = false)]
@@ -176,6 +185,7 @@ namespace EngineDecay
         float ignoreIgnitionTill = 0;
         int ticksTillDisabling = -1;
         float holdIndicatorsTill = 0;
+        int partSymmetryCounterpartsCount = -1;
 
         List<ModuleEngines> decayingEngines;
         MultiModeEngine modeSwitcher;
@@ -195,6 +205,10 @@ namespace EngineDecay
                 EngineDecay engineDecay = i.FindModuleImplementing<EngineDecay>();
                 if (i != null)
                 {
+                    if (baseIgnitions != -1 && !useSRBCost)
+                    {
+                        engineDecay.CounterpartIgnitionRestore(ignitionRestoreCost);
+                    }
                     engineDecay.CounterpartMaintenance(maintenanceCost);
                     engineDecay.CounterpartReplace(maintenanceCost);
                 }
@@ -204,16 +218,16 @@ namespace EngineDecay
                 }
             }
 
+            if (baseIgnitions != -1 && !useSRBCost)
+            {
+                CounterpartIgnitionRestore(ignitionRestoreCost);
+            }
             CounterpartMaintenance(maintenanceCost);                            // the counterpart is the same part for this case, we call it to update symmetry maintenance button
             CounterpartReplace(maintenanceCost);
 
             Maintenance();
 
-            if (part.PartActionWindow != null)
-            {
-                part.PartActionWindow.displayDirty = true;
-            }
-            //GameEvents.onEditorShipModified.Fire(EditorLogic.fetch.ship);
+            GameEvents.onEditorShipModified.Fire(EditorLogic.fetch.ship);           // the cost has changed!
         }
 
         void Maintenance()
@@ -221,7 +235,7 @@ namespace EngineDecay
             usedBurnTime = 0;
             usageExperienceCoeff = 0;
 
-            if (topBaseRatedTime != -1)                                                 // The r parameter is changed by OnLoad when getting back to editor
+            if (topBaseRatedTime != -1)                                                 // The r parameter is changed by OnStart when getting back to editor
             {
                 currentBaseRatedTime = ProbabilityLib.ATangentCumulativePercentArg(r, topBaseRatedTime);
                 setBurnTime = currentBaseRatedTime * (1 + extraBurnTimePercent * (topMaxRatedTime / topBaseRatedTime - 1) / 100);
@@ -230,6 +244,9 @@ namespace EngineDecay
             if (baseIgnitions != -1)
             {
                 ignitionsLeft = setIgnitions;
+
+                ignitionRestoreCost = 0;
+                Events["IgnitionRestoreEvent"].guiActiveEditor = false;
             }
 
             UpdateIndicators();
@@ -242,13 +259,13 @@ namespace EngineDecay
             {
                 reliabilityStatus = "nominal";
             }
-            nominal = true;
+            issueCode = 0;
 
             Enable();
 
             if (maintenanceCost != 0)
             {
-                targetPartCost = maintenanceCost;
+                targetPartCost += maintenanceCost;
             }
 
             UpdateReplaceCost();
@@ -275,11 +292,7 @@ namespace EngineDecay
 
             MaintenanceFromCounterpart();
 
-            if (part.PartActionWindow != null)
-            {
-                part.PartActionWindow.displayDirty = true;
-            }
-            //GameEvents.onEditorShipModified.Fire(EditorLogic.fetch.ship);
+            GameEvents.onEditorShipModified.Fire(EditorLogic.fetch.ship);           // the cost has changed!
         }
 
         void MaintenanceFromCounterpart()
@@ -291,6 +304,12 @@ namespace EngineDecay
 
             symmetryMaintenanceCost = 0;
             Events["SymmetryMaintenance"].guiActiveEditor = false;
+
+            if (baseIgnitions != -1 && !useSRBCost)
+            {
+                symmetryIgnitionRestoreCost = 0;
+                Events["SymmetryIgnitionRestore"].guiActive = false;
+            }
         }
 
         void CounterpartMaintenance(int cost)
@@ -315,11 +334,6 @@ namespace EngineDecay
             if (!useSRBCost)
             {
                 maintenanceCost = (int)(knownPartCost * (1f + extraBurnTimePercent * maxCostRatedTimeCoeff / 100f) * maintenanceAtRatedTimeCoeff * usedBurnTime / setBurnTime);
-
-                if (maintenanceCost > knownPartCost * (1f + extraBurnTimePercent * maxCostRatedTimeCoeff / 100f))
-                {
-                    maintenanceCost = (int)(knownPartCost * (1f + extraBurnTimePercent * maxCostRatedTimeCoeff / 100f));
-                }
             }
             else
             {
@@ -333,11 +347,22 @@ namespace EngineDecay
                 }
             }
 
-            if (maintenanceCost > 0 || !nominal)
+            if (baseIgnitions != -1 && !useSRBCost)
+            {
+                maintenanceCost += UpdateIgnitionRestoreCost();
+            }
+
+            if (maintenanceCost > 0 || issueCode != 0)
             {
                 Events["MaintenanceEvent"].guiActiveEditor = true;
                 Events["MaintenanceEvent"].guiName = string.Format("Maintenance: {0}", maintenanceCost);
             }
+            else
+            {
+                Events["MaintenanceEvent"].guiActiveEditor = false;
+            }
+
+            //maintenanceCost = maintenanceCost < fullPartCost ? maintenanceCost : (int)fullPartCost;
 
             return maintenanceCost;
         }
@@ -356,6 +381,10 @@ namespace EngineDecay
                 {
                     engineDecay.CounterpartReplace(replaceCost);
                     engineDecay.CounterpartMaintenance(maintenanceCost);
+                    if (baseIgnitions != -1 && !useSRBCost)
+                    {
+                        engineDecay.CounterpartIgnitionRestore(ignitionRestoreCost);
+                    }
                 }
                 else
                 {
@@ -365,17 +394,23 @@ namespace EngineDecay
 
             CounterpartReplace(replaceCost);                            // the counterpart is the same part for this case, we call it to update symmetry replace button
             CounterpartMaintenance(maintenanceCost);
+            if (baseIgnitions != -1 && !useSRBCost)
+            {
+                CounterpartIgnitionRestore(ignitionRestoreCost);
+            }
 
             maintenanceCost = 0;
             Events["MaintenanceEvent"].guiActiveEditor = false;
 
+            if (baseIgnitions != -1 && !useSRBCost)
+            {
+                ignitionRestoreCost = 0;
+                Events["IgnitionRestoreEvent"].guiActiveEditor = false;
+            }
+
             Replace();
 
-            if (part.PartActionWindow != null)
-            {
-                part.PartActionWindow.displayDirty = true;
-            }
-            //GameEvents.onEditorShipModified.Fire(EditorLogic.fetch.ship);
+            GameEvents.onEditorShipModified.Fire(EditorLogic.fetch.ship);           // the cost has changed!
         }
 
         void Replace()
@@ -387,7 +422,7 @@ namespace EngineDecay
 
             UpdateIndicators();
 
-            nominal = true;
+            issueCode = 0;
 
             Enable();
 
@@ -415,11 +450,7 @@ namespace EngineDecay
 
             ReplaceFromCounterpart();
 
-            if (part.PartActionWindow != null)
-            {
-                part.PartActionWindow.displayDirty = true;
-            }
-            //GameEvents.onEditorShipModified.Fire(EditorLogic.fetch.ship);
+            GameEvents.onEditorShipModified.Fire(EditorLogic.fetch.ship);           // the cost has changed!
         }
 
         void ReplaceFromCounterpart()
@@ -428,6 +459,14 @@ namespace EngineDecay
             symmetryMaintenanceCost = 0;
             Events["MaintenanceEvent"].guiActiveEditor = false;
             Events["SymmetryMaintenance"].guiActiveEditor = false;
+
+            if (baseIgnitions != -1 && !useSRBCost)
+            {
+                ignitionRestoreCost = 0;
+                symmetryIgnitionRestoreCost = 0;
+                Events["IgnitionRestoreEvent"].guiActiveEditor = false;
+                Events["SymmetryIgnitionRestore"].guiActiveEditor = false;
+            }
 
             Replace();
 
@@ -452,18 +491,41 @@ namespace EngineDecay
             }
         }
 
+        bool IsNewAndUpToDate()
+        {
+            if (procPart)
+            {
+                if (r != ReliabilityProgress.fetch.CheckProcSRBProgress(part.name, ref procSRBDiameter, ref procSRBThrust, ref procSRBBellName).r)
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                if (r != ReliabilityProgress.fetch.GetReliabilityData(part.name).r)
+                {
+                    return false;
+                }
+            }
+
+            if (topBaseRatedTime == -1)
+            {
+                return ignitionsLeft == setIgnitions;
+            }
+            else
+            {
+                return usedBurnTime == 0;
+            }
+        }
+
         int UpdateReplaceCost()
         {
             replaceCost = (int)(fullPartCost - targetPartCost);
 
-            if (replaceCost > 0 || !nominal)
+            if (!IsNewAndUpToDate())
             {
                 Events["ReplaceEvent"].guiActiveEditor = true;
                 Events["ReplaceEvent"].guiName = string.Format("Replace: {0}", replaceCost);
-            }
-            else
-            {
-                Events["ReplaceEvent"].guiActiveEditor = false;
             }
 
             return replaceCost;
@@ -471,14 +533,154 @@ namespace EngineDecay
 
         void UpdateSymmetryReplaceButton()
         {
-            if (symmetryReplaceCost > 0 || !nominal)
+            if (symmetryReplaceCost > 0 || issueCode != 0)
             {
                 Events["SymmetryReplace"].guiActiveEditor = true;
-                Events["SymmetryReplace"].guiName = string.Format("Replace: {0}", symmetryReplaceCost);
+                Events["SymmetryReplace"].guiName = string.Format("Symmetry Replace: {0}", symmetryReplaceCost);
             }
             else
             {
                 Events["SymmetryReplace"].guiActiveEditor = false;
+            }
+        }
+
+        #endregion
+
+        #region Ignition Restore
+
+        [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "Restore Ignitions", groupName = "PayToPlayReliability", groupDisplayName = "PayToPlay Reliability")]
+        void IgnitionRestoreEvent()
+        {
+            foreach (Part i in part.symmetryCounterparts)
+            {
+                EngineDecay engineDecay = i.FindModuleImplementing<EngineDecay>();
+                if (i != null)
+                {
+                    engineDecay.CounterpartIgnitionRestore(ignitionRestoreCost);
+                }
+                else
+                {
+                    Lib.LogWarning("EngineDecay found a counterpart without EngineDecay, it is really WEIRD!");
+                }
+            }
+
+            Lib.Log($"Separately Ign-Restored part keeps Symm Ign Restore Cost {symmetryIgnitionRestoreCost}, Ign Restore Cost is {ignitionRestoreCost}");
+            CounterpartIgnitionRestore(ignitionRestoreCost);
+            Lib.Log($"Resulting Symm Ign Restore Cost is {symmetryIgnitionRestoreCost}");
+
+            IgnitionRestore();
+
+            GameEvents.onEditorShipModified.Fire(EditorLogic.fetch.ship);           // the cost has changed!
+        }
+
+        void IgnitionRestore()
+        {
+            if (ignitionRestoreCost != 0)
+            {
+                ignitionsLeft = setIgnitions;
+
+                UpdateIndicators();
+
+                if (issueCode == 2)
+                {
+                    issueCode = 0;
+                    reliabilityStatus = "nominal";
+                    Enable();
+                }
+
+                targetPartCost = ignitionRestoreCost;
+                Lib.Log($"Restored ignitions, target part cost set to {targetPartCost}");
+
+                Lib.Log("Hiding Ignition Restore");
+                Events["IgnitionRestoreEvent"].guiActiveEditor = false;
+                ignitionRestoreCost = 0;
+
+                UpdateMaintenanceCost();
+                UpdateReplaceCost();
+            }
+        }
+
+        [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "Symm Ign Restore", groupName = "PayToPlayReliability", groupDisplayName = "PayToPlay Reliability")]
+        void SymmetryIgnitionRestore()
+        {
+            foreach (Part i in part.symmetryCounterparts)
+            {
+                EngineDecay engineDecay = i.FindModuleImplementing<EngineDecay>();
+                if (i != null)
+                {
+                    engineDecay.IgnitionRestoreFromCounterpart();
+                }
+                else
+                {
+                    Debug.LogWarning("EngineDecay found a counterpart without EngineDecay, it is really WEIRD!");
+                }
+            }
+
+            
+            IgnitionRestoreFromCounterpart();
+
+            GameEvents.onEditorShipModified.Fire(EditorLogic.fetch.ship);           // the cost has changed!
+        }
+
+        void IgnitionRestoreFromCounterpart()
+        {
+            CounterpartMaintenance(symmetryIgnitionRestoreCost);
+            CounterpartReplace(symmetryIgnitionRestoreCost);
+
+            IgnitionRestore();
+
+            symmetryIgnitionRestoreCost = 0;
+            Lib.Log("Hiding Symm Ign Restore");
+            Events["SymmetryIgnitionRestore"].guiActiveEditor = false;
+        }
+
+        void CounterpartIgnitionRestore(int cost)
+        {
+            CounterpartMaintenance(cost);
+            CounterpartReplace(cost);
+
+            if (symmetryIgnitionRestoreCost != 0)
+            {
+                symmetryIgnitionRestoreCost -= cost;
+
+                if (symmetryIgnitionRestoreCost != 0)
+                {
+                    Events["SymmetryIgnitionRestore"].guiName = string.Format("Symm Ign Restore: {0}", symmetryIgnitionRestoreCost);
+                }
+                else
+                {
+                    Events["SymmetryIgnitionRestore"].guiActiveEditor = false;
+                }
+            }
+        }
+
+        int UpdateIgnitionRestoreCost()
+        {
+            ignitionRestoreCost = (int)(knownPartCost * (1 + extraIgnitionsPercent/100) * (1 - ignitionsLeft/setIgnitions) * maxIgnitionRestoreCostCoeff);
+
+            if (ignitionRestoreCost > 0 || issueCode == 2)
+            {
+                Events["IgnitionRestoreEvent"].guiActiveEditor = true;
+                Events["IgnitionRestoreEvent"].guiName = string.Format("Restore Ignitions: {0}", ignitionRestoreCost);
+            }
+            else
+            {
+                Events["IgnitionRestoreEvent"].guiActiveEditor = false;
+            }
+
+            return ignitionRestoreCost;
+        }
+
+        void UpdateSymmetryIgnitionRestoreButton()
+        {
+            if (symmetryIgnitionRestoreCost > 0 || issueCode == 2)
+            {
+                Events["SymmetryIgnitionRestore"].guiActiveEditor = true;
+                Events["SymmetryIgnitionRestore"].guiName = string.Format("Symm Ign Restore: {0}", symmetryIgnitionRestoreCost);
+            }
+            else
+            {
+                Events["SymmetryIgnitionRestore"].guiActiveEditor = false;
             }
         }
 
@@ -571,6 +773,45 @@ namespace EngineDecay
         #endregion
 
         #region Game-called Methods
+
+        public override void OnCopy(PartModule fromModule)
+        {
+            base.OnCopy(fromModule);
+            UpdateModelState();
+            /*UpdateReliabilityProgress();
+            usedBurnTime = -1;
+            knownPartCost = -1;
+            if (baseIgnitions != -1)
+            {
+                ignitionsLeft = setIgnitions;
+            }*/
+        }
+
+        public override void OnLoad(ConfigNode node)
+        {
+            base.OnLoad(node);
+            if (node.HasValue("nominal"))                                               // Support for pre-1.5.4.0 saves (noncritical, to be removed at some point)
+            {
+                if (!bool.Parse(node.GetValue("nominal")))
+                {
+                    if (node.HasValue("reliabilityStatus"))
+                    {
+                        if (node.GetValue("reliabilityStatus") == "out of ignitions")
+                        {
+                            issueCode = 2;
+                        }
+                        else
+                        {
+                            issueCode = 1;
+                        }
+                    }
+                    else
+                    {
+                        issueCode = 1;
+                    }
+                }
+            }
+        }
 
         public override void OnStart(StartState state)
         {
@@ -714,7 +955,7 @@ namespace EngineDecay
 
                     ignoreIgnitionTill = Time.time + 0.5f;
 
-                    if (!nominal)
+                    if (issueCode != 0)
                     {
                         Disable();
                     }
@@ -732,13 +973,14 @@ namespace EngineDecay
                         }
                     }
 
+                    symmetryIgnitionRestoreCost = -1;
                     symmetryMaintenanceCost = -1;
                     symmetryReplaceCost = -1;
 
                     prevLoadWasInEditor = false;
                 }
 
-                Lib.Log($"EngineDecay at {part.name} is finishing OnLoad, about to update indicators");
+                Lib.Log($"EngineDecay at {part.name} is finishing OnStart, about to update indicators");
 
                 UpdateIndicators();
             }
@@ -766,10 +1008,99 @@ namespace EngineDecay
                 Events["MaintenanceEvent"].guiActive = false;
             }
 
-            isKCTBuilt = false;                                     // If we don't do this, this flag will be passed to saved the saved ship
+            isKCTBuilt = false;                                     // If we don't do this, this flag will be passed to a saved ship
         }
 
         public void Update()
+        {
+            if (PayToPlaySettingsFeatures.Enable)
+            {
+            }
+        }
+
+        void ReviewSymmetryCosts(List<Part> counterparts)
+        {
+            if (baseIgnitions != -1 && !useSRBCost)
+            {
+                symmetryIgnitionRestoreCost = UpdateIgnitionRestoreCost();
+            }
+            symmetryMaintenanceCost = UpdateMaintenanceCost();
+            symmetryReplaceCost = UpdateReplaceCost();
+
+            foreach (Part i in counterparts)
+            {
+                EngineDecay engineDecay = i.FindModuleImplementing<EngineDecay>();
+                if (engineDecay != null)
+                {
+                    if (baseIgnitions != -1 && !useSRBCost)
+                    {
+                        symmetryIgnitionRestoreCost += engineDecay.UpdateIgnitionRestoreCost();
+                    }
+                    symmetryMaintenanceCost += engineDecay.UpdateMaintenanceCost();
+                    symmetryReplaceCost += engineDecay.UpdateReplaceCost();
+                }
+                else
+                {
+                    Debug.LogWarning("EngineDecay found a counterpart without EngineDecay, it is really WEIRD!");
+                }
+            }
+
+            foreach (Part i in counterparts)
+            {
+                EngineDecay engineDecay = i.FindModuleImplementing<EngineDecay>();
+                if (engineDecay != null)
+                {
+                    if (baseIgnitions != -1 && !useSRBCost)
+                    {
+                        engineDecay.symmetryIgnitionRestoreCost = symmetryIgnitionRestoreCost;
+                    }
+                    engineDecay.symmetryMaintenanceCost = symmetryMaintenanceCost;
+                    engineDecay.symmetryReplaceCost = symmetryReplaceCost;
+
+                    if (symmetryMaintenanceCost > 0)
+                    {
+                        engineDecay.Events["SymmetryMaintenance"].guiName = string.Format("Symmetry Maintenance: {0}", symmetryMaintenanceCost);
+                        engineDecay.Events["SymmetryMaintenance"].guiActiveEditor = true;
+                    }
+                    if (symmetryReplaceCost > 0)
+                    {
+                        engineDecay.Events["SymmetryReplace"].guiName = string.Format("Symmetry Replace: {0}", symmetryReplaceCost);
+                        engineDecay.Events["SymmetryReplace"].guiActiveEditor = true;
+                    }
+                    if (symmetryIgnitionRestoreCost > 0)
+                    {
+                        engineDecay.Events["SymmetryIgnitionRestore"].guiName = string.Format("Symm Ign Restore: {0}", symmetryIgnitionRestoreCost);
+                        engineDecay.Events["SymmetryIgnitionRestore"].guiActiveEditor = true;
+                    }
+                }
+                else
+                {
+                    Debug.LogWarning("EngineDecay found a counterpart without EngineDecay, it is really WEIRD!");
+                }
+            }
+
+            if (symmetryMaintenanceCost > 0)
+            {
+                Events["SymmetryMaintenance"].guiName = string.Format("Symmetry Maintenance: {0}", symmetryMaintenanceCost);
+                Events["SymmetryMaintenance"].guiActiveEditor = true;
+            }
+            if (symmetryReplaceCost > 0)
+            {
+                Events["SymmetryReplace"].guiName = string.Format("Symmetry Replace: {0}", symmetryReplaceCost);
+                Events["SymmetryReplace"].guiActiveEditor = true;
+            }
+            if (symmetryIgnitionRestoreCost > 0)
+            {
+                Events["SymmetryIgnitionRestore"].guiName = string.Format("Symm Ign Restore: {0}", symmetryIgnitionRestoreCost);
+                Events["SymmetryIgnitionRestore"].guiActiveEditor = true;
+            }
+
+            partSymmetryCounterpartsCount = counterparts.Count();
+
+            GameEvents.onEditorShipModified.Fire(EditorLogic.fetch.ship);
+        }
+
+        public void FixedUpdate()
         {
             if (PayToPlaySettingsFeatures.Enable)
             {
@@ -783,67 +1114,39 @@ namespace EngineDecay
                 if (inEditor)
                 {
                     List<Part> counterparts = part.symmetryCounterparts;
-                    if(counterparts.Count() != 0)
+                    if (counterparts.Count() != 0)
                     {
-                        if(symmetryMaintenanceCost == -1)
+                        if (symmetryMaintenanceCost == -1 || partSymmetryCounterpartsCount != counterparts.Count())
                         {
-                            symmetryMaintenanceCost = UpdateMaintenanceCost();
-                            symmetryReplaceCost = UpdateReplaceCost();
-
-                            foreach (Part i in counterparts)
-                            {
-                                EngineDecay engineDecay = i.FindModuleImplementing<EngineDecay>();
-                                if (engineDecay != null)
-                                {
-                                    symmetryMaintenanceCost += engineDecay.UpdateMaintenanceCost();
-                                    symmetryReplaceCost += engineDecay.UpdateReplaceCost();
-                                }
-                                else
-                                {
-                                    Debug.LogWarning("EngineDecay found a counterpart without EngineDecay, it is really WEIRD!");
-                                }
-                            }
-
-                            foreach (Part i in counterparts)
-                            {
-                                EngineDecay engineDecay = i.FindModuleImplementing<EngineDecay>();
-                                if (engineDecay != null)
-                                {
-                                    engineDecay.symmetryMaintenanceCost = symmetryMaintenanceCost;
-                                    engineDecay.symmetryReplaceCost = symmetryReplaceCost;
-                                    if (symmetryMaintenanceCost > 0)
-                                    {
-                                        engineDecay.Events["SymmetryMaintenance"].guiName = string.Format("Symmetry Maintenance: {0}", symmetryMaintenanceCost);
-                                        engineDecay.Events["SymmetryMaintenance"].guiActiveEditor = true;
-                                    }
-                                    if (symmetryReplaceCost > 0)
-                                    {
-                                        engineDecay.Events["SymmetryReplace"].guiName = string.Format("Symmetry Replace: {0}", symmetryReplaceCost);
-                                        engineDecay.Events["SymmetryReplace"].guiActiveEditor = true;
-                                    }
-                                }
-                                else
-                                {
-                                    Debug.LogWarning("EngineDecay found a counterpart without EngineDecay, it is really WEIRD!");
-                                }
-                            }
-                        }
-
-                        if (symmetryMaintenanceCost > 0)
-                        {
-                            Events["SymmetryMaintenance"].guiName = string.Format("Symmetry Maintenance: {0}", symmetryMaintenanceCost);
-                            Events["SymmetryMaintenance"].guiActiveEditor = true;
-                        }
-                        if (symmetryReplaceCost > 0)
-                        {
-                            Events["SymmetryReplace"].guiName = string.Format("Symmetry Replace: {0}", symmetryReplaceCost);
-                            Events["SymmetryReplace"].guiActiveEditor = true;
+                            Lib.Log("Rviewing symmetry costs as symmetry counterparts count has changed or costs not set yet");
+                            ReviewSymmetryCosts(counterparts);
                         }
                     }
                     else
                     {
-                        UpdateMaintenanceCost();
-                        UpdateReplaceCost();
+                        if (partSymmetryCounterpartsCount > 0)            // If a part was started in a symmetry group
+                        {
+                            symmetryIgnitionRestoreCost = -1;
+                            symmetryMaintenanceCost = -1;
+                            symmetryReplaceCost = -1;
+
+                            Lib.Log("Detected symmetry disconnection, disabling symmetry-related buttons");
+                            Events["SymmetryIgnitionRestore"].guiActiveEditor = false;
+                            Events["SymmetryMaintenance"].guiActiveEditor = false;
+                            Events["SymmetryReplace"].guiActiveEditor = false;
+
+                            part.PartActionWindow.displayDirty = true;
+
+                            partSymmetryCounterpartsCount = 0;
+                        }
+                        if (partSymmetryCounterpartsCount == -1)        // -1 is initial value, then it is set to 0/positve
+                        {
+                            //UpdateIgnitionRestoreCost();          called in UpdateMaintenanceCost
+                            UpdateMaintenanceCost();
+                            UpdateReplaceCost();
+
+                            partSymmetryCounterpartsCount = 0;
+                        }
                     }
 
                     if (prevEBTP != extraBurnTimePercent || prevEIP != extraIgnitionsPercent)
@@ -856,13 +1159,7 @@ namespace EngineDecay
                         ReplaceEvent();
                     }
                 }
-            }
-        }
 
-        public void FixedUpdate()
-        {
-            if (PayToPlaySettingsFeatures.Enable)
-            {
                 if (!inEditor)
                 {
                     bool railWarping = IsRailWarping();
@@ -903,7 +1200,7 @@ namespace EngineDecay
 
                         if (topBaseRatedTime != -1)
                         {
-                            if (usedBurnTime > failAtBurnTime && nominal)
+                            if (usedBurnTime > failAtBurnTime && issueCode == 0)
                             {
                                 Failure();
 
@@ -951,13 +1248,13 @@ namespace EngineDecay
                             }
                         }
 
-                        if (Time.time >= ignoreIgnitionTill && baseIgnitions != -1 && nominal)
+                        if (Time.time >= ignoreIgnitionTill && baseIgnitions != -1 && issueCode == 0)
                         {
                             checkIgnition();
                         }
                     }
 
-                    if (nominal && baseIgnitions != -1)
+                    if (issueCode == 0 && baseIgnitions != -1)
                     {
                         LastIgnitionCheck();
                     }
@@ -1071,6 +1368,8 @@ namespace EngineDecay
                     ignitionsLeft--;
 
                     float luck = UnityEngine.Random.Range(0f, 1f);
+                    Lib.Log($"Failure on ignition chance is {PayToPlaySettingsDifficultyNumbers.FailureOnIgnitionPercent / 100 * Math.Pow(9 - r, 3.2)}");
+                    Lib.Log($"Noncritical gnition failure chance is {PayToPlaySettingsDifficultyNumbers.IgnitionFailurePercent / 100 * Math.Pow(9 - r, 3.2)}");
                     if (luck < PayToPlaySettingsDifficultyNumbers.FailureOnIgnitionPercent / 100 * Math.Pow(9 - r, 3.2))
                     {
                         Failure();
@@ -1143,7 +1442,7 @@ namespace EngineDecay
                 reliabilityStatus = "failed";
             }
 
-            nominal = false;
+            issueCode = 1;
         }
 
         void CutoffOnFailure()
@@ -1204,7 +1503,7 @@ namespace EngineDecay
                     Disable();
 
                     reliabilityStatus = "out of ignitions";
-                    nominal = false;
+                    issueCode = 2;
                 }
             }
             else
@@ -1231,7 +1530,7 @@ namespace EngineDecay
 
                             reliabilityStatus = "out of ignitions";
 
-                            nominal = false;
+                            issueCode = 2;
                         }
                         else if (ignitionsUsageList[0])
                         {
