@@ -204,7 +204,10 @@ namespace EngineDecay
                 EngineDecay engineDecay = i.FindModuleImplementing<EngineDecay>();
                 if (i != null)
                 {
-                    engineDecay.CounterpartIgnitionRestore(ignitionRestoreCost);
+                    if (baseIgnitions != -1)
+                    {
+                        engineDecay.CounterpartIgnitionRestore(ignitionRestoreCost);
+                    }
                     engineDecay.CounterpartMaintenance(maintenanceCost);
                     engineDecay.CounterpartReplace(maintenanceCost);
                 }
@@ -214,7 +217,10 @@ namespace EngineDecay
                 }
             }
 
-            CounterpartIgnitionRestore(ignitionRestoreCost);
+            if (baseIgnitions != -1)
+            {
+                CounterpartIgnitionRestore(ignitionRestoreCost);
+            }
             CounterpartMaintenance(maintenanceCost);                            // the counterpart is the same part for this case, we call it to update symmetry maintenance button
             CounterpartReplace(maintenanceCost);
 
@@ -298,9 +304,6 @@ namespace EngineDecay
             symmetryMaintenanceCost = 0;
             Events["SymmetryMaintenance"].guiActiveEditor = false;
 
-            symmetryIgnitionRestoreCost = 0;
-            Events["SymmetryIgnitionRestore"].guiActiveEditor = false;
-
             if (baseIgnitions != -1)
             {
                 symmetryIgnitionRestoreCost = 0;
@@ -377,7 +380,10 @@ namespace EngineDecay
                 {
                     engineDecay.CounterpartReplace(replaceCost);
                     engineDecay.CounterpartMaintenance(maintenanceCost);
-                    engineDecay.CounterpartIgnitionRestore(ignitionRestoreCost);
+                    if (baseIgnitions != -1)
+                    {
+                        engineDecay.CounterpartIgnitionRestore(ignitionRestoreCost);
+                    }
                 }
                 else
                 {
@@ -387,7 +393,10 @@ namespace EngineDecay
 
             CounterpartReplace(replaceCost);                            // the counterpart is the same part for this case, we call it to update symmetry replace button
             CounterpartMaintenance(maintenanceCost);
-            CounterpartIgnitionRestore(ignitionRestoreCost);
+            if (baseIgnitions != -1)
+            {
+                CounterpartIgnitionRestore(ignitionRestoreCost);
+            }
 
             maintenanceCost = 0;
             Events["MaintenanceEvent"].guiActiveEditor = false;
@@ -950,7 +959,10 @@ namespace EngineDecay
                     {
                         if(symmetryMaintenanceCost == -1)
                         {
-                            symmetryIgnitionRestoreCost = UpdateIgnitionRestoreCost();
+                            if (baseIgnitions != -1)
+                            {
+                                symmetryIgnitionRestoreCost = UpdateIgnitionRestoreCost();
+                            }
                             symmetryMaintenanceCost = UpdateMaintenanceCost();
                             symmetryReplaceCost = UpdateReplaceCost();
 
@@ -959,7 +971,10 @@ namespace EngineDecay
                                 EngineDecay engineDecay = i.FindModuleImplementing<EngineDecay>();
                                 if (engineDecay != null)
                                 {
-                                    symmetryIgnitionRestoreCost += engineDecay.UpdateIgnitionRestoreCost();
+                                    if (baseIgnitions != -1)
+                                    {
+                                        symmetryIgnitionRestoreCost += engineDecay.UpdateIgnitionRestoreCost();
+                                    }
                                     symmetryMaintenanceCost += engineDecay.UpdateMaintenanceCost();
                                     symmetryReplaceCost += engineDecay.UpdateReplaceCost();
                                 }
@@ -974,7 +989,10 @@ namespace EngineDecay
                                 EngineDecay engineDecay = i.FindModuleImplementing<EngineDecay>();
                                 if (engineDecay != null)
                                 {
-                                    engineDecay.symmetryIgnitionRestoreCost = symmetryIgnitionRestoreCost;
+                                    if (baseIgnitions != -1)
+                                    {
+                                        engineDecay.symmetryIgnitionRestoreCost = symmetryIgnitionRestoreCost;
+                                    }
                                     engineDecay.symmetryMaintenanceCost = symmetryMaintenanceCost;
                                     engineDecay.symmetryReplaceCost = symmetryReplaceCost;
 
