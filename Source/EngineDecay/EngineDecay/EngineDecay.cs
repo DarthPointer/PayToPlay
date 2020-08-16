@@ -204,6 +204,7 @@ namespace EngineDecay
                 EngineDecay engineDecay = i.FindModuleImplementing<EngineDecay>();
                 if (i != null)
                 {
+                    engineDecay.CounterpartIgnitionRestore(ignitionRestoreCost);
                     engineDecay.CounterpartMaintenance(maintenanceCost);
                     engineDecay.CounterpartReplace(maintenanceCost);
                 }
@@ -213,6 +214,7 @@ namespace EngineDecay
                 }
             }
 
+            CounterpartIgnitionRestore(ignitionRestoreCost);
             CounterpartMaintenance(maintenanceCost);                            // the counterpart is the same part for this case, we call it to update symmetry maintenance button
             CounterpartReplace(maintenanceCost);
 
@@ -235,6 +237,9 @@ namespace EngineDecay
             if (baseIgnitions != -1)
             {
                 ignitionsLeft = setIgnitions;
+
+                ignitionRestoreCost = 0;
+                Events["IgnitionRestoreEvent"].guiActiveEditor = false;
             }
 
             UpdateIndicators();
@@ -253,7 +258,7 @@ namespace EngineDecay
 
             if (maintenanceCost != 0)
             {
-                targetPartCost = maintenanceCost;
+                targetPartCost += maintenanceCost;
             }
 
             UpdateReplaceCost();
@@ -292,6 +297,12 @@ namespace EngineDecay
 
             symmetryMaintenanceCost = 0;
             Events["SymmetryMaintenance"].guiActiveEditor = false;
+
+            if (baseIgnitions != -1)
+            {
+                symmetryIgnitionRestoreCost = 0;
+                Events["SymmetryIgnitionRestore"].guiActive = false;
+            }
         }
 
         void CounterpartMaintenance(int cost)
@@ -329,15 +340,19 @@ namespace EngineDecay
                 }
             }
 
+            if (baseIgnitions != -1)
+            {
+                maintenanceCost += UpdateIgnitionRestoreCost();
+            }
+
             if (maintenanceCost > 0 || issueCode != 0)
             {
                 Events["MaintenanceEvent"].guiActiveEditor = true;
                 Events["MaintenanceEvent"].guiName = string.Format("Maintenance: {0}", maintenanceCost);
             }
-
-            if (baseIgnitions != -1)
+            else
             {
-                maintenanceCost += UpdateIgnitionRestoreCost();
+                Events["MaintenanceEvent"].guiActiveEditor = false;
             }
 
             //maintenanceCost = maintenanceCost < fullPartCost ? maintenanceCost : (int)fullPartCost;
@@ -453,15 +468,8 @@ namespace EngineDecay
         {
             replaceCost = (int)(fullPartCost - targetPartCost);
 
-            if (replaceCost > 0 || issueCode != 0)
-            {
-                Events["ReplaceEvent"].guiActiveEditor = true;
-                Events["ReplaceEvent"].guiName = string.Format("Replace: {0}", replaceCost);
-            }
-            else
-            {
-                Events["ReplaceEvent"].guiActiveEditor = false;
-            }
+            Events["ReplaceEvent"].guiActiveEditor = true;
+            Events["ReplaceEvent"].guiName = string.Format("Replace: {0}", replaceCost);
 
             return replaceCost;
         }
@@ -529,6 +537,9 @@ namespace EngineDecay
                 Lib.Log("Hiding Ignition Restore");
                 Events["IgnitionRestoreEvent"].guiActiveEditor = false;
                 ignitionRestoreCost = 0;
+
+                UpdateMaintenanceCost();
+                UpdateReplaceCost();
             }
         }
 
@@ -540,6 +551,7 @@ namespace EngineDecay
                 EngineDecay engineDecay = i.FindModuleImplementing<EngineDecay>();
                 if (i != null)
                 {
+                    engineDecay.CounterpartMaintenance(symmetryIgnitionRestoreCost);
                     engineDecay.IgnitionRestoreFromCounterpart();
                 }
                 else
@@ -548,6 +560,7 @@ namespace EngineDecay
                 }
             }
 
+            CounterpartMaintenance(symmetryIgnitionRestoreCost);
             IgnitionRestoreFromCounterpart();
 
             GameEvents.onEditorShipModified.Fire(EditorLogic.fetch.ship);           // the cost has changed!
