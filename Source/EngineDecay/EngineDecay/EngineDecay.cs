@@ -392,8 +392,11 @@ namespace EngineDecay
             maintenanceCost = 0;
             Events["MaintenanceEvent"].guiActiveEditor = false;
 
-            ignitionRestoreCost = 0;
-            Events["IgnitionRestoreEvent"].guiActiveEditor = false;
+            if (baseIgnitions != -1)
+            {
+                ignitionRestoreCost = 0;
+                Events["IgnitionRestoreEvent"].guiActiveEditor = false;
+            }
 
             Replace();
 
@@ -447,10 +450,13 @@ namespace EngineDecay
             Events["MaintenanceEvent"].guiActiveEditor = false;
             Events["SymmetryMaintenance"].guiActiveEditor = false;
 
-            ignitionRestoreCost = 0;
-            symmetryIgnitionRestoreCost = 0;
-            Events["IgnitionRestoreEvent"].guiActive = false;
-            Events["SymmetryIgnitionRestore"].guiActiveEditor = false;
+            if (baseIgnitions != -1)
+            {
+                ignitionRestoreCost = 0;
+                symmetryIgnitionRestoreCost = 0;
+                Events["IgnitionRestoreEvent"].guiActiveEditor = false;
+                Events["SymmetryIgnitionRestore"].guiActiveEditor = false;
+            }
 
             Replace();
 
