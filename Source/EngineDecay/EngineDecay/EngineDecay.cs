@@ -338,6 +338,8 @@ namespace EngineDecay
 
         int UpdateMaintenanceCost()
         {
+            maintenanceCost = 0;
+
             if (!useSRBCost)
             {
                 maintenanceCost = (int)(knownPartCost * (1f + extraBurnTimePercent * maxCostRatedTimeCoeff / 100f) * maintenanceAtRatedTimeCoeff * usedBurnTime / setBurnTime);
