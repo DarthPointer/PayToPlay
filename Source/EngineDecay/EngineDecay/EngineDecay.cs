@@ -380,6 +380,8 @@ namespace EngineDecay
                 Events["MaintenanceEvent"].guiActiveEditor = false;
             }
 
+            Lib.Log($"Maintenance Cost is set to {maintenanceCost}");
+
             return maintenanceCost;
         }
 
@@ -575,6 +577,8 @@ namespace EngineDecay
                 if (i != null)
                 {
                     engineDecay.CounterpartIgnitionRestore(ignitionRestoreCost);
+                    engineDecay.CounterpartMaintenance(ignitionRestoreCost);
+                    engineDecay.CounterpartReplace(ignitionRestoreCost);
                 }
                 else
                 {
@@ -585,6 +589,8 @@ namespace EngineDecay
             Lib.Log($"Separately Ign-Restored part keeps Symm Ign Restore Cost {symmetryIgnitionRestoreCost}, Ign Restore Cost is {ignitionRestoreCost}");
             CounterpartIgnitionRestore(ignitionRestoreCost);
             Lib.Log($"Resulting Symm Ign Restore Cost is {symmetryIgnitionRestoreCost}");
+            CounterpartMaintenance(ignitionRestoreCost);
+            CounterpartReplace(ignitionRestoreCost);
 
             IgnitionRestore();
 
@@ -654,9 +660,6 @@ namespace EngineDecay
 
         void CounterpartIgnitionRestore(int cost)
         {
-            CounterpartMaintenance(cost);
-            CounterpartReplace(cost);
-
             if (symmetryIgnitionRestoreCost != 0)
             {
                 symmetryIgnitionRestoreCost -= cost;
