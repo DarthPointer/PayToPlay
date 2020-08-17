@@ -71,6 +71,12 @@ namespace EngineDecay
 
         List<bool> ignitionsOnSwitchList = new List<bool>();
 
+        [KSPField(isPersistant = true, guiActive = false)]
+        float maxFailureFixCostCoeff = 0.1f;
+
+        [KSPField(isPersistant = true, guiActive = false)]
+        int currentFailureFixCost = 0;
+
         [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Extra Burn Time Percent", guiFormat = "D"),
             UI_FloatEdit(scene = UI_Scene.Editor, minValue = 0, maxValue = 100, incrementLarge = 20, incrementSmall = 5, incrementSlide = 1)]
         public float extraBurnTimePercent = 0;
@@ -271,6 +277,7 @@ namespace EngineDecay
             UpdateReplaceCost();
 
             maintenanceCost = 0;
+            currentFailureFixCost = 0;
             Events["MaintenanceEvent"].guiActiveEditor = false;
         }
 
@@ -362,7 +369,14 @@ namespace EngineDecay
                 Events["MaintenanceEvent"].guiActiveEditor = false;
             }
 
-            //maintenanceCost = maintenanceCost < fullPartCost ? maintenanceCost : (int)fullPartCost;
+            if (issueCode == 1 && currentFailureFixCost == 0)
+            {
+                if (currentFailureFixCost == 0)
+                {
+                    currentFailureFixCost = (int)(fullPartCost * UnityEngine.Random.Range(maxFailureFixCostCoeff / 2, maxFailureFixCostCoeff));
+                }
+                maintenanceCost += currentFailureFixCost;
+            }
 
             return maintenanceCost;
         }
@@ -400,6 +414,7 @@ namespace EngineDecay
             }
 
             maintenanceCost = 0;
+            currentFailureFixCost = 0;
             Events["MaintenanceEvent"].guiActiveEditor = false;
 
             if (baseIgnitions != -1 && !useSRBCost)
@@ -456,6 +471,7 @@ namespace EngineDecay
         void ReplaceFromCounterpart()
         {
             maintenanceCost = 0;
+            currentFailureFixCost = 0;
             symmetryMaintenanceCost = 0;
             Events["MaintenanceEvent"].guiActiveEditor = false;
             Events["SymmetryMaintenance"].guiActiveEditor = false;
