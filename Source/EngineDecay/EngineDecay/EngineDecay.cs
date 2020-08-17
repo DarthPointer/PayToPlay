@@ -359,6 +359,15 @@ namespace EngineDecay
                 maintenanceCost += UpdateIgnitionRestoreCost();
             }
 
+            if (issueCode == 1)
+            {
+                if (currentFailureFixCost == 0)
+                {
+                    currentFailureFixCost = (int)(fullPartCost * UnityEngine.Random.Range(maxFailureFixCostCoeff / 2, maxFailureFixCostCoeff));
+                }
+                maintenanceCost += currentFailureFixCost;
+            }
+
             if (maintenanceCost > 0 || issueCode != 0)
             {
                 Events["MaintenanceEvent"].guiActiveEditor = true;
@@ -367,15 +376,6 @@ namespace EngineDecay
             else
             {
                 Events["MaintenanceEvent"].guiActiveEditor = false;
-            }
-
-            if (issueCode == 1 && currentFailureFixCost == 0)
-            {
-                if (currentFailureFixCost == 0)
-                {
-                    currentFailureFixCost = (int)(fullPartCost * UnityEngine.Random.Range(maxFailureFixCostCoeff / 2, maxFailureFixCostCoeff));
-                }
-                maintenanceCost += currentFailureFixCost;
             }
 
             return maintenanceCost;
