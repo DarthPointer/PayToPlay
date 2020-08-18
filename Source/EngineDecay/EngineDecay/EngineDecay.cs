@@ -188,6 +188,7 @@ namespace EngineDecay
         public string procSRBBellName = "";
 
         bool inEditor = true;
+        bool onStartFinished = false;
         float ignoreIgnitionTill = 0;
         int ticksTillDisabling = -1;
         float holdIndicatorsTill = 0;
@@ -238,6 +239,8 @@ namespace EngineDecay
 
         void Maintenance()
         {
+            r -= usageExperienceCoeff * PayToPlaySettingsDifficultyNumbers.UsageExperienceToDegradationMul;
+
             usedBurnTime = 0;
             usageExperienceCoeff = 0;
 
@@ -338,6 +341,10 @@ namespace EngineDecay
 
         int UpdateMaintenanceCost()
         {
+            if (!onStartFinished)
+            {
+                return 0;
+            }
             maintenanceCost = 0;
 
             if (!useSRBCost)
@@ -538,8 +545,12 @@ namespace EngineDecay
             }
         }
 
-        int UpdateReplaceCost()
+        int UpdateReplaceCost(bool forceBeforeOnStartFinished = false)
         {
+            if (!onStartFinished && !forceBeforeOnStartFinished)
+            {
+                return 0;
+            }
             replaceCost = (int)(fullPartCost - targetPartCost);
 
             if (!IsNewAndUpToDate())
@@ -677,6 +688,10 @@ namespace EngineDecay
 
         int UpdateIgnitionRestoreCost()
         {
+            if (!onStartFinished)
+            {
+                return 0;
+            }
             ignitionRestoreCost = (int)(knownPartCost * (1 + extraIgnitionsPercent/100) * (1 - ignitionsLeft/setIgnitions) * maxIgnitionRestoreCostCoeff);
 
             if (ignitionRestoreCost > 0 || issueCode == 2)
@@ -843,6 +858,7 @@ namespace EngineDecay
 
                 modesNumber = decayingEngines.Count();
 
+                Lib.Log($"OnStart'in an EngineDecay module, isKCTBuilt: {isKCTBuilt}");
                 Lib.Log($"EngineDecay Module has found {modesNumber} engine modules");
 
                 if (decayRates.Length != 0)
@@ -924,8 +940,6 @@ namespace EngineDecay
                 {
                     inEditor = true;
 
-                    r -= usageExperienceCoeff * PayToPlaySettingsDifficultyNumbers.UsageExperienceToDegradationMul;
-
                     if (procPart)
                     {
                         procSRBCylinder = part.Modules["ProceduralShapeCylinder"];
@@ -952,11 +966,12 @@ namespace EngineDecay
                         }
                     }
 
-                    UpdateReplaceCost();
+                    UpdateReplaceCost(forceBeforeOnStartFinished: true);
 
                     if (!isKCTBuilt || replaceCost == 0 || newBorn)
                     {
-                        UpdateReliabilityProgress();
+                        Lib.Log($"isKCTBuilt: {isKCTBuilt}, replaceCost: {replaceCost}, newBorn: {newBorn}");
+                        ReplaceFromCounterpart();                       // It is not a replace called from counterpart, but it does all we need
 
                         Lib.Log($"EngineDecay has automatically updated to last reliability generation at part {part.name}");
                     }
@@ -984,7 +999,8 @@ namespace EngineDecay
                     {
                         if (replaceCost == 0 && (prevLoadWasInEditor || isKCTBuilt))        // if pLWIE is false and iKCTB is true, then we have been recovered and rolled out without visiting editor
                         {
-                            UpdateReliabilityProgress();
+                            ReplaceFromCounterpart();                       // It is not a replace called from counterpart, but it does all we need
+                            //part.PartActionWindow.displayDirty = true;
 
                             Lib.Log($"EngineDecay has automatically updated to last reliability generation at part {part.name}");
                         }
@@ -1030,6 +1046,7 @@ namespace EngineDecay
             }
 
             isKCTBuilt = false;                                     // If we don't do this, this flag will be passed to a saved ship
+            onStartFinished = true;
         }
 
         public void Update()
@@ -1051,9 +1068,9 @@ namespace EngineDecay
                 {
                     return;
                 }
-                else
+                else if (!i.FindModuleImplementing<EngineDecay>().onStartFinished)
                 {
-                    Lib.Log($"Counterpart {i.name}, not null");
+                    return;
                 }
             }
 
