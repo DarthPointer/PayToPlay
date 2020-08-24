@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using KerbalRepairsInterface;
+using static EngineDecay.EngineDecayCustomRepairableData;
 
 namespace EngineDecay
 {
@@ -205,7 +206,7 @@ namespace EngineDecay
         PartModule procSRB;
 
         IRepairsController repairsController;
-        HashSet<RepairData> associatedRepairs = new HashSet<RepairData>();
+        List<RepairData> associatedRepairs = new List<RepairData>();
 
         #endregion
 
@@ -213,11 +214,21 @@ namespace EngineDecay
 
         public void AcceptRepairsController(IRepairsController repairsController)
         {
-            Lib.Log("EngineDecay has been detected by an IRepairsController");
+            this.repairsController = repairsController;
         }
 
         public void RepairStarted(RepairData repairData)
         {
+            foreach (RepairData repair in new List<RepairData>(associatedRepairs))
+            {
+                if (repair != repairData)
+                {
+                    repairsController.RemoveRepair(repair);
+                    associatedRepairs.Remove(repair);
+                }
+            }
+
+            Lib.Log($"Repair controller has chosen repair with enum code {(repairData.customControllerData as EngineDecayCustomRepairableData).repairType}");
         }
 
         public void RepairStopped(RepairData repairData)
@@ -232,9 +243,38 @@ namespace EngineDecay
         {
             if (repairsController != null)
             {
-                RepairData ignRestore = new RepairData(this, "restore ignition", new Dictionary<string, double>() { { "Tape", UpdateIgnitionRestoreCost() } });
-                associatedRepairs.Add(ignRestore);
-                repairsController.AddRepair(ignRestore);
+                if (baseIgnitions != -1 && ignitionsLeft != setIgnitions)
+                {
+                    RepairData ignRestore = new RepairData(this, "restore ignitions", new Dictionary<string, double>()
+                    { { "Tape", UpdateIgnitionRestoreCost() } })
+                    {
+                        customTargetData = new EngineDecayCustomRepairableData(RepairType.IGNITION_RESTORE)
+                    };
+                    associatedRepairs.Add(ignRestore);
+                    repairsController.AddRepair(ignRestore);
+                }
+
+                if (issueCode == 1)
+                {
+                    RepairData failureFix = new RepairData(this, "failure fixing", new Dictionary<string, double>()
+                    { { "Tape", UpdateFailureFixCost()} })
+                    {
+                        customControllerData = new EngineDecayCustomRepairableData(RepairType.FAILURE_FIX)
+                    };
+                    associatedRepairs.Add(failureFix);
+                    repairsController.AddRepair(failureFix);
+                }
+
+                if (UpdateMaintenanceCost() != 0)
+                {
+                    RepairData maintenance = new RepairData(this, "maintenance", new Dictionary<string, double>()
+                    { { "Tape", UpdateFailureFixCost()} })
+                    {
+                        customControllerData = new EngineDecayCustomRepairableData(RepairType.FULL_MAINTENANCE)
+                    };
+                    associatedRepairs.Add(maintenance);
+                    repairsController.AddRepair(maintenance);
+                }
             }
         }
 
@@ -742,7 +782,7 @@ namespace EngineDecay
 
         int UpdateIgnitionRestoreCost()
         {
-            if (!onStartFinished)
+            if (!onStartFinished || baseIgnitions == -1)
             {
                 return 0;
             }
