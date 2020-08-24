@@ -4,10 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using KerbalRepairsInterface;
 
 namespace EngineDecay
 {
-    public class EngineDecay : PartModule, IPartMassModifier, IPartCostModifier
+    public class EngineDecay : PartModule, IPartMassModifier, IPartCostModifier, IRepairable
     {
         #region fields
 
@@ -202,6 +203,40 @@ namespace EngineDecay
 
         PartModule procSRBCylinder;
         PartModule procSRB;
+
+        IRepairsController repairsController;
+        HashSet<RepairData> associatedRepairs = new HashSet<RepairData>();
+
+        #endregion
+
+        #region IRepairable
+
+        public void AcceptRepairsController(IRepairsController repairsController)
+        {
+            Lib.Log("EngineDecay has been detected by an IRepairsController");
+        }
+
+        public void RepairStarted(RepairData repairData)
+        {
+        }
+
+        public void RepairStopped(RepairData repairData)
+        {
+        }
+
+        public void RepairFinished(RepairData repairData)
+        {
+        }
+
+        public void RequestRepairs()
+        {
+            if (repairsController != null)
+            {
+                RepairData ignRestore = new RepairData(this, "restore ignition", new Dictionary<string, double>() { { "Tape", UpdateIgnitionRestoreCost() } });
+                associatedRepairs.Add(ignRestore);
+                repairsController.AddRepair(ignRestore);
+            }
+        }
 
         #endregion
 
