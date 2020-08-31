@@ -217,7 +217,7 @@ namespace EngineDecay
             this.repairsController = repairsController;
         }
 
-        public void RepairStarted(RepairData repairData)
+        public void RepairSelected(RepairData repairData)
         {
             foreach (RepairData repair in new List<RepairData>(associatedRepairs))
             {
@@ -228,22 +228,54 @@ namespace EngineDecay
                 }
             }
 
-            Lib.Log($"Repair controller has chosen repair with enum code {(repairData.customControllerData as EngineDecayCustomRepairableData).repairType}");
+            if (repairData.customTargetData == null)
+            {
+                Lib.LogError("Repair data of the chosen option has no custom target data!");
+                return;
+            }
+            else if (repairData.customTargetData as EngineDecayCustomRepairableData == null)
+            {
+                Lib.LogError("Repeir data of the chosen option has custom target data that is not of a proper class!");
+                return;
+            }
+            else
+            {
+                Lib.Log($"Repair controller has chosen repair with enum code {(repairData.customTargetData as EngineDecayCustomRepairableData).repairType}");
+            }
         }
 
-        public void RepairStopped(RepairData repairData)
+        public void RepairDeselected(RepairData repairData)
         {
+            SendRepairs();
         }
 
         public void RepairFinished(RepairData repairData)
         {
+            RepairDeselected(repairData);
         }
 
         public void RequestRepairs()
         {
             if (repairsController != null)
             {
-                if (baseIgnitions != -1 && ignitionsLeft != setIgnitions)
+                foreach (RepairData repairData in associatedRepairs)
+                {
+                    repairsController.RemoveRepair(repairData);
+                }
+                associatedRepairs.Clear();
+                SendRepairs();
+            }
+            else
+            {
+                Lib.LogError("IRepairable.RequestRepairs called for EngineDecay while its repairController is null. Probably RequestRepairs has been called before AcceptController");
+            }
+        }
+
+        void SendRepairs()
+        {
+            if (repairsController != null)
+            {
+                if (baseIgnitions != -1 && ignitionsLeft != setIgnitions && GetRepairByRepairType(RepairType.IGNITION_RESTORE) == null)
                 {
                     RepairData ignRestore = new RepairData(this, "restore ignitions", new Dictionary<string, double>()
                     { { "Tape", UpdateIgnitionRestoreCost() } })
@@ -254,28 +286,51 @@ namespace EngineDecay
                     repairsController.AddRepair(ignRestore);
                 }
 
-                if (issueCode == 1)
+                if (issueCode == 1 && GetRepairByRepairType(RepairType.FAILURE_FIX) == null)
                 {
                     RepairData failureFix = new RepairData(this, "failure fixing", new Dictionary<string, double>()
                     { { "Tape", UpdateFailureFixCost()} })
                     {
-                        customControllerData = new EngineDecayCustomRepairableData(RepairType.FAILURE_FIX)
+                        customTargetData = new EngineDecayCustomRepairableData(RepairType.FAILURE_FIX)
                     };
                     associatedRepairs.Add(failureFix);
                     repairsController.AddRepair(failureFix);
                 }
 
-                if (UpdateMaintenanceCost() != 0)
+                if (UpdateMaintenanceCost() != 0 && GetRepairByRepairType(RepairType.FULL_MAINTENANCE) == null)
                 {
                     RepairData maintenance = new RepairData(this, "maintenance", new Dictionary<string, double>()
-                    { { "Tape", UpdateFailureFixCost()} })
+                    { { "Tape", UpdateMaintenanceCost()} })
                     {
-                        customControllerData = new EngineDecayCustomRepairableData(RepairType.FULL_MAINTENANCE)
+                        customTargetData = new EngineDecayCustomRepairableData(RepairType.FULL_MAINTENANCE)
                     };
                     associatedRepairs.Add(maintenance);
                     repairsController.AddRepair(maintenance);
                 }
             }
+            else
+            {
+                Lib.LogWarning("Attempted to SendReparis from EngineDecay while its repairController is null. Probably RequestRepairs has been called before AcceptController");
+            }
+        }
+
+        RepairData GetRepairByRepairType(RepairType repairType)
+        {
+            foreach (RepairData repairData in associatedRepairs)
+            {
+                if (repairData.customTargetData as EngineDecayCustomRepairableData != null)
+                {
+                    if ((repairData.customTargetData as EngineDecayCustomRepairableData).repairType == repairType)
+                    {
+                        return repairData;
+                    }
+                }
+                else
+                {
+                    Lib.LogError("EngineDecay has found an associated RepairData with customTargetData being null or not of EngineDecayCustomRepairableData");
+                }
+            }
+            return null;
         }
 
         #endregion
