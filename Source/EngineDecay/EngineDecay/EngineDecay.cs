@@ -284,7 +284,7 @@ namespace EngineDecay
         {
             if (repairsController != null)
             {
-                if (baseIgnitions != -1 && ignitionsLeft != setIgnitions && GetRepairByRepairType(RepairType.IGNITION_RESTORE) == null)
+                if (baseIgnitions != -1 && ignitionsLeft != setIgnitions && GetRepairByRepairType(RepairType.IGNITION_RESTORE) == null && !RepairTypeIsBlocked(RepairType.IGNITION_RESTORE))
                 {
                     RepairData ignRestore = new RepairData(this, "restore ignitions", new Dictionary<string, double>()
                     { { "Tape", UpdateIgnitionRestoreCost() } })
@@ -295,7 +295,7 @@ namespace EngineDecay
                     repairsController.AddRepair(ignRestore);
                 }
 
-                if (issueCode == 1 && GetRepairByRepairType(RepairType.FAILURE_FIX) == null)
+                if (issueCode == 1 && GetRepairByRepairType(RepairType.FAILURE_FIX) == null && !RepairTypeIsBlocked(RepairType.FAILURE_FIX))
                 {
                     RepairData failureFix = new RepairData(this, "failure fixing", new Dictionary<string, double>()
                     { { "Tape", UpdateFailureFixCost()} })
@@ -306,7 +306,7 @@ namespace EngineDecay
                     repairsController.AddRepair(failureFix);
                 }
 
-                if (UpdateMaintenanceCost() != 0 && GetRepairByRepairType(RepairType.FULL_MAINTENANCE) == null)
+                if (UpdateMaintenanceCost() != 0 && GetRepairByRepairType(RepairType.FULL_MAINTENANCE) == null && !RepairTypeIsBlocked(RepairType.FULL_MAINTENANCE))
                 {
                     RepairData maintenance = new RepairData(this, "maintenance", new Dictionary<string, double>()
                     { { "Tape", UpdateMaintenanceCost()} })
@@ -321,6 +321,26 @@ namespace EngineDecay
             {
                 Lib.LogWarning("Attempted to SendReparis from EngineDecay while its repairController is null. Probably RequestRepairs has been called before AcceptController");
             }
+        }
+
+        bool RepairTypeIsBlocked(RepairType repairType)
+        {
+            foreach (RepairData repair in associatedRepairs)
+            {
+                if (repair.IsSelected)
+                {
+                    if (!repairCompatibilities.ContainsKey((repair.customTargetData as EngineDecayCustomRepairableData).repairType))
+                    {
+                        return true;
+                    }
+                    if (!repairCompatibilities[(repair.customTargetData as EngineDecayCustomRepairableData).repairType].Contains(repairType))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
 
         RepairData GetRepairByRepairType(RepairType repairType)
