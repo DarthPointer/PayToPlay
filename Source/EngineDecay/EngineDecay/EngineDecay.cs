@@ -18,7 +18,7 @@ namespace EngineDecay
         public float topMaxRatedTime = 100;
 
         [KSPField(isPersistant = true, guiActive = false)]
-        bool subjectToProgress = true;
+        public bool subjectToProgress = true;
 
         [KSPField(isPersistant = true, guiActive = false)]
         float r = 0;
@@ -1839,42 +1839,44 @@ namespace EngineDecay
             {
                 r = 8;
                 reliabilityIsVisible = true;
-                return;
-            }
-            if (!procPart)
-            {
-                r = ReliabilityProgress.fetch.GetReliabilityData(part.name).r;
-                reliabilityIsVisible = ReliabilityProgress.fetch.GetReliabilityData(part.name).reliabilityIsVisible;
             }
             else
             {
-                r = ReliabilityProgress.fetch.CheckProcSRBProgress(part.name, ref procSRBDiameter, ref procSRBThrust, ref procSRBBellName).r;
-                reliabilityIsVisible = ReliabilityProgress.fetch.CheckProcSRBProgress(part.name, ref procSRBDiameter, ref procSRBThrust, ref procSRBBellName).reliabilityIsVisible;
-
-                if (r == -1)
+                if (!procPart)
                 {
-                    if (PayToPlaySettingsFeatures.ReliabilityProgress)
-                    {
-                        r = PayToPlaySettingsDifficultyNumbers.StartingReliability;
-                        if (PayToPlaySettingsFeatures.RandomStartingReliability)
-                        {
-                            r += UnityEngine.Random.Range(0f, 1f) * PayToPlaySettingsDifficultyNumbers.RandomStartingReliabilityBonusLimit;
-                        }
-
-                        r = Math.Min(r, 8);
-                    }
-                    else
-                    {
-                        r = 8;
-                    }
-
-                    reliabilityIsVisible = !PayToPlaySettingsFeatures.HideStartingReliability;
-
-                    Events["SetAsANewProcSRBModel"].guiActiveEditor = true;
+                    r = ReliabilityProgress.fetch.GetReliabilityData(part.name).r;
+                    reliabilityIsVisible = ReliabilityProgress.fetch.GetReliabilityData(part.name).reliabilityIsVisible;
                 }
                 else
                 {
-                    Events["SetAsANewProcSRBModel"].guiActiveEditor = false;
+                    r = ReliabilityProgress.fetch.CheckProcSRBProgress(part.name, ref procSRBDiameter, ref procSRBThrust, ref procSRBBellName).r;
+                    reliabilityIsVisible = ReliabilityProgress.fetch.CheckProcSRBProgress(part.name, ref procSRBDiameter, ref procSRBThrust, ref procSRBBellName).reliabilityIsVisible;
+
+                    if (r == -1)
+                    {
+                        if (PayToPlaySettingsFeatures.ReliabilityProgress)
+                        {
+                            r = PayToPlaySettingsDifficultyNumbers.StartingReliability;
+                            if (PayToPlaySettingsFeatures.RandomStartingReliability)
+                            {
+                                r += UnityEngine.Random.Range(0f, 1f) * PayToPlaySettingsDifficultyNumbers.RandomStartingReliabilityBonusLimit;
+                            }
+
+                            r = Math.Min(r, 8);
+                        }
+                        else
+                        {
+                            r = 8;
+                        }
+
+                        reliabilityIsVisible = !PayToPlaySettingsFeatures.HideStartingReliability;
+
+                        Events["SetAsANewProcSRBModel"].guiActiveEditor = true;
+                    }
+                    else
+                    {
+                        Events["SetAsANewProcSRBModel"].guiActiveEditor = false;
+                    }
                 }
             }
 
