@@ -18,6 +18,9 @@ namespace EngineDecay
         public float topMaxRatedTime = 100;
 
         [KSPField(isPersistant = true, guiActive = false)]
+        bool subjectToProgress = true;
+
+        [KSPField(isPersistant = true, guiActive = false)]
         float r = 0;
 
         [KSPField(isPersistant = true, guiActive = false)]
@@ -1832,6 +1835,12 @@ namespace EngineDecay
 
         void UpdateReliabilityProgress()
         {
+            if (!subjectToProgress)
+            {
+                r = 8;
+                reliabilityIsVisible = true;
+                return;
+            }
             if (!procPart)
             {
                 r = ReliabilityProgress.fetch.GetReliabilityData(part.name).r;
