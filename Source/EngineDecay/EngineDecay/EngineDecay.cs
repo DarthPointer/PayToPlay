@@ -216,6 +216,7 @@ namespace EngineDecay
 
         IRepairsController repairsController;
         List<RepairData> associatedRepairs = new List<RepairData>();
+        bool repairsSent = false;
 
 #endregion
 
@@ -271,18 +272,6 @@ namespace EngineDecay
             RepairDeselected(repairData);
         }
 
-        public void RequestRepairs()
-        {
-            if (repairsController != null)
-            {
-                SendRepairs();
-            }
-            else
-            {
-                Lib.LogError("IRepairable.RequestRepairs called for EngineDecay while its repairController is null. Probably RequestRepairs has been called before AcceptController");
-            }
-        }
-
         void SendRepairs()
         {
             if (repairsController != null)
@@ -290,7 +279,7 @@ namespace EngineDecay
                 if (baseIgnitions != -1 && ignitionsLeft != setIgnitions && GetRepairByRepairType(RepairType.IGNITION_RESTORE) == null && !RepairTypeIsBlocked(RepairType.IGNITION_RESTORE))
                 {
                     RepairData ignRestore = new RepairData(this, "restore ignitions", new Dictionary<string, double>()
-                    { { "Tape", UpdateIgnitionRestoreCost() } })
+                    { { "Tape", UpdateIgnitionRestoreCost() } }, false)
                     {
                         customTargetData = new EngineDecayCustomRepairableData(RepairType.IGNITION_RESTORE)
                     };
@@ -301,7 +290,7 @@ namespace EngineDecay
                 if (issueCode == 1 && GetRepairByRepairType(RepairType.FAILURE_FIX) == null && !RepairTypeIsBlocked(RepairType.FAILURE_FIX))
                 {
                     RepairData failureFix = new RepairData(this, "failure fixing", new Dictionary<string, double>()
-                    { { "Tape", UpdateFailureFixCost()} })
+                    { { "Tape", UpdateFailureFixCost()} }, false)
                     {
                         customTargetData = new EngineDecayCustomRepairableData(RepairType.FAILURE_FIX)
                     };
@@ -312,7 +301,7 @@ namespace EngineDecay
                 if (UpdateMaintenanceCost() != 0 && GetRepairByRepairType(RepairType.FULL_MAINTENANCE) == null && !RepairTypeIsBlocked(RepairType.FULL_MAINTENANCE))
                 {
                     RepairData maintenance = new RepairData(this, "maintenance", new Dictionary<string, double>()
-                    { { "Tape", UpdateMaintenanceCost()} })
+                    { { "Tape", UpdateMaintenanceCost()} }, true)
                     {
                         customTargetData = new EngineDecayCustomRepairableData(RepairType.FULL_MAINTENANCE)
                     };
@@ -365,9 +354,19 @@ namespace EngineDecay
             return null;
         }
 
-#endregion
+        void CancelRepairs()
+        {
+            foreach (RepairData repairData in associatedRepairs)
+            {
+                repairsController.RemoveRepair(repairData);
+            }
 
-#region Maintenance
+            associatedRepairs = new List<RepairData>();
+        }
+
+        #endregion
+
+        #region Maintenance
 
         [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "Maintenance", groupName = "PayToPlayReliability", groupDisplayName = "PayToPlay Reliability")]
         void MaintenanceEvent()
@@ -1599,6 +1598,12 @@ namespace EngineDecay
 
                         if (runningMode != -1)
                         {
+                            if (repairsSent)
+                            {
+                                CancelRepairs();
+                                repairsSent = false;
+                            }
+
                             if (topBaseRatedTime != -1)
                             {
                                 if (!usingMultiModeLogic)
@@ -1620,6 +1625,14 @@ namespace EngineDecay
                                 usageExperienceCoeff = 0.3f;
                             }
                             targetPartCost = 0;
+                        }
+                        else
+                        {
+                            if (!repairsSent && repairsController != null)
+                            {
+                                SendRepairs();
+                                repairsSent = true;
+                            }
                         }
 
                         if (topBaseRatedTime != -1)
@@ -1694,7 +1707,7 @@ namespace EngineDecay
             }
         }
 
-#region mass and cost modifiers implementation (game-called too)
+        #region mass and cost modifiers implementation (game-called too)
 
         float IPartMassModifier.GetModuleMass(float defaultMass, ModifierStagingSituation sit)
         {
