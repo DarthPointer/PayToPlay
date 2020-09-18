@@ -1176,6 +1176,8 @@ namespace EngineDecay
                     }
                     else
                     {
+                        UpdateReplaceCost(forceBeforeOnStartFinished: true);
+
                         if (replaceCost == 0 && (prevLoadWasInEditor || isKCTBuilt))        // if pLWIE is false and iKCTB is true, then we have been recovered and rolled out without visiting editor
                         {
                             ReplaceFromCounterpart();                       // It is not a replace called from counterpart, but it does all we need
@@ -1487,7 +1489,7 @@ namespace EngineDecay
 
                                         if (autoShutdownOnWarning)
                                         {
-                                            CutoffOnFailure();
+                                            CutoffOnFailure("Failure Prediction Alert");
                                         }
                                     }
                                 }
@@ -1502,7 +1504,7 @@ namespace EngineDecay
 
                             if (ticksTillDisabling > 0)
                             {
-                                CutoffOnFailure();
+                                CutoffOnFailure("Failure");
                                 ticksTillDisabling--;
                             }
 
@@ -1651,7 +1653,7 @@ namespace EngineDecay
                     else if(luck < (PayToPlaySettingsDifficultyNumbers.FailureOnIgnitionPercent + PayToPlaySettingsDifficultyNumbers.IgnitionFailurePercent) / 100 * Math.Pow(9 - r, 3.2))
                     {
                         FlightLogger.fetch?.LogEvent(string.Format("Bad ignition of {0}, shutdown performed to prevent consequences", part.name));
-                        CutoffOnFailure();
+                        CutoffOnFailure("Bad Ignition");
                     }
                 }
             }
@@ -1674,7 +1676,7 @@ namespace EngineDecay
                         else if (luck < (PayToPlaySettingsDifficultyNumbers.FailureOnIgnitionPercent + PayToPlaySettingsDifficultyNumbers.IgnitionFailurePercent) / 100 * Math.Pow(9 - r, 3.2))
                         {
                             FlightLogger.fetch?.LogEvent(string.Format("Bad ignition of {0}, shutdown performed to prevent consequences", part.name));
-                            CutoffOnFailure();
+                            CutoffOnFailure("Bad Ignition");
                         }
                     }
                 }
@@ -1696,7 +1698,7 @@ namespace EngineDecay
 
             ticksTillDisabling = 5;
 
-            CutoffOnFailure();
+            CutoffOnFailure("Failure");
 
             if (PayToPlaySettingsFeatures.JokesInsteadOfFailedStatus)
             {
@@ -1710,11 +1712,11 @@ namespace EngineDecay
             issueCode = 1;
         }
 
-        void CutoffOnFailure()
+        void CutoffOnFailure(string reason)
         {
             foreach (ModuleEngines i in decayingEngines)
             {
-                i.Flameout("failure");
+                i.Flameout(reason);
                 i.Shutdown();
                 i.EngineIgnited = false;
                 i.currentThrottle = 0;
