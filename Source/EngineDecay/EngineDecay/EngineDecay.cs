@@ -17,7 +17,7 @@ namespace EngineDecay
             { RepairType.IGNITION_RESTORE, new List<RepairType>() { RepairType.FAILURE_FIX } }
         };
 
-#region fields
+    #region fields
 
         [KSPField(isPersistant = true, guiActive = false)]
         public float topBaseRatedTime = 10;
@@ -220,7 +220,7 @@ namespace EngineDecay
 
 #endregion
 
-#region IRepairable
+    #region IRepairable
 
         public void AcceptRepairsController(IRepairsController repairsController)
         {
@@ -366,7 +366,7 @@ namespace EngineDecay
 
         #endregion
 
-        #region Maintenance
+    #region Maintenance
 
         [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "Maintenance", groupName = "PayToPlayReliability", groupDisplayName = "PayToPlay Reliability")]
         void MaintenanceEvent()
@@ -565,7 +565,7 @@ namespace EngineDecay
 
 #endregion
 
-#region Replacement
+    #region Replacement
 
         [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "Replace", groupName = "PayToPlayReliability", groupDisplayName = "PayToPlay Reliability")]
         void ReplaceEvent()
@@ -757,7 +757,7 @@ namespace EngineDecay
 
 #endregion
 
-#region Ignition Restore
+    #region Ignition Restore
 
         [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "Restore Ignitions", groupName = "PayToPlayReliability", groupDisplayName = "PayToPlay Reliability")]
         void IgnitionRestoreEvent()
@@ -902,7 +902,7 @@ namespace EngineDecay
 
 #endregion
 
-#region Failure Fix
+    #region Failure Fix
 
         [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "Failure Fix", groupName = "PayToPlayReliability", groupDisplayName = "PayToPlay Reliability")]
         void FailureFixEvent()
@@ -1061,7 +1061,7 @@ namespace EngineDecay
 
 #endregion
 
-#region proc SRB events
+    #region proc SRB events
 
         [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "Set as a New Model", groupName = "PayToPlayReliability", groupDisplayName = "PayToPlay Reliability")]
         void SetAsANewProcSRBModel()
@@ -1085,7 +1085,7 @@ namespace EngineDecay
 
 #endregion
 
-#region Indicators
+    #region Indicators
 
         [KSPEvent(guiActive = true, guiActiveEditor = true, guiName = "Switch Time Format", groupName = "PayToPlayReliability", groupDisplayName = "PayToPlay Reliability")]
         void SwitchTimeFormat()
@@ -1136,7 +1136,7 @@ namespace EngineDecay
 
 #endregion
 
-#region Autoshutdown Button
+    #region Autoshutdown Button
 
         [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "Autoshutdown on Warning", groupName = "PayToPlayReliability", groupDisplayName = "PayToPlay Reliability")]
         void ToggleAutoShutdownOnWarning()
@@ -1147,7 +1147,7 @@ namespace EngineDecay
 
 #endregion
 
-#region Game-called Methods
+    #region Game-called Methods
 
         public override void OnCopy(PartModule fromModule)
         {
@@ -1776,7 +1776,7 @@ namespace EngineDecay
 
 #endregion
 
-#region internal methods
+    #region internal methods
 
         int RunningMode()
         {
@@ -2104,7 +2104,7 @@ namespace EngineDecay
         }
 #endregion
 
-#region ProcSRB Internal Methods
+    #region ProcSRB Internal Methods
 
         public void ProcUpdateDiameter(BaseField diameter, object obj)
         {
