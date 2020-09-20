@@ -1409,13 +1409,6 @@ namespace EngineDecay
             }
         }
 
-        public void Update()
-        {
-            if (PayToPlaySettingsFeatures.Enable)
-            {
-            }
-        }
-
         void ReviewSymmetryCosts(List<Part> counterparts)           // Returns true if succeeds
         {
             if (counterparts == null)
