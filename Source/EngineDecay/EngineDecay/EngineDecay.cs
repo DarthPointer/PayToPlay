@@ -1409,7 +1409,7 @@ namespace EngineDecay
             }
         }
 
-        void ReviewSymmetryCosts(List<Part> counterparts)           // Returns true if succeeds
+        void ReviewSymmetryCosts(List<Part> counterparts)
         {
             if (counterparts == null)
             {
