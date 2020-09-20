@@ -258,6 +258,8 @@ namespace EngineDecay
             }
             else
             {
+                Disable();
+
                 Lib.Log($"Repair controller has chosen repair with enum code {(repairData.customTargetData as EngineDecayCustomRepairableData).repairType}");
             }
         }
@@ -265,6 +267,14 @@ namespace EngineDecay
         public void RepairDeselected(RepairData repairData)
         {
             SendRepairs();
+
+            if (!associatedRepairs.Exists((RepairData a) => a.IsSelected))
+            {
+                if (issueCode == 0)
+                {
+                    Enable();
+                }
+            }
         }
 
         public void RepairFinished(RepairData repairData)
@@ -1387,6 +1397,16 @@ namespace EngineDecay
 
             isKCTBuilt = false;                                     // If we don't do this, this flag will be passed to a saved ship
             onStartFinished = true;
+        }
+
+        public override void OnStartFinished(StartState state)
+        {
+            base.OnStartFinished(state);
+
+            if (associatedRepairs.Exists((RepairData a) => a.IsSelected))           // To support field maintenance mods that can save repairs off-scene and load them back
+            {
+                Disable();
+            }
         }
 
         public void Update()
