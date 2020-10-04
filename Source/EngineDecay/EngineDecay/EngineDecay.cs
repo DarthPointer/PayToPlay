@@ -288,7 +288,7 @@ namespace EngineDecay
             {
                 if (baseIgnitions != -1 && ignitionsLeft != setIgnitions && GetRepairByRepairType(RepairType.IGNITION_RESTORE) == null && !RepairTypeIsBlocked(RepairType.IGNITION_RESTORE))
                 {
-                    RepairData ignRestore = new RepairData(this, "restore ignitions", new Dictionary<string, double>()
+                    RepairData ignRestore = new RepairData(this, "restore ignitions", UpdateIgnitionRestoreCost()*3600, true, new Dictionary<string, double>()
                     { { "Tape", UpdateIgnitionRestoreCost() } }, false)
                     {
                         customTargetData = new EngineDecayCustomRepairableData(RepairType.IGNITION_RESTORE)
@@ -299,7 +299,7 @@ namespace EngineDecay
 
                 if (issueCode == 1 && GetRepairByRepairType(RepairType.FAILURE_FIX) == null && !RepairTypeIsBlocked(RepairType.FAILURE_FIX))
                 {
-                    RepairData failureFix = new RepairData(this, "failure fixing", new Dictionary<string, double>()
+                    RepairData failureFix = new RepairData(this, "failure fixing", UpdateFailureFixCost()*3600, true, new Dictionary<string, double>()
                     { { "Tape", UpdateFailureFixCost()} }, false)
                     {
                         customTargetData = new EngineDecayCustomRepairableData(RepairType.FAILURE_FIX)
@@ -310,7 +310,7 @@ namespace EngineDecay
 
                 if (UpdateMaintenanceCost() != 0 && GetRepairByRepairType(RepairType.FULL_MAINTENANCE) == null && !RepairTypeIsBlocked(RepairType.FULL_MAINTENANCE))
                 {
-                    RepairData maintenance = new RepairData(this, "maintenance", new Dictionary<string, double>()
+                    RepairData maintenance = new RepairData(this, "maintenance", UpdateMaintenanceCost()*3600, true, new Dictionary<string, double>()
                     { { "Tape", UpdateMaintenanceCost()} }, true)
                     {
                         customTargetData = new EngineDecayCustomRepairableData(RepairType.FULL_MAINTENANCE)
