@@ -17,6 +17,7 @@ namespace EngineDecay
         [KSPField(isPersistant = true, guiActive = false)]
         public float topMaxRatedTime = 100;
 
+
         [KSPField(isPersistant = true, guiActive = false)]
         public bool subjectToProgress = true;
 
@@ -30,6 +31,10 @@ namespace EngineDecay
         float currentBaseRatedTime;
 
         [KSPField(isPersistant = true, guiActive = false)]
+        public string engineModelId = "";
+
+
+        [KSPField(isPersistant = true, guiActive = false)]
         public float maintenanceAtRatedTimeCoeff = 0.3f;
 
         [KSPField(isPersistant = true, guiActive = false)]
@@ -37,6 +42,7 @@ namespace EngineDecay
 
         [KSPField(isPersistant = true, guiActive = false)]
         public float maxCostRatedTimeCoeff = 4;
+
 
         [KSPField(isPersistant = true, guiActive = false)]
         public int baseIgnitions = 1;
@@ -52,6 +58,10 @@ namespace EngineDecay
 
         [KSPField(isPersistant = true, guiActive = false)]
         public float maxIgnitionRestoreCostCoeff = 0.1f;
+
+        [KSPField(isPersistant = true, guiActive = false)]
+        public float ignitionIssuesChanceScale = 1;
+
 
         [KSPField(isPersistant = true, guiActive = false)]
         bool usingMultiModeLogic = false;
@@ -74,8 +84,10 @@ namespace EngineDecay
 
         List<bool> ignitionsOnSwitchList = new List<bool>();
 
+
         [KSPField(isPersistant = true, guiActive = false)]
         float maxFailureFixCostCoeff = 0.1f;
+
 
         [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Extra Burn Time Percent", guiFormat = "D"),
             UI_FloatEdit(scene = UI_Scene.Editor, minValue = 0, maxValue = 100, incrementLarge = 20, incrementSmall = 5, incrementSlide = 1)]
@@ -121,8 +133,10 @@ namespace EngineDecay
         [KSPField(isPersistant = true, guiActive = false)]
         int issueCode = 0;
 
+
         int modeRunningPrevTick = -1;
         bool wasRailWarpingPrevTick = false;
+
 
         [KSPField(isPersistant = true, guiActive = false)]
         public float knownPartCost = -1;
@@ -133,6 +147,7 @@ namespace EngineDecay
         [KSPField(isPersistant = true, guiActive = false)]
         public float targetPartCost = -1;
 
+
         [KSPField(isPersistant = true, guiActive = false)]
         public bool subtractResourcesCost = false;
 
@@ -141,6 +156,7 @@ namespace EngineDecay
 
         [KSPField(isPersistant = true, guiActive = false)]                                      //use mass and cost logic for Procedural Parts mod
         public bool procPart = false;
+
 
         [KSPField(isPersistant = true, guiActive = false)]
         bool newBorn = true;
@@ -151,6 +167,7 @@ namespace EngineDecay
         [KSPField(isPersistant = true, guiActive = false)]
         bool isKCTBuilt = false;
 
+
         [KSPField(isPersistant = true, guiActive = false)]
         float failAtBurnTime = -1;
 
@@ -159,6 +176,7 @@ namespace EngineDecay
 
         [KSPField(isPersistant = true, guiActive = false)]
         bool autoShutdownOnWarning = false;
+
 
         [KSPField(isPersistant = true, guiActive = false)]
         int maintenanceCost = 0;
@@ -184,6 +202,7 @@ namespace EngineDecay
         [KSPField(isPersistant = true, guiActive = false)]
         int symmetryFailureFixCost = 0;
 
+
         [KSPField(isPersistant = true, guiActive = false)]
         public float procSRBDiameter = 0;
 
@@ -192,6 +211,7 @@ namespace EngineDecay
 
         [KSPField(isPersistant = true, guiActive = false)]
         public string procSRBBellName = "";
+
 
         bool inEditor = true;
         bool onStartFinished = false;
@@ -544,14 +564,14 @@ namespace EngineDecay
         {
             if (procPart)
             {
-                if (r != ReliabilityProgress.fetch.CheckProcSRBProgress(part.name, ref procSRBDiameter, ref procSRBThrust, ref procSRBBellName).r)
+                if (r != ReliabilityProgress.fetch.CheckProcSRBProgress(engineModelId, ref procSRBDiameter, ref procSRBThrust, ref procSRBBellName).r)
                 {
                     return false;
                 }
             }
             else
             {
-                if (r != ReliabilityProgress.fetch.GetReliabilityData(part.name).r)
+                if (r != ReliabilityProgress.fetch.GetReliabilityData(engineModelId).r)
                 {
                     return false;
                 }
@@ -908,7 +928,7 @@ namespace EngineDecay
         [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "Set as a New Model", groupName = "PayToPlayReliability", groupDisplayName = "PayToPlay Reliability")]
         void SetAsANewProcSRBModel()
         {
-            ReliabilityProgress.fetch.CreateModel(part.name, r, procSRBDiameter, procSRBThrust, procSRBBellName);
+            ReliabilityProgress.fetch.CreateModel(engineModelId, r, procSRBDiameter, procSRBThrust, procSRBBellName);
             Events["SetAsANewProcSRBModel"].guiActiveEditor = false;
 
             foreach (Part i in part.symmetryCounterparts)
@@ -1028,6 +1048,11 @@ namespace EngineDecay
             {
                 Lib.Log("Loaded from null Node");
             }
+
+            if (engineModelId == "")
+            {
+                engineModelId = part.name;
+            }
         }
 
         public override void OnStart(StartState state)
@@ -1079,16 +1104,16 @@ namespace EngineDecay
 
                 if (modesNumber == 0)
                 {
-                    Lib.LogWarning($"EngineDecay could not find engine modules at part {part.name}");           // Need full stop flag
+                    Lib.LogWarning($"EngineDecay could not find engine modules at part {engineModelId}");           // Need full stop flag
                     return;
                 }
                 else if (modesNumber != 1 && !usingMultiModeLogic)
                 {
-                    Lib.LogWarning($"EngineDecay found multiple engine modules at {part.name} but is not properly configured for {modesNumber} modes, fallback to singlemode logic");
+                    Lib.LogWarning($"EngineDecay found multiple engine modules at {engineModelId} but is not properly configured for {modesNumber} modes, fallback to singlemode logic");
                 }
                 else
                 {
-                    Lib.Log($"EngineDecay found {modesNumber} modes at {part.name}");
+                    Lib.Log($"EngineDecay found {modesNumber} modes at {engineModelId}");
                 }
 
                 if (topBaseRatedTime == -1)
@@ -1133,7 +1158,7 @@ namespace EngineDecay
                         }
                         else
                         {
-                            Lib.Log($"EngineDecay started initialization for procedural SRB at part {part.name}");
+                            Lib.Log($"EngineDecay started initialization for procedural SRB at part {engineModelId}");
 
                             procSRBCylinder.Fields["diameter"].uiControlEditor.onFieldChanged += ProcUpdateDiameter;
                             procSRB.Fields["thrust"].uiControlEditor.onFieldChanged += ProcUpdateThrust;
@@ -1143,7 +1168,7 @@ namespace EngineDecay
                             ProcUpdateBellName(procSRB.Fields["selectedBellName"], null);
                             ProcUpdateThrust(procSRB.Fields["thrust"], null);
 
-                            Lib.Log($"EngineDecay initialization success for procedural SRB at part {part.name}");
+                            Lib.Log($"EngineDecay initialization success for procedural SRB at part {engineModelId}");
                         }
                     }
 
@@ -1154,7 +1179,7 @@ namespace EngineDecay
                         Lib.Log($"isKCTBuilt: {isKCTBuilt}, replaceCost: {replaceCost}, newBorn: {newBorn}");
                         ReplaceFromCounterpart();                       // It is not a replace called from counterpart, but it does all we need
 
-                        Lib.Log($"EngineDecay has automatically updated to last reliability generation at part {part.name}");
+                        Lib.Log($"EngineDecay has automatically updated to last reliability generation at part {engineModelId}");
                     }
 
                     if (part.PartActionWindow != null)
@@ -1183,7 +1208,7 @@ namespace EngineDecay
                             ReplaceFromCounterpart();                       // It is not a replace called from counterpart, but it does all we need
                             //part.PartActionWindow.displayDirty = true;
 
-                            Lib.Log($"EngineDecay has automatically updated to last reliability generation at part {part.name}");
+                            Lib.Log($"EngineDecay has automatically updated to last reliability generation at part {engineModelId}");
                         }
                         if (failAtBurnTime == -1 && topBaseRatedTime != -1)
                         {
@@ -1199,7 +1224,7 @@ namespace EngineDecay
                     prevLoadWasInEditor = false;
                 }
 
-                Lib.Log($"EngineDecay at {part.name} is finishing OnStart, about to update indicators");
+                Lib.Log($"EngineDecay at {engineModelId} is finishing OnStart, about to update indicators");
 
                 UpdateIndicators();
             }
@@ -1634,7 +1659,7 @@ namespace EngineDecay
                 {
                     ignitionsLeft--;
 
-                    float luck = UnityEngine.Random.Range(0f, 1f);
+                    float luck = UnityEngine.Random.Range(0f, 1f)/ignitionIssuesChanceScale;
                     Lib.Log($"Failure on ignition chance is {PayToPlaySettingsDifficultyNumbers.FailureOnIgnitionPercent / 100 * Math.Pow(9 - r, 3.2)}");
                     Lib.Log($"Noncritical gnition failure chance is {PayToPlaySettingsDifficultyNumbers.IgnitionFailurePercent / 100 * Math.Pow(9 - r, 3.2)}");
                     if (luck < PayToPlaySettingsDifficultyNumbers.FailureOnIgnitionPercent / 100 * Math.Pow(9 - r, 3.2))
@@ -1652,7 +1677,7 @@ namespace EngineDecay
                     }
                     else if(luck < (PayToPlaySettingsDifficultyNumbers.FailureOnIgnitionPercent + PayToPlaySettingsDifficultyNumbers.IgnitionFailurePercent) / 100 * Math.Pow(9 - r, 3.2))
                     {
-                        FlightLogger.fetch?.LogEvent(string.Format("Bad ignition of {0}, shutdown performed to prevent consequences", part.name));
+                        FlightLogger.fetch?.LogEvent(string.Format("Bad ignition of {0}, shutdown performed to prevent consequences", engineModelId));
                         CutoffOnFailure("Bad Ignition");
                     }
                 }
@@ -1666,7 +1691,7 @@ namespace EngineDecay
                     {
                         ignitionsLeft--;
 
-                        float luck = UnityEngine.Random.Range(0f, 1f);
+                        float luck = UnityEngine.Random.Range(0f, 1f)/ignitionIssuesChanceScale;
                         if (luck < PayToPlaySettingsDifficultyNumbers.FailureOnIgnitionPercent / 100 * Math.Pow(9 - r, 3.2))
                         {
                             Failure();
@@ -1675,7 +1700,7 @@ namespace EngineDecay
                         }
                         else if (luck < (PayToPlaySettingsDifficultyNumbers.FailureOnIgnitionPercent + PayToPlaySettingsDifficultyNumbers.IgnitionFailurePercent) / 100 * Math.Pow(9 - r, 3.2))
                         {
-                            FlightLogger.fetch?.LogEvent(string.Format("Bad ignition of {0}, shutdown performed to prevent consequences", part.name));
+                            FlightLogger.fetch?.LogEvent(string.Format("Bad ignition of {0}, shutdown performed to prevent consequences", engineModelId));
                             CutoffOnFailure("Bad Ignition");
                         }
                     }
@@ -1685,7 +1710,7 @@ namespace EngineDecay
 
         void Failure()
         {
-            Lib.Log($"Failing {part.name}, destruction chance is {PayToPlaySettingsDifficultyNumbers.DestructionOnFailurePercent / 100 * (9 - r)}");
+            Lib.Log($"Failing {engineModelId}, destruction chance is {PayToPlaySettingsDifficultyNumbers.DestructionOnFailurePercent / 100 * (9 - r)}");
 
             if(UnityEngine.Random.Range(0f, 1f) < PayToPlaySettingsDifficultyNumbers.DestructionOnFailurePercent/100 * (9 - r))
             {
@@ -1693,7 +1718,7 @@ namespace EngineDecay
             }
             else
             {
-                FlightLogger.fetch?.LogEvent(string.Format("{0} failed", part.name));
+                FlightLogger.fetch?.LogEvent(string.Format("{0} failed", engineModelId));
             }
 
             ticksTillDisabling = 5;
@@ -1757,7 +1782,7 @@ namespace EngineDecay
 
         void BadaBoom()
         {
-            FlightLogger.fetch?.LogEvent(string.Format("A critical maulfunction has destroyed {0}", part.name));        //placeholder using internal part name
+            FlightLogger.fetch?.LogEvent(string.Format("A critical maulfunction has destroyed {0}", engineModelId));        //placeholder using internal part name
             part.explode();
         }
 
@@ -1846,13 +1871,13 @@ namespace EngineDecay
             {
                 if (!procPart)
                 {
-                    r = ReliabilityProgress.fetch.GetReliabilityData(part.name).r;
-                    reliabilityIsVisible = ReliabilityProgress.fetch.GetReliabilityData(part.name).reliabilityIsVisible;
+                    r = ReliabilityProgress.fetch.GetReliabilityData(engineModelId).r;
+                    reliabilityIsVisible = ReliabilityProgress.fetch.GetReliabilityData(engineModelId).reliabilityIsVisible;
                 }
                 else
                 {
-                    r = ReliabilityProgress.fetch.CheckProcSRBProgress(part.name, ref procSRBDiameter, ref procSRBThrust, ref procSRBBellName).r;
-                    reliabilityIsVisible = ReliabilityProgress.fetch.CheckProcSRBProgress(part.name, ref procSRBDiameter, ref procSRBThrust, ref procSRBBellName).reliabilityIsVisible;
+                    r = ReliabilityProgress.fetch.CheckProcSRBProgress(engineModelId, ref procSRBDiameter, ref procSRBThrust, ref procSRBBellName).r;
+                    reliabilityIsVisible = ReliabilityProgress.fetch.CheckProcSRBProgress(engineModelId, ref procSRBDiameter, ref procSRBThrust, ref procSRBBellName).reliabilityIsVisible;
 
                     if (r == -1)
                     {

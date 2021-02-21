@@ -91,11 +91,13 @@ namespace EngineDecay
                         {
                             if (engineDecay.values.GetValue("procPart") == "False")
                             {
-                                ReliabilityProgress.fetch.Improve(part.partName, float.Parse(engineDecay.GetValue("usageExperienceCoeff")), float.Parse(engineDecay.GetValue("r")));
+                                ReliabilityProgress.fetch.Improve(engineDecay.GetValue("engineModelId"),
+                                    float.Parse(engineDecay.GetValue("usageExperienceCoeff")), float.Parse(engineDecay.GetValue("r")));
                             }
                             else
                             {
-                                ReliabilityProgress.fetch.ImproveProcedural(part.partName, float.Parse(engineDecay.values.GetValue("procSRBDiameter")), 
+                                ReliabilityProgress.fetch.ImproveProcedural(engineDecay.GetValue("engineModelId"),
+                                    float.Parse(engineDecay.values.GetValue("procSRBDiameter")), 
                                     float.Parse(engineDecay.values.GetValue("procSRBThrust")), engineDecay.values.GetValue("procSRBBellName"),
                                     float.Parse(engineDecay.GetValue("usageExperienceCoeff")), float.Parse(engineDecay.GetValue("r")));
                             }

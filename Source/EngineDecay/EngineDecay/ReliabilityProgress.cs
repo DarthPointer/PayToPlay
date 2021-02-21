@@ -102,6 +102,8 @@ namespace EngineDecay
 
         public override void OnLoad(ConfigNode node)
         {
+            if (!node.HasNode("Engines")) { return; }
+
             foreach (ConfigNode.Value val in node.GetNodes("Engines")[0].values)
             {
                 records[val.name] = new ReliabilityProgressData(val.value);
@@ -143,27 +145,27 @@ namespace EngineDecay
 
         #region Logic
 
-        public ReliabilityProgressData GetReliabilityData(string partName)
+        public ReliabilityProgressData GetReliabilityData(string engineModelId)
         {
-            Lib.Log($"Getting reliability progress for {partName}");
+            Lib.Log($"Getting reliability progress for {engineModelId}");
 
             if (PayToPlaySettingsFeatures.ReliabilityProgress)
             {
-                if (!records.ContainsKey(partName))
+                if (!records.ContainsKey(engineModelId))
                 {
-                    Lib.Log($"Reliability progress record for {partName} not found, creating it");
+                    Lib.Log($"Reliability progress record for {engineModelId} not found, creating it");
 
                     float r = PayToPlaySettingsDifficultyNumbers.StartingReliability;
                     if (PayToPlaySettingsFeatures.RandomStartingReliability)
                     {
-                        Lib.Log($"Applying random starting reliability bonus for {partName}");
+                        Lib.Log($"Applying random starting reliability bonus for {engineModelId}");
                         r += UnityEngine.Random.Range(0f, 1f) * PayToPlaySettingsDifficultyNumbers.RandomStartingReliabilityBonusLimit;
                     }
                     r = Math.Min(r, 8);
 
-                    records[partName] = new ReliabilityProgressData(r, !PayToPlaySettingsFeatures.HideStartingReliability);
+                    records[engineModelId] = new ReliabilityProgressData(r, !PayToPlaySettingsFeatures.HideStartingReliability);
                 }
-                return records[partName];
+                return records[engineModelId];
             }
             else
             {
@@ -171,14 +173,14 @@ namespace EngineDecay
             }
         }
 
-        public void Improve(string partName, float coeff, float generationExp)
+        public void Improve(string engineModelId, float coeff, float generationExp)
         {
-            if(!records.ContainsKey(partName))
+            if(!records.ContainsKey(engineModelId))
             {
-                records[partName] = new ReliabilityProgressData(PayToPlaySettingsDifficultyNumbers.StartingReliability, !PayToPlaySettingsFeatures.HideStartingReliability);
+                records[engineModelId] = new ReliabilityProgressData(PayToPlaySettingsDifficultyNumbers.StartingReliability, !PayToPlaySettingsFeatures.HideStartingReliability);
             }
 
-            float oldExp = records[partName].r;
+            float oldExp = records[engineModelId].r;
             float newExp = generationExp + (9 - generationExp) * coeff;
             if (newExp > 8)
             {
@@ -187,20 +189,20 @@ namespace EngineDecay
 
             if (newExp > oldExp)
             {
-                records[partName].r = newExp;
+                records[engineModelId].r = newExp;
             }
             if (coeff > 0)
             {
-                records[partName].reliabilityIsVisible = true;
+                records[engineModelId].reliabilityIsVisible = true;
             }
         }
 
-        public ReliabilityProgressData CheckProcSRBProgress(string partName, ref float diameter, ref float thrust, ref string bellName)           // -1 if no registered model fits specified stats
+        public ReliabilityProgressData CheckProcSRBProgress(string engineModelId, ref float diameter, ref float thrust, ref string bellName)           // -1 if no registered model fits specified stats
         {                                                                                                                       // It CHANGES procedural data of EngineDecay in order to specify which model it is to prevent possible reliability progress issues
             if (PayToPlaySettingsFeatures.ReliabilityProgress)
             {
                 ProcSRBProgress partProgress;
-                if (procSRBs.TryGetValue(partName, out partProgress))
+                if (procSRBs.TryGetValue(engineModelId, out partProgress))
                 {
                     Dictionary<ProcSRBData, ReliabilityProgressData>.Enumerator i = partProgress.models.GetEnumerator();
 
@@ -229,18 +231,18 @@ namespace EngineDecay
             }
         }
 
-        public void CreateModel(string partName, float startingReliability, float diameter, float thrust, string bellName)
+        public void CreateModel(string engineModelId, float startingReliability, float diameter, float thrust, string bellName)
         {
             ProcSRBProgress partProgress;
-            if (!procSRBs.TryGetValue(partName, out partProgress))
+            if (!procSRBs.TryGetValue(engineModelId, out partProgress))
             {
-                partProgress = procSRBs[partName] = new ProcSRBProgress();
+                partProgress = procSRBs[engineModelId] = new ProcSRBProgress();
             }
 
             partProgress.models[new ProcSRBData(diameter, thrust, bellName)] = new ReliabilityProgressData(startingReliability, !PayToPlaySettingsFeatures.HideStartingReliability);
         }
 
-        public void ImproveProcedural(string partName, float diameter, float thrust, string bellName, float coeff, float generationExp)
+        public void ImproveProcedural(string engineModelId, float diameter, float thrust, string bellName, float coeff, float generationExp)
         {
             if (PayToPlaySettingsFeatures.ReliabilityProgress)
             {
@@ -251,9 +253,9 @@ namespace EngineDecay
                 }
 
                 ProcSRBProgress partProgress;
-                if (!procSRBs.TryGetValue(partName, out partProgress))
+                if (!procSRBs.TryGetValue(engineModelId, out partProgress))
                 {
-                    partProgress = procSRBs[partName] = new ProcSRBProgress();
+                    partProgress = procSRBs[engineModelId] = new ProcSRBProgress();
                 }
 
                 ProcSRBData key = new ProcSRBData(diameter, thrust, bellName);
