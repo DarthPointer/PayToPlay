@@ -11,6 +11,8 @@ namespace EngineDecay
         public float r;
         public bool reliabilityIsVisible;
 
+        public ReliabilityProgressData() { }
+
         public ReliabilityProgressData(float _r, bool _reliabilityIsVisible)
         {
             r = _r;
@@ -155,15 +157,7 @@ namespace EngineDecay
                 {
                     Lib.Log($"Reliability progress record for {engineModelId} not found, creating it");
 
-                    float r = PayToPlaySettingsDifficultyNumbers.StartingReliability;
-                    if (PayToPlaySettingsFeatures.RandomStartingReliability)
-                    {
-                        Lib.Log($"Applying random starting reliability bonus for {engineModelId}");
-                        r += UnityEngine.Random.Range(0f, 1f) * PayToPlaySettingsDifficultyNumbers.RandomStartingReliabilityBonusLimit;
-                    }
-                    r = Math.Min(r, 8);
-
-                    records[engineModelId] = new ReliabilityProgressData(r, !PayToPlaySettingsFeatures.HideStartingReliability);
+                    records[engineModelId] = GenerateInitialRelaibilityData();
                 }
                 return records[engineModelId];
             }
@@ -177,7 +171,7 @@ namespace EngineDecay
         {
             if(!records.ContainsKey(engineModelId))
             {
-                records[engineModelId] = new ReliabilityProgressData(PayToPlaySettingsDifficultyNumbers.StartingReliability, !PayToPlaySettingsFeatures.HideStartingReliability);
+                records[engineModelId] = new ReliabilityProgressData();
             }
 
             float oldExp = records[engineModelId].r;
@@ -276,6 +270,18 @@ namespace EngineDecay
                     partProgress.models[key] = new ReliabilityProgressData(newExp, true);
                 }
             }
+        }
+
+        private static ReliabilityProgressData GenerateInitialRelaibilityData()
+        {
+            float r = PayToPlaySettingsDifficultyNumbers.StartingReliability;
+            if (PayToPlaySettingsFeatures.RandomStartingReliability)
+            {
+                r += UnityEngine.Random.Range(0f, 1f) * PayToPlaySettingsDifficultyNumbers.RandomStartingReliabilityBonusLimit;
+                r = Math.Min(r, 8);
+            }
+
+            return new ReliabilityProgressData(r, !PayToPlaySettingsFeatures.HideStartingReliability);
         }
 
         #endregion
