@@ -102,7 +102,7 @@ namespace EngineDecay
                                     float thisModelR = ReliabilityProgress.fetch.GetReliabilityData(engineModelId).r;
                                     foreach (ConfigNode.Value i in engineDecay.GetNode("SIBLINGS").values)
                                     {
-                                        ReliabilityProgress.fetch.SiblingImproveIfLess(i.name, thisModelR * float.Parse(i.value));
+                                        ReliabilityProgress.fetch.SiblingImproveIfLess(i.name, (thisModelR-2) * float.Parse(i.value) + 2);
                                     }
                                 }
 
