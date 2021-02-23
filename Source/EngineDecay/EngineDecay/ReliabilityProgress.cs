@@ -191,6 +191,20 @@ namespace EngineDecay
             }
         }
 
+        public void SiblingImproveIfLess(string engineModelId, float r)
+        {
+            r = Math.Min(r, 8);
+
+            if (!records.ContainsKey(engineModelId))
+            {
+                records[engineModelId] = new ReliabilityProgressData(r, true);
+            }
+            else if (records[engineModelId].r < r)
+            {
+                records[engineModelId] = new ReliabilityProgressData(r, true);
+            }
+        }
+
         public ReliabilityProgressData CheckProcSRBProgress(string engineModelId, ref float diameter, ref float thrust, ref string bellName)           // -1 if no registered model fits specified stats
         {                                                                                                                       // It CHANGES procedural data of EngineDecay in order to specify which model it is to prevent possible reliability progress issues
             if (PayToPlaySettingsFeatures.ReliabilityProgress)

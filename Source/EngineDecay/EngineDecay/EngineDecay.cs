@@ -1055,6 +1055,14 @@ namespace EngineDecay
             {
                 engineModelId = part.name;
             }
+
+            if (node.HasNode("SIBLINGS"))
+            {
+                foreach (ConfigNode.Value i in node.GetNode("SIBLINGS").values)
+                {
+                    siblingRelations[i.name] = float.Parse(i.value);
+                }
+            }
         }
 
         public override void OnStart(StartState state)
@@ -1561,6 +1569,16 @@ namespace EngineDecay
                     wasRailWarpingPrevTick = railWarping;
                     modeRunningPrevTick = runningMode;
                 }
+            }
+        }
+
+        public override void OnSave(ConfigNode node)
+        {
+            base.OnSave(node);
+            ConfigNode siblingRelationsNode = node.AddNode("SIBLINGS");
+            foreach (var i in siblingRelations)
+            {
+                siblingRelationsNode.AddValue(i.Key, i.Value);
             }
         }
 
