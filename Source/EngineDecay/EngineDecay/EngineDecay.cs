@@ -220,6 +220,8 @@ namespace EngineDecay
         float holdIndicatorsTill = 0;
         int partSymmetryCounterpartsCount = -1;
 
+        Dictionary<string, float> siblingRelations = new Dictionary<string, float>();
+
         List<ModuleEngines> decayingEngines = new List<ModuleEngines>();
         MultiModeEngine modeSwitcher;
 
