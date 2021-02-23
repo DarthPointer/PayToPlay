@@ -1021,6 +1021,14 @@ namespace EngineDecay
 
         public override void OnLoad(ConfigNode node)
         {
+            if (node.HasNode("SIBLINGS"))
+            {
+                foreach (ConfigNode.Value i in node.GetNode("SIBLINGS").values)
+                {
+                    siblingRelations[i.name] = float.Parse(i.value);
+                }
+            }
+
             base.OnLoad(node);
             if (node != null)
             {
@@ -1054,14 +1062,6 @@ namespace EngineDecay
             if (engineModelId == "")
             {
                 engineModelId = part.name;
-            }
-
-            if (node.HasNode("SIBLINGS"))
-            {
-                foreach (ConfigNode.Value i in node.GetNode("SIBLINGS").values)
-                {
-                    siblingRelations[i.name] = float.Parse(i.value);
-                }
             }
         }
 
