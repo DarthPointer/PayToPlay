@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace EngineDecay
 {
-    public class EngineDecay : PartModule, IPartMassModifier, IPartCostModifier
+    public class EngineDecay : PartModule, IPartMassModifier, IPartCostModifier, ISerializationCallbackReceiver
     {
         #region fields
 
@@ -221,6 +221,7 @@ namespace EngineDecay
         int partSymmetryCounterpartsCount = -1;
 
         Dictionary<string, float> siblingRelations = new Dictionary<string, float>();
+        static Dictionary<string, float> passedSiblingRelations;
 
         List<ModuleEngines> decayingEngines = new List<ModuleEngines>();
         MultiModeEngine modeSwitcher;
@@ -1067,6 +1068,7 @@ namespace EngineDecay
 
         public override void OnStart(StartState state)
         {
+            if (state == StartState.None) { return; }           // Get TF out of here! KSP, why are you calling OnStart when I recover the vessel?
             if (PayToPlaySettingsFeatures.Enable)
             {
                 decayingEngines = part.FindModulesImplementing<ModuleEngines>();
@@ -1581,6 +1583,18 @@ namespace EngineDecay
                 siblingRelationsNode.AddValue(i.Key, i.Value);
             }
         }
+
+        #region ISerializationCallbackReciever
+        void ISerializationCallbackReceiver.OnBeforeSerialize()
+        {
+            passedSiblingRelations = siblingRelations;
+        }
+
+        void ISerializationCallbackReceiver.OnAfterDeserialize()
+        {
+            siblingRelations = passedSiblingRelations;
+        }
+        #endregion
 
         #region mass and cost modifiers implementation (game-called too)
 

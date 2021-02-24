@@ -74,4 +74,3 @@ D:\Repos\PayToPlay\Source\EngineDecay\EngineDecay\obj\Debug\EngineDecay.csproj.C
 D:\Repos\PayToPlay\Source\EngineDecay\EngineDecay\obj\Debug\EngineDecay.dll
 D:\Repos\PayToPlay\Source\EngineDecay\EngineDecay\obj\Debug\EngineDecay.pdb
 D:\Repos\PayToPlay\Source\EngineDecay\EngineDecay\obj\Debug\EngineDecay.csproj.CoreCompileInputs.cache
-D:\Repos\PayToPlay\Source\EngineDecay\EngineDecay\obj\Debug\EngineDecay.csprojAssemblyReference.cache
