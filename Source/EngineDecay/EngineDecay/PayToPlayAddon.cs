@@ -91,11 +91,26 @@ namespace EngineDecay
                         {
                             if (engineDecay.values.GetValue("procPart") == "False")
                             {
-                                ReliabilityProgress.fetch.Improve(part.partName, float.Parse(engineDecay.GetValue("usageExperienceCoeff")), float.Parse(engineDecay.GetValue("r")));
+                                string engineModelId = engineDecay.GetValue("engineModelId");
+                                float usageExperienceCoeff = float.Parse(engineDecay.GetValue("usageExperienceCoeff"));
+
+                                ReliabilityProgress.fetch.Improve(engineModelId,
+                                    usageExperienceCoeff, float.Parse(engineDecay.GetValue("r")));
+
+                                if (usageExperienceCoeff > 0 && engineDecay.HasNode("SIBLINGS"))
+                                {
+                                    float thisModelR = ReliabilityProgress.fetch.GetReliabilityData(engineModelId).r;
+                                    foreach (ConfigNode.Value i in engineDecay.GetNode("SIBLINGS").values)
+                                    {
+                                        ReliabilityProgress.fetch.SiblingImproveIfLess(i.name, (thisModelR-2) * float.Parse(i.value) + 2);
+                                    }
+                                }
+
                             }
                             else
                             {
-                                ReliabilityProgress.fetch.ImproveProcedural(part.partName, float.Parse(engineDecay.values.GetValue("procSRBDiameter")), 
+                                ReliabilityProgress.fetch.ImproveProcedural(engineDecay.GetValue("engineModelId"),
+                                    float.Parse(engineDecay.values.GetValue("procSRBDiameter")), 
                                     float.Parse(engineDecay.values.GetValue("procSRBThrust")), engineDecay.values.GetValue("procSRBBellName"),
                                     float.Parse(engineDecay.GetValue("usageExperienceCoeff")), float.Parse(engineDecay.GetValue("r")));
                             }
