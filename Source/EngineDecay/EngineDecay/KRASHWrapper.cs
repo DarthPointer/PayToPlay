@@ -16,7 +16,7 @@ using System.Reflection;
 using UnityEngine;
 
 
-namespace KRASH
+namespace EngineDecay
 {
 	public class KRASHWrapper : MonoBehaviour
 	{
