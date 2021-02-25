@@ -33,6 +33,8 @@ namespace EngineDecay
         [KSPField(isPersistant = true, guiActive = false)]
         public string engineModelId = "";
 
+        string startedWithEngineModelId;
+
 
         [KSPField(isPersistant = true, guiActive = false)]
         public float maintenanceAtRatedTimeCoeff = 0.3f;
@@ -1069,6 +1071,9 @@ namespace EngineDecay
         public override void OnStart(StartState state)
         {
             if (state == StartState.None) { return; }           // Get TF out of here! KSP, why are you calling OnStart when I recover the vessel?
+
+            startedWithEngineModelId = engineModelId;
+
             if (PayToPlaySettingsFeatures.Enable)
             {
                 decayingEngines = part.FindModulesImplementing<ModuleEngines>();
@@ -1600,7 +1605,18 @@ namespace EngineDecay
 
         float IPartMassModifier.GetModuleMass(float defaultMass, ModifierStagingSituation sit)
         {
-            return defaultMass * (extraBurnTimePercent * maxMassRatedTimeCoeff + extraIgnitionsPercent * maxMassIgnitionsCoeff) / 100;
+            float partMass = defaultMass;
+            foreach (IPartMassModifier massModifier in part.FindModulesImplementing<IPartMassModifier>())
+            {
+#pragma warning disable CS0252 // Yes, I compare references
+                if (massModifier != this)
+#pragma warning restore CS0252
+                {
+                    partMass += massModifier.GetModuleMass(defaultMass, sit);
+                }
+
+            }
+            return partMass * (extraBurnTimePercent * maxMassRatedTimeCoeff + extraIgnitionsPercent * maxMassIgnitionsCoeff) / 100;
         }
 
         ModifierChangeWhen IPartMassModifier.GetModuleMassChangeWhen()
@@ -1638,6 +1654,17 @@ namespace EngineDecay
                     }
 
                     knownPartCost = defaultCost;
+
+                    foreach (IPartCostModifier costModifier in part.FindModulesImplementing<IPartCostModifier>())
+                    {
+#pragma warning disable CS0252 // Yes, I compare references
+                        if (costModifier != this)
+#pragma warning restore CS0252
+                        {
+                            knownPartCost += costModifier.GetModuleCost(defaultCost, sit);
+                        }
+                    }
+
                     fullPartCost = knownPartCost * (1 + maxCostRatedTimeCoeff * extraBurnTimePercent / 100 + maxCostIgnitionsCoeff * extraIgnitionsPercent / 100);
                     targetPartCost = fullPartCost;
                     replaceCost = 0;
@@ -1660,6 +1687,17 @@ namespace EngineDecay
         }
 
         #endregion
+
+        [KSPEvent]
+        public void ModuleDataChanged(BaseEventDetails details)
+        {
+            if (prevLoadWasInEditor && startedWithEngineModelId != engineModelId)       // We don't need to update our internal stuff in flighscene as B9PS will trigger the state chosen in editor and model change in flight is not designed.
+            {                                                                           // Also ignoring change if we did not actually switch the model.
+                knownPartCost = -1;
+                ReplaceFromCounterpart();
+                startedWithEngineModelId = engineModelId;
+            }
+        }
 
         #endregion
 
