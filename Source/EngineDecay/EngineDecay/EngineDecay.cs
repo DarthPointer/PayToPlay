@@ -1503,27 +1503,42 @@ namespace EngineDecay
                         {
                             if (usedBurnTime > failAtBurnTime && issueCode == 0)
                             {
-                                Failure();
+                                if (KRASHWrapper.simulationActive())
+                                {
+                                    failAtBurnTime = float.PositiveInfinity;
+                                }
+                                else
+                                {
 
-                                usageExperienceCoeff = 0.3f;
+                                    Failure();
+
+                                    usageExperienceCoeff = 0.3f;
+                                }
                             }
 
                             if (PayToPlaySettingsFeatures.RandomFailureWarningEnable)
                             {
                                 if (usedBurnTime > warnAtBurnTime)
                                 {
-                                    if (reliabilityStatus == "nominal")
+                                    if (KRASHWrapper.simulationActive())
                                     {
-                                        reliabilityStatus = PayToPlayAddon.RandomStatus("PoorEngineCondition");
-                                        part.SetHighlightType(Part.HighlightType.AlwaysOn);
-                                        part.SetHighlightColor(new Color(1, 1, 0));
-                                        part.SetHighlight(true, false);
-
-                                        ScreenMessages.PostScreenMessage("Bad engine telemetry, get ready for a failure!");
-
-                                        if (autoShutdownOnWarning)
+                                        warnAtBurnTime = float.PositiveInfinity;
+                                    }
+                                    else
+                                    {
+                                        if (reliabilityStatus == "nominal")
                                         {
-                                            CutoffOnFailure("Failure Prediction Alert");
+                                            reliabilityStatus = PayToPlayAddon.RandomStatus("PoorEngineCondition");
+                                            part.SetHighlightType(Part.HighlightType.AlwaysOn);
+                                            part.SetHighlightColor(new Color(1, 1, 0));
+                                            part.SetHighlight(true, false);
+
+                                            ScreenMessages.PostScreenMessage("Bad engine telemetry, get ready for a failure!");
+
+                                            if (autoShutdownOnWarning)
+                                            {
+                                                CutoffOnFailure("Failure Prediction Alert");
+                                            }
                                         }
                                     }
                                 }
@@ -1718,7 +1733,7 @@ namespace EngineDecay
                 {
                     ignitionsLeft--;
 
-                    float luck = UnityEngine.Random.Range(0f, 1f)/ignitionIssuesChanceScale;
+                    float luck = KRASHWrapper.simulationActive() ? float.PositiveInfinity : UnityEngine.Random.Range(0f, 1f)/ignitionIssuesChanceScale;
                     Lib.Log($"Failure on ignition chance is {PayToPlaySettingsDifficultyNumbers.FailureOnIgnitionPercent / 100 * Math.Pow(9 - r, 3.2)}");
                     Lib.Log($"Noncritical gnition failure chance is {PayToPlaySettingsDifficultyNumbers.IgnitionFailurePercent / 100 * Math.Pow(9 - r, 3.2)}");
                     if (luck < PayToPlaySettingsDifficultyNumbers.FailureOnIgnitionPercent / 100 * Math.Pow(9 - r, 3.2))
@@ -1750,7 +1765,7 @@ namespace EngineDecay
                     {
                         ignitionsLeft--;
 
-                        float luck = UnityEngine.Random.Range(0f, 1f)/ignitionIssuesChanceScale;
+                        float luck = KRASHWrapper.simulationActive() ? float.PositiveInfinity : UnityEngine.Random.Range(0f, 1f)/ignitionIssuesChanceScale;
                         if (luck < PayToPlaySettingsDifficultyNumbers.FailureOnIgnitionPercent / 100 * Math.Pow(9 - r, 3.2))
                         {
                             Failure();
