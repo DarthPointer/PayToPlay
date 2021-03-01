@@ -73,8 +73,9 @@
 	real_title = LR-89 Atlas Booster
 			real_title = LR-89-5
 			real_title = LR89-7
+
 			real_title = RS56-OBA		// RS-56 is not really LR-89
-./Delta/bluedog_Delta2_RS27.cfg				// But I was told RS-27 is close to RS-56
+./Delta/bluedog_Delta2_RS27.cfg				// H-1 -> RS-27 -> RS-56
 	real_title = RS-27 Liquid Engine
 			real_title = RS27
 			real_title = RS27A
@@ -203,14 +204,14 @@ real_title = J-2 Sea Level
 real_title = J-2 Annular Aerospike
 			real_title = J-2 Annular Aerospike
 			real_title = J-2 250K Annular Aerospike
-./Saturn/Engines/bluedog_Saturn_Engine_J2X.cfg
+./Saturn/Engines/bluedog_Saturn_Engine_J2X.cfg		// J-2X is "a clean-sheet design", BUT BDB USES THIS NAME FOR ORIGINAL J-2X TO BE J-2S WITH NOZZLE EXTENSION. KILLMEPLS.
 	real_title = J-2X
 			real_title = J-2X
 			real_title = J-2X-A2
 
 
 
-./Thor/bluedog_Thor_LR79.cfg
+./Thor/bluedog_Thor_LR79.cfg				// Check RS-27 and S3D above
 	real_title = LR79 Liquid Engine Series
 			real_title = LR-79-NA11
 			real_title = S3D
