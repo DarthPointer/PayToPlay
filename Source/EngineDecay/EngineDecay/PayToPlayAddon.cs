@@ -14,6 +14,7 @@ namespace EngineDecay
         public static PayToPlayAddon fetch;
 
         Dictionary<string, List<string>> reliabilityStatuses;
+        Dictionary<string, Dictionary<string, float>> siblingReliabilities;
 
         public static string RandomStatus(string statusType)
         {
@@ -40,6 +41,44 @@ namespace EngineDecay
             GameEvents.onVesselRecovered.Add(ReadRecoveredVessel);
 
             fetch = this;
+
+            ConfigNode[] siblingReliabiliesNodes = GameDatabase.Instance.GetConfigNodes("ENGINE_SIBLING_RELIABILITY");
+            siblingReliabilities = new Dictionary<string, Dictionary<string, float>>();
+
+            foreach (ConfigNode siblingRN in siblingReliabiliesNodes)
+            {
+                string engineModelId;
+
+                if (siblingRN.HasValue("engineModelId"))
+                {
+                    engineModelId = siblingRN.GetValue("engineModelId");
+                    siblingReliabilities[engineModelId] = new Dictionary<string, float>();
+                }
+                else
+                {
+                    Lib.LogError("ENGINE_SIBLING_RELIABILITY node did not contain engineModelId field");
+                    continue;
+                }
+
+                if (siblingRN.HasNode("SIBLINGS"))
+                {
+                    foreach (ConfigNode.Value sibling in siblingRN.GetNode("SIBLINGS").values)
+                    {
+                        if (float.TryParse(sibling.value, out float siblingCoeff))
+                        {
+                            siblingReliabilities[engineModelId][sibling.name] = siblingCoeff;
+                        }
+                        else
+                        {
+                            Lib.LogError($"Missformated sibling coeff for {sibling.name} in ENGINE_SIBLING_RELIABILITY node of {engineModelId} (should be parsable as float)");
+                        }
+                    }
+                }
+                else
+                {
+                    Lib.LogError($"ENGINE_SIBLING_RELIABILITY node of {engineModelId} did not contain SIBLINGS subnode");
+                }
+            }
 
             reliabilityStatuses = new Dictionary<string, List<string>>();
 
@@ -97,12 +136,12 @@ namespace EngineDecay
                                 ReliabilityProgress.fetch.Improve(engineModelId,
                                     usageExperienceCoeff, float.Parse(engineDecay.GetValue("r")));
 
-                                if (usageExperienceCoeff > 0 && engineDecay.HasNode("SIBLINGS"))
+                                if (usageExperienceCoeff > 0 && siblingReliabilities.ContainsKey(engineModelId))
                                 {
                                     float thisModelR = ReliabilityProgress.fetch.GetReliabilityData(engineModelId).r;
-                                    foreach (ConfigNode.Value i in engineDecay.GetNode("SIBLINGS").values)
+                                    foreach (var i in siblingReliabilities[engineModelId])
                                     {
-                                        ReliabilityProgress.fetch.SiblingImproveIfLess(i.name, (thisModelR-2) * float.Parse(i.value) + 2);
+                                        ReliabilityProgress.fetch.SiblingImproveIfLess(i.Key, (thisModelR-2) * i.Value + 2);
                                     }
                                 }
 

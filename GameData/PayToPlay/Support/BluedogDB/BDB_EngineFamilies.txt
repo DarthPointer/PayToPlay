@@ -1,0 +1,293 @@
+./Able/bluedog_Ablestar_Engine.cfg
+	real_title = Ablestar AJ10-104
+			real_title = AJ10-104
+			real_title = AJ10-118E
+./Able/bluedog_Able_Engine.cfg
+	real_title = Able AJ10-37
+			real_title = AJ10-37
+			real_title = AJ10-118D
+./Apollo/bluedog_Apollo_Block2_ServiceEngine.cfg
+	real_title = AJ10-137 Apollo Service Propulsion System
+./Delta/DeltaK/bluedog_AJ10_118F.cfg
+	real_title = Delta F AJ10-118F
+./Delta/DeltaK/bluedog_AJ10_118K.cfg
+	real_title = AJ10-118K Liquid Engine
+./Delta/DeltaK/bluedog_AJ10_118X.cfg
+	real_title = AJ10-118X Liquid Engine
+
+
+
+./Agena/bluedog_Agena_Engine_8096C.cfg
+	real_title = XLR81-8096C Advanced Agena Engine
+./Agena/bluedog_Agena_Engine_XLR81.cfg
+	real_title = XLR81 Agena Engine Series
+			real_title = Bell XLR-81-8048
+			real_title = Bell XLR-81-8081
+			real_title = Bell XLR-81-8096
+			real_title = Bell XLR-81-8096-39 HDA
+			real_title = Bell XLR-81-8096B
+
+
+
+./Agena/bluedog_GATV_SPS.cfg						// Tefock are these? Different real titles but looks like they are virtually the same engine and the only difference is resources they store.
+	real_title = Model 8250 Agena-D Secondary Engine
+./Agena/bluedog_GATV_SPS_LFO.cfg
+	real_title = Model 8250-B Agena-D Secondary Engine
+
+
+
+./Apollo/bluedog_Apollo_Block3_ServiceEngine.cfg			// MethaLOX derivative of LEM upper stage engine (LMAE)????
+	real_title = RS-18 Apollo block III Service Propulsion System
+./Apollo/bluedog_LEM_Ascent_Engine.cfg					
+	real_title = LM Ascent Propulsion System
+
+
+
+./Apollo/bluedog_Apollo_Block5_ServiceEngine.cfg			// Derivative of LMDE
+	real_title = TR-201 Apollo Service Propulsion System
+./Apollo/bluedog_LEM_Descent_Engine.cfg
+	real_title = LM Descent Propulsion System
+./Delta/DeltaK/bluedog_TR_201.cfg
+	real_title = TR-201
+
+
+
+
+./Atlas/bluedog_Atlas_LR101_Inline.cfg
+	real_title = LR-101 Inline Engine
+./Atlas/bluedog_Atlas_LR101_Radial.cfg
+	real_title = LR-101 Atlas Vernier Engine
+./Thor/bluedog_Thor_LR101.cfg
+	real_title = LR-101 Vernier
+
+
+
+./Atlas/bluedog_Atlas_LR105.cfg
+	real_title = LR-105 Atlas Sustainer
+			real_title = LR-105-5
+			real_title = LR-105-7
+
+
+
+./Atlas/bluedog_Atlas_LR89.cfg
+	real_title = LR-89 Atlas Booster
+			real_title = LR-89-5
+			real_title = LR89-7
+
+			real_title = RS56-OBA		// RS-56 is not really LR-89
+./Delta/bluedog_Delta2_RS27.cfg				// H-1 -> RS-27 -> RS-56
+	real_title = RS-27 Liquid Engine
+			real_title = RS27
+			real_title = RS27A
+./Saturn/Engines/bluedog_Saturn_Engine_H1C.cfg
+	real_title = H-1C
+			real_title = H-1C
+			real_title = H-1C 1973
+./Saturn/Engines/bluedog_Saturn_Engine_H1D.cfg
+	real_title = H-1D
+			real_title = H-1D
+			real_title = H-1D 1973
+
+
+
+
+./AtlasV/bluedog_AtlasV_RD180.cfg
+	real_title = RD-180 Liquid Engine
+
+
+
+./Centaur/bluedog_CentaurD_RL10.cfg
+	real_title = RL10-A Cryogenic Engine
+			real_title = RL-10-A-1
+			real_title = RL10-A-3
+			real_title = RL10-A-4
+			real_title = RL10-C1
+			real_title = RL10-A5
+./Centaur/bluedog_CentaurD_RL10A4N.cfg
+	real_title = RL10A-4-1N Extendable Cryogenic Engine
+./Centaur/bluedog_CentaurD_RL10B2.cfg
+	real_title = RL10-B-2 Extendable Cryogenic Engine
+./Centaur/bluedog_Centaur_RL10.cfg
+	real_title = RL10-A Cryogenic Engine
+			real_title = RL-10-A-1
+			real_title = RL10-A-3
+			real_title = RL10-A-4
+./Centaur/bluedog_Centaur_RL10A41.cfg
+	real_title = RL10A-4-1N Extendable Cryogenic Engine
+./Centaur/bluedog_Centaur_RL10B2.cfg
+	real_title = RL10-B-2 Extendable Cryogenic Engine
+
+
+
+./Delta/bluedog_DeltaIV_RS68.cfg
+real_title = RS-68
+      real_title = RS-68
+      real_title = RS-68A
+      real_title = RS-68B
+      real_title = RS-68K Regen
+
+
+
+./Engines/bluedog_E1.cfg
+	real_title = E-1
+			real_title = E1
+			real_title = E1 mk II
+
+
+
+./Gemini/bluedog_Gemini_OAMSThruster.cfg
+	real_title = Gemini Orbit Attitude and Maneuvering System
+
+
+
+./Gemini/Lander/bluedog_Gemini_Lander_Engine.cfg
+	real_title = Gemini Lander Engine
+
+
+
+./Jupiter/bluedog_Juno4_Engine_45K.cfg
+	real_title = Juno IVB JPL 45K Engine
+		real_title = Juno IVB JPL 45K Engine
+			real_title = Juno IVB JPL 45K Block II Engine
+
+
+
+./Jupiter/bluedog_Juno4_Engine_6K.cfg
+	real_title = Juno IVB JPL 6K Engine
+		real_title = Juno IVB JPL 6K Engine
+			real_title = Juno IVB JPL 6K Block II Engine
+
+
+
+./Jupiter/bluedog_Jupiter_Vernier.cfg
+	real_title = S-3D Vernier Exhaust
+
+
+
+./ProbeExpansion/PioneerAble/bluedog_PioneerAble_Core.cfg
+	real_title = Pioneer P3
+./ProbeExpansion/PioneerAble/bluedog_PioneerAble_Engine.cfg
+	real_title = Pioneer P3 Able IV Space Engine
+
+
+
+./Redstone/bluedog_Redstone_A7_Bare.cfg
+	real_title = A-7
+			real_title = A-7 Alcolox
+			real_title = A-7 Hydyne
+./Redstone/bluedog_Redstone_A7_TailUnit.cfg
+	real_title = A-7
+			real_title = A-7 Alcolox
+			real_title = A-7 Hydyne
+./Redstone/bluedog_Redstone_QuadEngine.cfg
+	real_title = A-7 Quad
+
+
+
+./Saturn/Engines/bluedog_Saturn_Engine_F1.cfg
+real_title = F-1
+			real_title = F-1
+			real_title = F-1A
+			real_title = F-1B
+
+
+
+./Saturn/Engines/bluedog_Saturn_Engine_J2.cfg
+real_title = J-2
+./Saturn/Engines/bluedog_Saturn_Engine_J2S.cfg
+real_title = J-2S
+			real_title = J-2S
+			real_title = J-2A2
+./Saturn/Engines/bluedog_Saturn_Engine_J2SL.cfg
+real_title = J-2 Sea Level
+./Saturn/Engines/bluedog_Saturn_Engine_J2T.cfg
+real_title = J-2 Annular Aerospike
+			real_title = J-2 Annular Aerospike
+			real_title = J-2 250K Annular Aerospike
+./Saturn/Engines/bluedog_Saturn_Engine_J2X.cfg		// J-2X is "a clean-sheet design", BUT BDB USES THIS NAME FOR ORIGINAL J-2X TO BE J-2S WITH NOZZLE EXTENSION. KILLMEPLS.
+	real_title = J-2X
+			real_title = J-2X
+			real_title = J-2X-A2
+
+
+
+./Thor/bluedog_Thor_LR79.cfg				// Check RS-27 and S3D above
+	real_title = LR79 Liquid Engine Series
+			real_title = LR-79-NA11
+			real_title = S3D
+			real_title = LR-79-NA13
+			real_title = RS-27
+			real_title = RS-27A
+
+
+
+./Titan/bluedog_LR87_11.cfg
+	real_title = LR87-AJ-11
+			real_title = LR87-AJ-11
+			real_title = LR87-AJ-11K
+./Titan/bluedog_LR87_11_Single.cfg
+	real_title = LR87 Single Series
+			real_title = LR87-AJ-3(S)
+			real_title = LR87-AJ-5(S)
+			real_title = LR87-AJ-5K(S)
+			real_title = LR87-AJ-11(S)
+			real_title = LR87-AJ-11K(S)
+./Titan/bluedog_LR87_11_Vac.cfg
+	real_title = LR87 Single Vacuum Optimized
+			real_title = AJ23-170
+			real_title = AJ23-170-K
+./Titan/bluedog_LR87_3.cfg
+	real_title = LR87-AJ-3
+./Titan/bluedog_LR87_5.cfg
+	real_title = LR87-AJ-5
+			real_title = LR87-AJ-5
+			real_title = LR87-AJ-5K
+./Titan/bluedog_LR87_LH2_SL.cfg
+	real_title = LR87-LH2 Sea Level
+			real_title = AJ23-141 Sea Level
+			real_title = AJ23-142 Sea Level
+			real_title = AJ23-143
+./Titan/bluedog_LR87_LH2_V.cfg
+	real_title = LR87-LH2 Vacuum
+			real_title = AJ23-171
+			real_title = AJ23-172
+			real_title = AJ23-173
+
+
+
+./Titan/bluedog_LR91_11.cfg
+	real_title = LR91-AJ-11
+			real_title = LR91-AJ-11
+			real_title = LR91-AJ-11K
+./Titan/bluedog_LR91_11_FourVernier.cfg
+	real_title = LR91-AJ-11(V)4
+			real_title = LR91-AJ-11(V)4
+			real_title = LR91-AJ-11(V)4K
+./Titan/bluedog_LR91_3.cfg
+	real_title = LR91-AJ-3
+./Titan/bluedog_LR91_3_SingleVernier.cfg
+	real_title = LR91-AJ-3(V)1
+./Titan/bluedog_LR91_5.cfg
+	real_title = LR91-AJ-5
+			real_title = LR91-AJ-5
+			real_title = LR91-AJ-5K
+./Titan/bluedog_LR91_5_FourVernier.cfg
+	real_title = LR91-AJ-5(V)4
+			real_title = LR91-AJ-5(V)4
+			real_title = LR91-AJ-5(V)4K
+
+
+
+./Titan/bluedog_Titan_Transtage.cfg
+	real_title = Titan Transtage
+			real_title = Titan III Transtage
+			real_title = Titan 34-D Transtage
+
+
+
+./Vanguard/bluedog_Vanguard_GE405.cfg
+	real_title = Vanguard XLR50-GE-2/X-405
+./Vega/bluedog_Vega_GE405H.cfg
+	real_title = GE-405H
+			real_title = GE-405H
+			real_title = GE-405H-U

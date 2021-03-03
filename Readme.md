@@ -23,6 +23,9 @@ Grab the latest release and make sure you have module manager (in order to patch
 #### Supported
 - Kerbalism: K 3.8+ has a compatibillity patch removing own reliability from engines. For use with K 3.7- rename the .txt in PayToPlay/Support/Kerbalism into a .cfg. Kerbalism has a lot of interesting features and it is unacceptable to be incompatible with it.
 
+## Not all project files are mine
+KRASHWrapper.cs is under a different license, taken from [KRASH repo](https://github.com/linuxgurugamer/KRASH).
+
 ## Some regards
 
 I'd like to thank kerbalism contributors team, their open source and advice have been essential to let me code the plugin.
