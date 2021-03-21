@@ -1,2 +1,0 @@
-D:\Repos\PayToPlay\Source\EngineDecay\EngineDecay\obj\Release\EngineDecay.csprojAssemblyReference.cache
-D:\Repos\PayToPlay\Source\EngineDecay\EngineDecay\obj\Release\EngineDecay.csproj.CoreCompileInputs.cache
