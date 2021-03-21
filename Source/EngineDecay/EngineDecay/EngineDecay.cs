@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace EngineDecay
 {
-    public class EngineDecay : PartModule, IPartMassModifier, IPartCostModifier, ISerializationCallbackReceiver
+    public class EngineDecay : PartModule, IPartMassModifier, IPartCostModifier
     {
         #region fields
 
@@ -179,6 +179,8 @@ namespace EngineDecay
         [KSPField(isPersistant = true, guiActive = false)]
         bool autoShutdownOnWarning = false;
 
+        bool warningWasFired = false;
+
 
         [KSPField(isPersistant = true, guiActive = false)]
         int maintenanceCost = 0;
@@ -222,8 +224,6 @@ namespace EngineDecay
         float holdIndicatorsTill = 0;
         int partSymmetryCounterpartsCount = -1;
 
-        Dictionary<string, float> siblingRelations = new Dictionary<string, float>();
-        static Dictionary<string, float> passedSiblingRelations;
 
         List<ModuleEngines> decayingEngines = new List<ModuleEngines>();
         MultiModeEngine modeSwitcher;
@@ -1509,7 +1509,6 @@ namespace EngineDecay
                                 }
                                 else
                                 {
-
                                     Failure();
 
                                     usageExperienceCoeff = 0.3f;
@@ -1518,7 +1517,7 @@ namespace EngineDecay
 
                             if (PayToPlaySettingsFeatures.RandomFailureWarningEnable)
                             {
-                                if (usedBurnTime > warnAtBurnTime)
+                                if (usedBurnTime > warnAtBurnTime && !warningWasFired)
                                 {
                                     if (KRASHWrapper.simulationActive())
                                     {
@@ -1526,19 +1525,18 @@ namespace EngineDecay
                                     }
                                     else
                                     {
-                                        if (reliabilityStatus == "nominal")
+                                        warningWasFired = true;
+
+                                        reliabilityStatus = PayToPlayAddon.RandomStatus("PoorEngineCondition");
+                                        part.SetHighlightType(Part.HighlightType.AlwaysOn);
+                                        part.SetHighlightColor(new Color(1, 1, 0));
+                                        part.SetHighlight(true, false);
+
+                                        ScreenMessages.PostScreenMessage("Bad engine telemetry, get ready for a failure!");
+
+                                        if (autoShutdownOnWarning)
                                         {
-                                            reliabilityStatus = PayToPlayAddon.RandomStatus("PoorEngineCondition");
-                                            part.SetHighlightType(Part.HighlightType.AlwaysOn);
-                                            part.SetHighlightColor(new Color(1, 1, 0));
-                                            part.SetHighlight(true, false);
-
-                                            ScreenMessages.PostScreenMessage("Bad engine telemetry, get ready for a failure!");
-
-                                            if (autoShutdownOnWarning)
-                                            {
-                                                CutoffOnFailure("Failure Prediction Alert");
-                                            }
+                                            CutoffOnFailure("Failure Prediction Alert");
                                         }
                                     }
                                 }
@@ -1590,18 +1588,6 @@ namespace EngineDecay
         {
             base.OnSave(node);
         }
-
-        #region ISerializationCallbackReciever
-        void ISerializationCallbackReceiver.OnBeforeSerialize()
-        {
-            passedSiblingRelations = siblingRelations;
-        }
-
-        void ISerializationCallbackReceiver.OnAfterDeserialize()
-        {
-            siblingRelations = passedSiblingRelations;
-        }
-        #endregion
 
         #region mass and cost modifiers implementation (game-called too)
 
