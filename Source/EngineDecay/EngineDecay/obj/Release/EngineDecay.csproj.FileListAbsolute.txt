@@ -68,3 +68,4 @@ D:\Repos\PayToPlay\Source\EngineDecay\EngineDecay\bin\Release\KSPAssets.XmlSeria
 D:\Repos\PayToPlay\Source\EngineDecay\EngineDecay\obj\Release\EngineDecay.csproj.CopyComplete
 D:\Repos\PayToPlay\Source\EngineDecay\EngineDecay\obj\Release\EngineDecay.dll
 D:\Repos\PayToPlay\Source\EngineDecay\EngineDecay\obj\Release\EngineDecay.pdb
+D:\Repos\PayToPlay\Source\EngineDecay\EngineDecay\obj\Release\EngineDecay.csprojAssemblyReference.cache

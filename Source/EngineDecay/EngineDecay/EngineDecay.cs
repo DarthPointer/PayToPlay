@@ -136,8 +136,10 @@ namespace EngineDecay
         int issueCode = 0;
 
 
+        int modeRunningPrevPrevTick = -1;
         int modeRunningPrevTick = -1;
         bool wasRailWarpingPrevTick = false;
+        float lastPhysicalTickTime = -1;
 
 
         [KSPField(isPersistant = true, guiActive = false)]
@@ -1265,13 +1267,6 @@ namespace EngineDecay
             onStartFinished = true;
         }
 
-        public void Update()
-        {
-            if (PayToPlaySettingsFeatures.Enable)
-            {
-            }
-        }
-
         void ReviewSymmetryCosts(List<Part> counterparts)           // Returns true if succeeds
         {
             if (counterparts == null)
@@ -1395,7 +1390,7 @@ namespace EngineDecay
             Lib.Log($"Costs reviewing complete, found {partSymmetryCounterpartsCount} counterparts");
         }
 
-        public void FixedUpdate()
+        private void Update()
         {
             if (PayToPlaySettingsFeatures.Enable)
             {
@@ -1476,15 +1471,15 @@ namespace EngineDecay
 
                         if (runningMode != -1)
                         {
-                            if (topBaseRatedTime != -1)
+                            if (topBaseRatedTime != -1 && lastPhysicalTickTime != -1)
                             {
                                 if (!usingMultiModeLogic)
                                 {
-                                    usedBurnTime += TimeWarp.fixedDeltaTime;
+                                    usedBurnTime += (float)Planetarium.GetUniversalTime() - lastPhysicalTickTime;
                                 }
                                 else
                                 {
-                                    usedBurnTime += TimeWarp.fixedDeltaTime * decayRatesList[runningMode];
+                                    usedBurnTime += ((float)Planetarium.GetUniversalTime() - lastPhysicalTickTime) * decayRatesList[runningMode];
                                 }
 
                                 if (usedBurnTime <= setBurnTime)
@@ -1501,7 +1496,7 @@ namespace EngineDecay
 
                         if (topBaseRatedTime != -1)
                         {
-                            if (usedBurnTime > failAtBurnTime && issueCode == 0)
+                            if (usedBurnTime > failAtBurnTime && issueCode == 0 && runningMode != -1)
                             {
                                 if (KRASHWrapper.simulationActive())
                                 {
@@ -1566,6 +1561,12 @@ namespace EngineDecay
                         {
                             checkIgnition();
                         }
+
+                        lastPhysicalTickTime = (float)Planetarium.GetUniversalTime();
+                    }
+                    else
+                    {
+                        lastPhysicalTickTime = -1;
                     }
 
                     if (issueCode == 0 && baseIgnitions != -1)
@@ -1579,6 +1580,7 @@ namespace EngineDecay
                     }
 
                     wasRailWarpingPrevTick = railWarping;
+                    modeRunningPrevPrevTick = modeRunningPrevTick;
                     modeRunningPrevTick = runningMode;
                 }
             }
@@ -1693,14 +1695,14 @@ namespace EngineDecay
 
         int RunningMode()
         {
-            int mode = -1, c = 0;
-            foreach (ModuleEngines i in decayingEngines)
+            int mode = -1;
+
+            for (int i = 0; i < modesNumber; i++)
             {
-                if(i.currentThrottle > 0 && i.EngineIgnited)
+                if (decayingEngines[i].currentThrottle > 0 && decayingEngines[i].EngineIgnited)
                 {
-                    mode = c;
+                    mode = i;
                 }
-                c++;
             }
 
             return mode;
@@ -1745,9 +1747,15 @@ namespace EngineDecay
             else
             {
                 int runningMode = RunningMode();
-                if(runningMode != -1)
+
+                if (modeRunningPrevPrevTick != runningMode && modeRunningPrevTick != runningMode)
                 {
-                    if(SwitchNeedsIgnition(modeRunningPrevTick, runningMode))
+                    Lib.Log($"Switched to mode {runningMode} from mode {modeRunningPrevPrevTick}");
+                }
+
+                if (runningMode != -1 && modeRunningPrevTick != runningMode)
+                {
+                    if(SwitchNeedsIgnition(modeRunningPrevPrevTick, runningMode))
                     {
                         ignitionsLeft--;
 
@@ -1827,16 +1835,24 @@ namespace EngineDecay
 
         void Enable()
         {
-            foreach (ModuleEngines i in decayingEngines)
+            if (!usingMultiModeLogic)
             {
-                i.isEnabled = true;
-                i.currentThrottle = 0;
-                i.stagingEnabled = true;
+                ModuleEngines engine = decayingEngines[0];
+                engine.isEnabled = true;
+                engine.currentThrottle = 0;
+                engine.stagingEnabled = true;
+
+                if (modeSwitcher != null)
+                {
+                    modeSwitcher.isEnabled = true;
+                    modeSwitcher.SetPrimary(true);
+                }
             }
 
-            if (modeSwitcher != null)
+            else
             {
                 modeSwitcher.isEnabled = true;
+                modeSwitcher.SetPrimary(true);
             }
         }
 
@@ -1850,7 +1866,7 @@ namespace EngineDecay
         {
             if (!usingMultiModeLogic)
             {
-                if (modeRunningPrevTick != -1 && RunningMode() == -1 && ignitionsLeft == 0)
+                if (modeRunningPrevTick == -1 && RunningMode() == -1 && ignitionsLeft == 0)
                 {
                     Disable();
 
@@ -1874,7 +1890,7 @@ namespace EngineDecay
                         modeSwitcher.isEnabled = !SwitchNeedsIgnition(1, 0);
                     }
 
-                    if(runningMode == -1)
+                    if(runningMode == -1 && modeRunningPrevTick == -1)
                     {
                         if (ignitionsUsageList[0] && ignitionsUsageList[1])
                         {
@@ -1896,12 +1912,11 @@ namespace EngineDecay
                         }
                     }
 
-                    int c = 0;
-                    foreach(ModuleEngines i in decayingEngines)
+                    for (int i = 0; i < modesNumber; i++)
                     {
-                        if(SwitchNeedsIgnition(runningMode, c))
+                        if(SwitchNeedsIgnition(runningMode, i))
                         {
-                            i.isEnabled = false;
+                            decayingEngines[i].isEnabled = false;
                         }
                     }
                 }
