@@ -1118,9 +1118,9 @@ namespace EngineDecay
                     Lib.LogWarning($"EngineDecay could not find engine modules at part {engineModelId}");           // Need full stop flag
                     return;
                 }
-                else if (modesNumber != 1 && !usingMultiModeLogic)
+                else if (modesNumber != 1 && !usingMultiModeLogic && modeSwitcher != null)
                 {
-                    Lib.LogWarning($"EngineDecay found multiple engine modules at {engineModelId} but is not properly configured for {modesNumber} modes, fallback to singlemode logic");
+                    Lib.LogWarning($"EngineDecay found multiple engine modules at {engineModelId} and MultiModeEngine module but is not properly configured for {modesNumber} modes, fallback to singlemode logic");
                 }
                 else
                 {
@@ -1837,15 +1837,19 @@ namespace EngineDecay
         {
             if (!usingMultiModeLogic)
             {
-                ModuleEngines engine = decayingEngines[0];
-                engine.isEnabled = true;
-                engine.currentThrottle = 0;
-                engine.stagingEnabled = true;
-
                 if (modeSwitcher != null)
                 {
                     modeSwitcher.isEnabled = true;
                     modeSwitcher.SetPrimary(true);
+                }
+                else
+                {
+                    for (int i = 0; i < modesNumber; i++)
+                    {
+                        decayingEngines[i].isEnabled = true;
+                        decayingEngines[i].currentThrottle = 0;
+                        decayingEngines[i].stagingEnabled = true;
+                    }
                 }
             }
 
