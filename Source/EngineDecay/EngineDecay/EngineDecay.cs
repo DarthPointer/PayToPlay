@@ -1844,11 +1844,11 @@ namespace EngineDecay
                 }
                 else
                 {
-                    for (int i = 0; i < modesNumber; i++)
+                    foreach (ModuleEngines i in decayingEngines)
                     {
-                        decayingEngines[i].isEnabled = true;
-                        decayingEngines[i].currentThrottle = 0;
-                        decayingEngines[i].stagingEnabled = true;
+                        i.isEnabled = true;
+                        i.currentThrottle = 0;
+                        i.stagingEnabled = true;
                     }
                 }
             }
