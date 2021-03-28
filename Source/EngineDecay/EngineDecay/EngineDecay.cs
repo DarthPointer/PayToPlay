@@ -994,7 +994,6 @@ namespace EngineDecay
         void ReviewPAWStuffVisibilities()
         {
             Fields["extraIgnitionsPercent"].guiActiveEditor = baseIgnitions != -1 && baseIgnitions != maxIgnitions;
-            Fields["extraIgnitionsPercent"].guiActive = baseIgnitions != -1 && baseIgnitions != maxIgnitions;
 
             Fields["ignitionsIndicator"].guiActiveEditor = baseIgnitions != -1;
             Fields["ignitionsIndicator"].guiActive = baseIgnitions != -1;
@@ -1002,7 +1001,6 @@ namespace EngineDecay
 
 
             Fields["extraBurnTimePercent"].guiActiveEditor = topBaseRatedTime != -1 && topBaseRatedTime != topMaxRatedTime;
-            Fields["extraBurnTimePercent"].guiActive = topBaseRatedTime != -1 && topBaseRatedTime != topMaxRatedTime;
 
             Fields["burnTimeIndicator"].guiActiveEditor = topBaseRatedTime != -1;
             Fields["burnTimeIndicator"].guiActive = topBaseRatedTime != -1;
