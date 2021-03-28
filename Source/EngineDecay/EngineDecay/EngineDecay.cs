@@ -954,7 +954,7 @@ namespace EngineDecay
 
         #endregion
 
-        #region Indicators
+        #region Indicators and Settings Sliders
 
         [KSPEvent(guiActive = true, guiActiveEditor = true, guiName = "Switch Time Format", groupName = "PayToPlayReliability", groupDisplayName = "PayToPlay Reliability")]
         void SwitchTimeFormat()
@@ -989,6 +989,28 @@ namespace EngineDecay
             ignitionsIndicator = string.Format("{0} / {1}", ignitionsLeft, setIgnitions);
 
             holdIndicatorsTill = Time.time + 0.5f;
+        }
+
+        void ReviewPAWStuffVisibilities()
+        {
+            Fields["extraIgnitionsPercent"].guiActiveEditor = baseIgnitions != -1 && baseIgnitions != maxIgnitions;
+            Fields["extraIgnitionsPercent"].guiActive = baseIgnitions != -1 && baseIgnitions != maxIgnitions;
+
+            Fields["ignitionsIndicator"].guiActiveEditor = baseIgnitions != -1;
+            Fields["ignitionsIndicator"].guiActive = baseIgnitions != -1;
+
+
+
+            Fields["extraBurnTimePercent"].guiActiveEditor = topBaseRatedTime != -1 && topBaseRatedTime != topMaxRatedTime;
+            Fields["extraBurnTimePercent"].guiActive = topBaseRatedTime != -1 && topBaseRatedTime != topMaxRatedTime;
+
+            Fields["burnTimeIndicator"].guiActiveEditor = topBaseRatedTime != -1;
+            Fields["burnTimeIndicator"].guiActive = topBaseRatedTime != -1;
+
+            Events["SwitchTimeFormat"].guiActiveEditor = topBaseRatedTime != -1;
+            Events["SwitchTimeFormat"].guiActive = topBaseRatedTime != -1;
+
+
 
             if (topBaseRatedTime != -1 && PayToPlaySettingsDifficultyNumbers.TopFailureWarningDeviationRatioPercent * (float)Math.Pow(9 - r, 2) <= 50 && PayToPlaySettingsFeatures.RandomFailureWarningEnable)
             {
@@ -1127,27 +1149,6 @@ namespace EngineDecay
                     Lib.Log($"EngineDecay found {modesNumber} modes at {engineModelId}");
                 }
 
-                if (topBaseRatedTime == -1)
-                {
-                    Fields["extraBurnTimePercent"].guiActiveEditor = false;
-                    Fields["extraBurnTimePercent"].guiActive = false;
-
-                    Fields["burnTimeIndicator"].guiActiveEditor = false;
-                    Fields["burnTimeIndicator"].guiActive = false;
-
-                    Events["SwitchTimeFormat"].guiActiveEditor = false;
-                    Events["SwitchTimeFormat"].guiActive = false;
-                }
-
-                if (baseIgnitions == -1 || baseIgnitions == maxIgnitions)
-                {
-                    Fields["extraIgnitionsPercent"].guiActiveEditor = false;
-                    Fields["extraIgnitionsPercent"].guiActive = false;
-
-                    Fields["ignitionsIndicator"].guiActiveEditor = false;
-                    Fields["ignitionsIndicator"].guiActive = false;
-                }
-
                 if (!PayToPlaySettingsFeatures.RandomFailureWarningEnable)
                 {
                     autoShutdownOnWarning = false;
@@ -1236,6 +1237,8 @@ namespace EngineDecay
                 }
 
                 Lib.Log($"EngineDecay at {engineModelId} is finishing OnStart, about to update indicators");
+
+                ReviewPAWStuffVisibilities();
 
                 UpdateIndicators();
             }
@@ -1538,7 +1541,7 @@ namespace EngineDecay
                             }
                             else if (usedBurnTime > setBurnTime)
                             {
-                                if (reliabilityStatus == "nominal")
+                                if (reliabilityStatus == "nominal")             // to be replaced with a bool/enum check
                                 {
                                     reliabilityStatus = PayToPlayAddon.RandomStatus("PoorEngineCondition");
                                 }
@@ -1684,7 +1687,16 @@ namespace EngineDecay
             if (prevLoadWasInEditor && startedWithEngineModelId != engineModelId)       // We don't need to update our internal stuff in flighscene as B9PS will trigger the state chosen in editor and model change in flight is not designed.
             {                                                                           // Also ignoring change if we did not actually switch the model.
                 knownPartCost = -1;
+
+                extraBurnTimePercent = 0;
+                prevEBTP = 0;
+                extraIgnitionsPercent = 0;
+                prevEIP = 0;
+
+                ReviewPAWStuffVisibilities();
+
                 ReplaceFromCounterpart();
+
                 startedWithEngineModelId = engineModelId;
             }
         }
